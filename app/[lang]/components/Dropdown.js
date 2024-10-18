@@ -1,23 +1,23 @@
-'use client'
-import { useState } from 'react';
-import { FaCaretDown } from 'react-icons/fa';
+"use client"
+import {useState} from 'react'
+import {FaCaretDown} from 'react-icons/fa'
 
 export default function Dropdown() {
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedLanguage, setSelectedLanguage] = useState('Select Course');
+    const [selectedLanguage, setSelectedLanguage] = useState('Select Course')
 
     const languages = ['DSA Self Placed', 'JavaScript',
         'Python', 'Java', 'C++', 'Ruby',
-        'Go', 'TypeScript'];
+        'Go', 'TypeScript']
 
     const toggleDropdown = () => {
-        setIsOpen(!isOpen);
-    };
+        setIsOpen(!isOpen)
+    }
 
     const handleSelect = (language) => {
-        setSelectedLanguage(language);
-        setIsOpen(false);
-    };
+        setSelectedLanguage(language)
+        setIsOpen(false)
+    }
 
     return (
         <div className="flex justify-center min-h-screen">
@@ -32,7 +32,7 @@ export default function Dropdown() {
                     onClick={toggleDropdown}
                 >
                     {selectedLanguage}
-                    <FaCaretDown className="ml-2" />
+                    <FaCaretDown className="ml-2"/>
                 </button>
 
                 {/* Dropdown menu */}
@@ -59,5 +59,5 @@ export default function Dropdown() {
                 )}
             </div>
         </div>
-    );
+    )
 }
