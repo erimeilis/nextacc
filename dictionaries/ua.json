@@ -1,0 +1,16 @@
+{
+  "server-component": {
+    "welcome": "Ласкаво просимо"
+  },
+  "login": {
+    "email": "Електронна адреса",
+    "password": "Пароль",
+    "remember_me": "Запам'ятати",
+    "forgot_password": "Забули пароль?",
+    "login": "Увійти",
+    "google": "Увійти за допомогою Google",
+    "not_signed_in": "Не в системі",
+    "signed_in_as": "Увійшов як",
+    "signout": "Вийти"
+  }
+}

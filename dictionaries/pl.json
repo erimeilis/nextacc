@@ -1,0 +1,16 @@
+{
+  "server-component": {
+    "welcome": "Witam"
+  },
+  "login": {
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "remember_me": "Zapamiętaj mnie",
+    "forgot_password": "Zapomniałeś hasła?",
+    "login": "Zaloguj się",
+    "google": "Zaloguj się przez Google",
+    "not_signed_in": "Nie zalogowany",
+    "signed_in_as": "Zalogowano jako",
+    "signout": "Wyloguj się"
+  }
+}
