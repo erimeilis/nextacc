@@ -17,6 +17,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.backdrop {
+  background-color: rgb(0 0 0 / 0.1);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.backdrop:where(.dark, .dark *) {
+  background-color: rgb(0 0 0 / 0.3);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

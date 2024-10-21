@@ -11,6 +11,12 @@
     "google": "Zaloguj się przez Google",
     "not_signed_in": "Nie zalogowany",
     "signed_in_as": "Zalogowano jako",
-    "signout": "Wyloguj się"
+    "signout": "Wyloguj się",
+    "signin": "Zaloguj",
+    "register": "Zarejestruj się",
+    "phone": "Numer telefonu",
+    "confirm": "Potwierdź hasło",
+    "signup": "Zarejestruj się",
+    "restore": "Przywróć hasło"
   }
 }

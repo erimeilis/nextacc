@@ -23,14 +23,14 @@ const loginFields=[
 
 const signupFields=[
     {
-        labelText:"Username",
-        labelFor:"username",
-        id:"username",
-        name:"username",
-        type:"text",
-        autoComplete:"username",
+        labelText:"phone",
+        labelFor:"phone",
+        id:"phone",
+        name:"phone",
+        type:"phone",
+        autoComplete:"phone",
         isRequired:true,
-        placeholder:"Username"
+        placeholder:"phone"
     },
     {
         labelText:"email",
@@ -53,14 +53,14 @@ const signupFields=[
         placeholder:"password"
     },
     {
-        labelText:"Confirm Password",
+        labelText:"confirm",
         labelFor:"confirm-password",
         id:"confirm-password",
         name:"confirm-password",
         type:"password",
         autoComplete:"confirm-password",
         isRequired:true,
-        placeholder:"Confirm Password"
+        placeholder:"confirm"
     }
 ]
 

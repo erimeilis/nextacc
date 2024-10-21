@@ -7,6 +7,7 @@ import {getDictionary} from "@/get-dictionary"
 import {i18n, type Locale} from "@/i18n-config"
 import DictionaryProvider from "@/app/[lang]/DictionaryProvider"
 import {StyleProvider} from "@/app/[lang]/StyleProvider";
+import React from "react";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -30,9 +31,11 @@ export async function generateStaticParams() {
 
 export default async function RootLayout({
                                              children,
+                                             profile,
                                              params,
                                          }: {
     children: React.ReactNode
+    profile: React.ReactNode
     params: { lang: Locale }
 }) {
     const dictionary = await getDictionary(params.lang)
@@ -45,11 +48,16 @@ export default async function RootLayout({
             <StyleProvider>
                 <Navbar loc={params.lang}/>
                 <DictionaryProvider dictionary={dictionary}>
-                    {children}
+                    <main className="flex items-center justify-center px-4 pt-32 pb-96 bg-white dark:bg-indigo-900">
+                        <div className="sm:w-full md:w-3/4 lg:w-1/2 max-w-4xl">
+                            {profile}
+                            {children}
+                        </div>
+                    </main>
                 </DictionaryProvider>
             </StyleProvider>
             </body>
             </html>
         </AuthProvider>
-    )
+)
 }

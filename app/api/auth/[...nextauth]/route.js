@@ -1,107 +1,9 @@
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import {jwtDecode} from "jwt-decode"
-import axios from 'axios'
 import NextAuth from "next-auth"
-
-async function kcToken(token) {
-    const response = await axios.post(
-        process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
-        'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
-        '&client_secret=' + process.env.KEYCLOAK_CLIENT_SECRET +
-        '&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange' +
-        '&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token' +
-        '&subject_token=' + token +
-        '&subject_issuer=google',
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    )
-    return response.data
-}
-async function kcCreds(username, password) {
-    const response = await axios.post(
-        process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
-        'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
-        '&client_secret=' + process.env.KEYCLOAK_CLIENT_SECRET +
-        '&grant_type=password' +
-        '&username=' + username +
-        '&password=' + password,
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    )
-    return response.data
-}
-async function kcGetAdminToken () {
-    const response = await axios.post(
-        process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
-        'client_id=' + process.env.KEYCLOAK_ADMIN_ID +
-        '&client_secret=' + process.env.KEYCLOAK_ADMIN_SECRET +
-        '&grant_type=client_credentials',
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    )
-    return response.data.access_token
-}
-async function kcCreateUser(username, password, adminToken) {
-    const request = await axios.post(
-        process.env.KEYCLOAK_ADMIN_REALM + '/users',
-        {
-            'username': username,
-            'email': username,
-            'emailVerified': true,
-            'enabled': true,
-            'credentials': [{
-                'temporary': false,
-                'type': 'password',
-                'value': password
-            }]
-        },
-        {
-            headers: {
-                'Authorization': 'Bearer ' + adminToken,
-            }
-        }
-    );
-    return request.status
-}
-async function redToken(token) {
-    const response = await axios.get(
-        process.env.REDREPORT_URL + '/api/kc/userinfo?site=' + process.env.SITE_ID,
-        {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token,
-            }
-        }
-    )
-    return response.data
-}
-async function redCreds(username, password) {
-    const response = await axios.post(
-        process.env.REDREPORT_URL + '/api/usercheck',
-        'username=' + username +
-        '&password=' + password +
-        '&site=' + process.env.SITE_ID,
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
-            }
-        }
-    )
-    return response.data
-}
+import {kcAddSocial, kcCreateUser, kcCreds, kcGetAdminToken, kcToken, redCreds, redToken} from "./restRequests"
+import axios from "axios";
 
 const handler = NextAuth({
     session: {
@@ -134,46 +36,56 @@ const handler = NextAuth({
                             id: access_token.jti,
                             email: access_token.email,
                             username: access_token.email,
+                            phone: access_token.phone,
                             access_token: res.access_token,
                             maxAge: credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
                         }
                     } catch (error) {
                         if (axios.isAxiosError(error)) {
-                            console.log(error.status)
+                            console.log('kcCreds ' + error.status)
                             if (error.response && error.response.status === 401) { //User not found on KC
-                                const req = await redCreds(credentials.username, credentials.password) //Check if user exist on Red
-                                if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists as we've got ID
-                                    try {
-                                        const adminToken = await kcGetAdminToken() //Get Admin token on KC
-                                        const res = await kcCreateUser(credentials.username, credentials.password, adminToken) //Create user on KC
-                                        if (res === 201) { //Success
-                                            try {
-                                                const res = await kcCreds(credentials.username, credentials.password) //Second try KC
-                                                const maxAge = credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
-                                                const access_token = jwtDecode(res.access_token)
-                                                return {
-                                                    id: access_token.jti,
-                                                    email: access_token.email,
-                                                    username: access_token.email,
-                                                    access_token: res.access_token,
-                                                    maxAge: maxAge
-                                                }
-                                            } catch (error) {
-                                                if (axios.isAxiosError(error)) {
-                                                    console.log(error.status)
-                                                    console.error(error.response)
-                                                } else {
-                                                    console.error(error)
+                                try {
+                                    const req = await redCreds(credentials.username, credentials.password) //Check if user exist on Red
+                                    if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists as we've got ID
+                                        try {
+                                            const adminToken = await kcGetAdminToken() //Get Admin token on KC
+                                            const res = await kcCreateUser(credentials.username, credentials.password, adminToken) //Create user on KC
+                                            if (res === 201) { //Success
+                                                try {
+                                                    const res = await kcCreds(credentials.username, credentials.password) //Second try KC
+                                                    const maxAge = credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
+                                                    const access_token = jwtDecode(res.access_token)
+                                                    return {
+                                                        id: access_token.jti,
+                                                        email: access_token.email,
+                                                        username: access_token.email,
+                                                        access_token: res.access_token,
+                                                        maxAge: maxAge
+                                                    }
+                                                } catch (error) {
+                                                    if (axios.isAxiosError(error)) {
+                                                        console.log('kcCreds2 ' + error.status)
+                                                        //console.error(error.response)
+                                                    } else {
+                                                        console.error(error)
+                                                    }
                                                 }
                                             }
+                                        } catch (error) {
+                                            if (axios.isAxiosError(error)) {
+                                                console.log('kcGetAdminToken->kcCreateUser ' + error.status)
+                                                //console.error(error.response)
+                                            } else {
+                                                console.error(error)
+                                            }
                                         }
-                                    } catch (error) {
-                                        if (axios.isAxiosError(error)) {
-                                            console.log(error.status)
-                                            console.error(error.response)
-                                        } else {
-                                            console.error(error)
-                                        }
+                                    }
+                                } catch (error) {
+                                    if (axios.isAxiosError(error)) {
+                                        console.log('redCreds ' + error.status)
+                                        //console.error(error.response)
+                                    } else {
+                                        console.error(error)
                                     }
                                 }
                             }
@@ -188,9 +100,10 @@ const handler = NextAuth({
     ],
     callbacks: {
         async signIn({user, account}) {
+            //console.log({account, user})
             if (account && account.provider === 'google') {
                 try {
-                    const res = await kcToken(account.access_token);
+                    const res = await kcToken(account.access_token) //First try KC
                     try {
                         const req = await redToken(res.access_token)
                         console.log(req);
@@ -208,9 +121,59 @@ const handler = NextAuth({
                     }
                 } catch (error) {
                     if (axios.isAxiosError(error)) {
-                        console.log(error.status)
-                        console.error(error.response)
-                        // Do something with this error...
+                        console.log('kcToken ' + error.status)
+                        console.log(error.response.data.error_description)
+                        if (error.status === 400
+                            && error.response
+                            && error.response.data.error_description === 'User already exists') {
+                            try {
+                                const req = await kcAddSocial({
+                                    email: user.email,
+                                    provider: 'google',
+                                    rep: {
+                                        identityProvider: 'google',
+                                        userId: user.id,
+                                        userName: user.name
+                                    }
+                                })
+                                if (req) {
+                                    try {
+                                        const res = await kcToken(account.access_token) //Second try KC
+                                        try {
+                                            const req = await redToken(res.access_token)
+                                            console.log(req);
+                                            user.access_token = res.access_token
+                                            user.id = req
+                                            //user.maxAge = 30 * 24 * 60 * 60
+                                        } catch (error) {
+                                            if (axios.isAxiosError(error)) {
+                                                console.log(error.status)
+                                                console.error(error.response)
+                                                // Do something with this error...
+                                            } else {
+                                                console.error(error)
+                                            }
+                                        }
+                                    } catch (error) {
+                                        if (axios.isAxiosError(error)) {
+                                            console.log('ksToken ' + error.status)
+                                            console.error(error.response)
+                                            // Do something with this error...
+                                        } else {
+                                            console.error(error)
+                                        }
+                                    }
+                                }
+                            } catch (error) {
+                                if (axios.isAxiosError(error)) {
+                                    console.log('ksAddSocial ' + error.status)
+                                    console.error(error.response)
+                                    // Do something with this error...
+                                } else {
+                                    console.error(error)
+                                }
+                            }
+                        }
                     } else {
                         console.error(error)
                     }
@@ -233,6 +196,7 @@ const handler = NextAuth({
             return true
         },
         async jwt({token, user}) {
+            //console.log(token)
             if (user) {
                 token.sub = user.id
                 token.accessToken = user.access_token
@@ -243,6 +207,7 @@ const handler = NextAuth({
             return token
         },
         async session({session, token}) {
+            //console.log(token)
             if (token) {
                 session.user.id = token.sub
                 session.accessToken = token.accessToken
