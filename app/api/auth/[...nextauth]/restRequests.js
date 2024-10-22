@@ -1,7 +1,7 @@
 "use server"
 import axios from "axios";
 
-export async function kcToken(token) {
+export async function kcLoginToken(token) {
     const response = await axios.post(
         process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
         'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
@@ -19,7 +19,7 @@ export async function kcToken(token) {
     return response.data
 }
 
-export async function kcCreds(username, password) {
+export async function kcLoginCreds(username, password) {
     const response = await axios.post(
         process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
         'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
@@ -79,7 +79,7 @@ export async function kcCreateUser(username, password, adminToken, phone = '') {
     return request.status
 }
 
-export async function redToken(token) {
+export async function redLoginToken(token) {
     const response = await axios.get(
         process.env.REDREPORT_URL + '/api/kc/userinfo?site=' + process.env.SITE_ID,
         {
@@ -94,7 +94,7 @@ export async function redToken(token) {
     return response.data
 }
 
-export async function redCreds(username, password = '') {
+export async function redExists(username, password = '') {
     const pass = (password !== '') ? ('&password=' + password) : ''
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/usercheck',
@@ -130,12 +130,14 @@ export async function registerUser(username, phone, password) {
         const req = await kcExists(username, adminToken)
         if (req.length > 0) {
             console.log('User already exists on KC')
+            return {error: "user_exist"}
         } else {
             try {
                 console.log('Look for user on Red')
-                const req = await redCreds(username)
+                const req = await redExists(username)
                 if (!isNaN(parseFloat(req)) && isFinite(req)) {
                     console.log('User already exists on Red')
+                    return {error: "user_exist"}
                 }
             } catch (error) {
                 if (axios.isAxiosError(error)) {

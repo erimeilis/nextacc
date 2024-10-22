@@ -1,5 +1,5 @@
 "use client"
-import {MdDarkMode, MdLightMode, MdBubbleChart} from "react-icons/md"
+import {FaRegMoon, FaRegSun, FaCircleNotch} from "react-icons/fa"
 import {useState, useEffect} from 'react'
 import {useTheme} from 'next-themes'
 
@@ -10,14 +10,14 @@ export default function StyleSwitcher() {
     useEffect(() => setMounted(true), [])
 
     if (!mounted) return (
-        <MdBubbleChart className="text-slate-600" size={20} />
+        <FaCircleNotch className="text-slate-600" size={20} />
     )
 
     if (resolvedTheme === 'dark') {
-        return <MdLightMode className="hidden dark:block text-indigo-400" size={20} onClick={() => setTheme('light')}/>
+        return <FaRegSun className="hidden dark:block text-indigo-400" size={20} onClick={() => setTheme('light')}/>
     }
 
     if (resolvedTheme === 'light') {
-        return <MdDarkMode className="dark:hidden text-amber-200" size={20} onClick={() => setTheme('dark')}/>
+        return <FaRegMoon className="dark:hidden text-amber-200" size={20} onClick={() => setTheme('dark')}/>
     }
 }

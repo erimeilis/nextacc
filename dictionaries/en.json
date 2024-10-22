@@ -2,6 +2,9 @@
   "server-component": {
     "welcome": "Welcome"
   },
+  "common": {
+    "refresh": "Refresh page"
+  },
   "login": {
     "email": "Email address",
     "password": "Password",
@@ -17,6 +20,13 @@
     "phone": "Phone number",
     "confirm": "Confirm password",
     "signup": "Sign up",
-    "restore": "Restore password"
+    "restore": "Restore password",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "short_password": "Password can't be that short",
+    "passwords_mismatch": "Passwords not match",
+    "no_user": "User not found",
+    "bad_credentials": "Bad credentials",
+    "user_exist": "User already registered"
   }
 }

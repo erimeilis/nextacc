@@ -2,13 +2,16 @@
   "server-component": {
     "welcome": "Witam"
   },
+  "common": {
+    "refresh": "Odśwież"
+  },
   "login": {
     "email": "Adres e-mail",
     "password": "Hasło",
     "remember_me": "Zapamiętaj mnie",
-    "forgot_password": "Zapomniałeś hasła?",
+    "forgot_password": "Zresetuj hasło",
     "login": "Zaloguj się",
-    "google": "Zaloguj się przez Google",
+    "google": "Kontynuuj z Google",
     "not_signed_in": "Nie zalogowany",
     "signed_in_as": "Zalogowano jako",
     "signout": "Wyloguj się",
@@ -17,6 +20,13 @@
     "phone": "Numer telefonu",
     "confirm": "Potwierdź hasło",
     "signup": "Zarejestruj się",
-    "restore": "Przywróć hasło"
+    "restore": "Przywróć hasło",
+    "invalid_email": "Nieprawidłowy adres email",
+    "invalid_phone": "Nieprawidłowy numer telefonu",
+    "short_password": "Hasło nie może być tak krótkie",
+    "passwords_mismatch": "Hasła nie pasują",
+    "no_user": "Nie znaleziono użytkownika",
+    "bad_credentials": "Nieprawidłowe hasło",
+    "user_exist": "Użytkownik już zarejestrowany"
   }
 }

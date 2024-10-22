@@ -1,9 +1,9 @@
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import {jwtDecode} from "jwt-decode"
-import NextAuth from "next-auth"
-import {kcAddSocial, kcCreateUser, kcCreds, kcGetAdminToken, kcToken, redCreds, redToken} from "./restRequests"
-import axios from "axios";
+import axios from 'axios'
+import {jwtDecode} from 'jwt-decode'
+import NextAuth from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcLoginCreds, kcLoginToken, redExists, redLoginToken} from './restRequests'
 
 const handler = NextAuth({
     session: {
@@ -21,76 +21,118 @@ const handler = NextAuth({
         }),
         CredentialsProvider({
             id: 'kccreds',
-            name: "KC",
+            name: 'KC',
             credentials: {
-                username: {label: "Email", type: "text", placeholder: "name@example.com"},
-                password: {label: "Password", type: "password"},
-                rememberMe: {label: "Remember Me", type: "boolean"}
+                username: {label: 'Email', type: 'text', placeholder: 'name@example.com'},
+                password: {label: 'Password', type: 'password'},
+                rememberMe: {label: 'Remember Me', type: 'boolean'}
             },
             async authorize(credentials) {
                 if (credentials && credentials.username && credentials.password) {
                     try {
-                        const res = await kcCreds(credentials.username, credentials.password) //First try KC
-                        const access_token = jwtDecode(res.access_token)
-                        return {
-                            id: access_token.jti,
-                            email: access_token.email,
-                            username: access_token.email,
-                            phone: access_token.phone,
-                            access_token: res.access_token,
-                            maxAge: credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
-                        }
-                    } catch (error) {
-                        if (axios.isAxiosError(error)) {
-                            console.log('kcCreds ' + error.status)
-                            if (error.response && error.response.status === 401) { //User not found on KC
-                                try {
-                                    const req = await redCreds(credentials.username, credentials.password) //Check if user exist on Red
-                                    if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists as we've got ID
-                                        try {
-                                            const adminToken = await kcGetAdminToken() //Get Admin token on KC
-                                            const res = await kcCreateUser(credentials.username, credentials.password, adminToken) //Create user on KC
-                                            if (res === 201) { //Success
-                                                try {
-                                                    const res = await kcCreds(credentials.username, credentials.password) //Second try KC
-                                                    const maxAge = credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
-                                                    const access_token = jwtDecode(res.access_token)
-                                                    return {
-                                                        id: access_token.jti,
-                                                        email: access_token.email,
-                                                        username: access_token.email,
-                                                        access_token: res.access_token,
-                                                        maxAge: maxAge
-                                                    }
-                                                } catch (error) {
-                                                    if (axios.isAxiosError(error)) {
-                                                        console.log('kcCreds2 ' + error.status)
-                                                        //console.error(error.response)
-                                                    } else {
-                                                        console.error(error)
-                                                    }
-                                                }
-                                            }
-                                        } catch (error) {
-                                            if (axios.isAxiosError(error)) {
-                                                console.log('kcGetAdminToken->kcCreateUser ' + error.status)
-                                                //console.error(error.response)
-                                            } else {
-                                                console.error(error)
-                                            }
-                                        }
-                                    }
-                                } catch (error) {
-                                    if (axios.isAxiosError(error)) {
-                                        console.log('redCreds ' + error.status)
-                                        //console.error(error.response)
-                                    } else {
-                                        console.error(error)
-                                    }
+                        const adminToken = await kcGetAdminToken() //Get Admin token on KC
+                        const req = await kcExists(credentials.username, adminToken)
+                        if (req.length > 0) {
+                            console.log('User exists on KC')
+                            try {
+                                const res = await kcLoginCreds(credentials.username, credentials.password)
+                                const access_token = jwtDecode(res.access_token)
+                                return {
+                                    id: access_token.jti,
+                                    email: access_token.email,
+                                    username: access_token.email,
+                                    phone: access_token.phone,
+                                    access_token: res.access_token,
+                                    maxAge: credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
+                                }
+                            } catch (error) { //Bad credentials
+                                if (axios.isAxiosError(error)) {
+                                    console.log('kcCreds ' + error.status)
+                                    console.log('Bad credentials')
+                                    return {error: 'bad_credentials'}
+                                } else {
+                                    console.error(error)
+                                    return {error: error.message}
                                 }
                             }
                         } else {
+                            console.log('No such user on KC')
+                            try {
+                                const req = await redExists(credentials.username) //Check if user exist on Red
+                                if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists as we've got ID
+                                    try {
+                                        const req = await redExists(credentials.username, credentials.password) //Check if user exist on Red and creds are right
+                                        if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists and creds are ok as we've got ID
+                                            try {
+                                                const adminToken = await kcGetAdminToken() //Get Admin token on KC
+                                                const res = await kcCreateUser(credentials.username, credentials.password, adminToken) //Create user on KC
+                                                if (res === 201) { //Success
+                                                    try {
+                                                        const res = await kcLoginCreds(credentials.username, credentials.password) //Second try KC
+                                                        const maxAge = credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
+                                                        const access_token = jwtDecode(res.access_token)
+                                                        return {
+                                                            id: access_token.jti,
+                                                            email: access_token.email,
+                                                            username: access_token.email,
+                                                            access_token: res.access_token,
+                                                            maxAge: maxAge
+                                                        }
+                                                    } catch (error) {
+                                                        if (axios.isAxiosError(error)) {
+                                                            console.log('kcCreds2 ' + error.status)
+                                                            return {error: error.message}
+                                                        } else {
+                                                            console.error(error)
+                                                            return {error: error.message}
+                                                        }
+                                                    }
+                                                }
+                                            } catch (error) {
+                                                if (axios.isAxiosError(error)) {
+                                                    console.log('kcCreateUser ' + error.status)
+                                                    return {error: error.message}
+                                                } else {
+                                                    console.error(error)
+                                                    return {error: error.message}
+                                                }
+                                            }
+                                        } else { //No user with this creds on Red
+                                            console.log('Bad credentials')
+                                            return {error: 'bad_credentials'}
+                                        }
+                                    } catch (error) {
+                                        if (axios.isAxiosError(error)) {
+                                            console.log('redCreds ' + error.status)
+                                            return {error: error.message}
+                                        } else {
+                                            console.error(error)
+                                            return {error: error.message}
+                                        }
+                                    }
+                                } else {
+                                    console.log('No such user on Red')
+                                    console.log('User not found')
+                                    return {error: 'no_user'}
+                                }
+                            } catch (error) {
+                                if (axios.isAxiosError(error)) {
+                                    console.log('redCreds ' + error.status)
+                                    console.log('User not found')
+                                    return {error: 'no_user'}
+                                } else {
+                                    console.error(error)
+                                    return {error: error.message}
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        if (axios.isAxiosError(error)) {
+                            console.log('kcExists ' + error.status)
+                            return {error: error.message}
+                        } else {
                             console.error(error)
+                            return {error: error.message}
                         }
                     }
                 }
@@ -100,13 +142,15 @@ const handler = NextAuth({
     ],
     callbacks: {
         async signIn({user, account}) {
-            //console.log({account, user})
+            if (user?.error) {
+                throw new Error(user.error)
+            }
             if (account && account.provider === 'google') {
                 try {
-                    const res = await kcToken(account.access_token) //First try KC
+                    const res = await kcLoginToken(account.access_token) //First try KC
                     try {
-                        const req = await redToken(res.access_token)
-                        console.log(req);
+                        const req = await redLoginToken(res.access_token)
+                        console.log(req)
                         user.access_token = res.access_token
                         user.id = req
                         //user.maxAge = 30 * 24 * 60 * 60
@@ -138,10 +182,10 @@ const handler = NextAuth({
                                 })
                                 if (req) {
                                     try {
-                                        const res = await kcToken(account.access_token) //Second try KC
+                                        const res = await kcLoginToken(account.access_token) //Second try KC
                                         try {
-                                            const req = await redToken(res.access_token)
-                                            console.log(req);
+                                            const req = await redLoginToken(res.access_token)
+                                            console.log(req)
                                             user.access_token = res.access_token
                                             user.id = req
                                             //user.maxAge = 30 * 24 * 60 * 60
@@ -180,7 +224,7 @@ const handler = NextAuth({
                 }
             } else if (account && account.provider === 'kccreds' && user && user.access_token) {
                 try {
-                    const req = await redToken(user.access_token)
+                    const req = await redLoginToken(user.access_token)
                     user.access_token = req.access_token
                     user.id = req
                 } catch (error) {
