@@ -1,0 +1,67 @@
+{
+  "server-component": {
+    "welcome": "Welcome"
+  },
+  "common": {
+    "locale": "en",
+    "refresh": "Refresh page"
+  },
+  "login": {
+    "email": "Email address",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot your password?",
+    "login": "Log in",
+    "google": "Sign in with Google",
+    "not_signed_in": "Not signed in",
+    "signed_in_as": "Signed in as",
+    "signout": "Sign out",
+    "signin": "Sign in",
+    "register": "Register",
+    "phone": "Phone number",
+    "confirm": "Confirm password",
+    "signup": "Sign up",
+    "restore": "Restore password",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "short_password": "Password can't be that short",
+    "passwords_mismatch": "Passwords not match",
+    "no_user": "User not found",
+    "bad_credentials": "Bad credentials",
+    "user_exist": "User already registered"
+  },
+  "offers": {
+    "voice": "Voice",
+    "sms": "SMS",
+    "tollfree": "Toll-free",
+    "reg": "For registration",
+    "select_country": "Select country",
+    "select_area": "Select area",
+    "setupfee": "Setup fee",
+    "monthlyfee": "Monthly fee"
+  },
+  "docs": {
+    "name_lastname": "First name, last name",
+    "birth": "Date of birth, place of birth",
+    "company_name": "First name, last name",
+    "company_inc": "Company incorporation certificate copy",
+    "company_inc_country": "Company incorporation certificate copy in the same country in which the virtual number is needed",
+    "phone_number": "Contact phone number",
+    "address": "Full address (street, building number, postal code, city and country)",
+    "address_country": "Full address in the same country in which the virtual number is needed",
+    "address_city": "Full address in the same country, in the same city in which the virtual number is needed",
+    "pass_or_id": "Passport or ID copy",
+    "pass_or_id_country": "Passport or ID copy in the same country in which the virtual number is needed",
+    "company_id": "Company's certificate of incorporation",
+    "address_proof": "Proof of address less than 6 months old (a copy of a utility bill)",
+    "address_proof_city": "Proof of address less than 6 months old, must be from the same city as the virtual number ordered",
+    "address_proof_country": "Proof of address less than 6 months old, must be from the same country as the virtual number ordered",
+    "address_proof_country_3": "Proof of address less than 3 months old, must be from the same country as the virtual number ordered",
+    "loi": "LOI (Letter of intent)",
+    "usage": "Service usage description",
+    "tax_id": "Tax ID (Taxpayer Identification Number)",
+    "pass_id_x2": "2 forms Passport or ID copy",
+    "address_proof_x2": "2 forms of proof of address (a copy of utility bill no older than of 6 months)",
+    "photo": "Photo verification (high definition colored photo of you holding your opened on the first page passport)"
+  }
+}
