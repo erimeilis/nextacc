@@ -51,13 +51,11 @@ deploy-dev:
   variables:
     SECURE_FILES_DOWNLOAD_PATH: './helm/'
   before_script:
-# download secret files
-    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
-    - apk add curl
-    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-# Install helm and kubectl
     - apt update
     - apt install -y curl unzip jq
+# download secret files
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+# Install helm and kubectl
     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
     - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -91,13 +89,11 @@ deploy-prod:
   variables:
     SECURE_FILES_DOWNLOAD_PATH: './helm/'
   before_script:
-# download secret files
-    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
-    - apk add curl
-    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-# Install helm and kubectl
     - apt update
     - apt install -y curl unzip jq
+# download secret files
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+# Install helm and kubectl
     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
     - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
