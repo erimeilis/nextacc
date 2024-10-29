@@ -1,0 +1,121 @@
+variables:
+  RELEASE_NAME: nextacc-lk
+  KUBE_NAMESPACE: nextacc-lk
+
+docker-build:
+  # Use the official docker image.
+  image: docker:cli
+  stage: build
+  only:
+      - master
+      - production
+#  when: manual
+  services:
+    - docker:dind
+  variables:
+    DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH-$CI_CONCURRENT_ID
+#    SECURE_FILES_DOWNLOAD_PATH: './src/'
+  before_script:
+# SECURE_FILES_DOWNLOAD_PATH
+#    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
+#    - apk add curl
+#    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+# SECURE_FILES_DOWNLOAD_PATH end
+    - echo $CI_REGISTRY_IMAGE && echo $CI_COMMIT_REF_SLUG
+    - echo "$CI_REGISTRY_USER" && echo "$CI_REGISTRY_PASSWORD" && echo $CI_REGISTRY
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  # Default branch is also tagged with `latest`
+  script:
+    - echo $CI_COMMIT_BRANCH && echo $CI_COMMIT_BRANCH-$CI_CONCURRENT_ID
+    - docker build --pull -t "$DOCKER_IMAGE_NAME" .
+    - docker push "$DOCKER_IMAGE_NAME"
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        docker tag "$DOCKER_IMAGE_NAME" "$CI_REGISTRY_IMAGE:latest"
+        docker push "$CI_REGISTRY_IMAGE:latest"
+      fi
+  after_script:
+    - echo $CI_COMMIT_BRANCH-$CI_CONCURRENT_ID > TAG_NU.txt
+  artifacts:
+      paths:
+          - TAG_NU.txt
+
+deploy-dev:
+  stage: deploy
+  environment: $CI_COMMIT_BRANCH
+ # when: manual
+  needs: ["docker-build"]
+  only:
+      - master
+  image: ubuntu:latest
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: './helm/'
+  before_script:
+# download secret files
+    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
+    - apk add curl
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+# Install helm and kubectl
+    - apt update
+    - apt install -y curl unzip jq
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    - helm version
+ #   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+ #   - unzip awscliv2.zip
+ #   - ./aws/install
+ #   - aws --version
+    - kubectl version --client
+    - helm version
+    - TAG_NU=$(cat TAG_NU.txt) && echo $TAG_NU && echo $CI_COMMIT_REF_SLUG
+    - echo $SANDBOX_3 > sandbox_config && base64 -d -i sandbox_config > helm/sandbox_config.yaml
+#    - cat sandbox_config.yaml
+    - kubectl get ns --kubeconfig helm/sandbox_config.yaml
+  script:
+    - cd helm && ls -la
+    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml
+    - helm upgrade --install $RELEASE_NAME --wait --values=values-$CI_COMMIT_BRANCH.yaml --set image.tag=$TAG_NU --namespace $KUBE_NAMESPACE --create-namespace --kubeconfig sandbox_config.yaml .
+  after_script:
+    - sleep 3
+    - kubectl --namespace $KUBE_NAMESPACE get pods --kubeconfig helm/sandbox_config.yaml
+
+deploy-prod:
+  stage: deploy
+  environment: $CI_COMMIT_BRANCH
+ # when: manual
+  needs: ["docker-build"]
+  only:
+      - production
+  image: ubuntu:latest
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: './helm/'
+  before_script:
+# download secret files
+    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
+    - apk add curl
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+# Install helm and kubectl
+    - apt update
+    - apt install -y curl unzip jq
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    - helm version
+ #   - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+ #   - unzip awscliv2.zip
+ #   - ./aws/install
+ #   - aws --version
+    - kubectl version --client
+    - helm version
+    - TAG_NU=$(cat TAG_NU.txt) && echo $TAG_NU && echo $CI_COMMIT_REF_SLUG
+    - echo $PRODUCTION_SCW > prod_config && base64 -d -i prod_config > helm/prod_config.yaml
+ #  - cat helm/prod_config.yaml
+    - kubectl get ns --kubeconfig helm/prod_config.yaml
+  script:
+    - cd helm && ls -la
+    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml
+    - helm upgrade --install $RELEASE_NAME --wait --values=values-$CI_COMMIT_BRANCH.yaml --set image.tag=$TAG_NU --namespace $KUBE_NAMESPACE --create-namespace --kubeconfig prod_config.yaml .
+  after_script:
+    - sleep 3
+    - kubectl --namespace $KUBE_NAMESPACE get pods --kubeconfig helm/prod_config.yaml

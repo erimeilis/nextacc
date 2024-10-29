@@ -1,0 +1,49 @@
+# Declare variables to be passed into your templates.
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/betacompany/freeje/nextacc
+  tag: master
+  pullPolicy: IfNotPresent
+  secretName: gitlab-nextacc
+  secretCr: ICB7CiAgICAiYXV0aHMiOiB7CiAgICAgICJyZWdpc3RyeS5naXRsYWIuY29tIjogewogICAgICAgICJhdXRoIjogIloybDBiR0ZpSzJSbGNHeHZlUzEwYjJ0bGJpMDFNemd3TkRNek9tZHNaSFF0UVZSNFdITjZXa2N0WTNoNVNuRmxUbVZ3WVZBPSIKICAgICAgfQogICAgfQogIH0K
+
+ingress:
+  host: nextacc-sandbox.telecomax.net
+
+service:
+  http: 3000
+
+#resources:
+#  limits:
+#   cpu: 0.5
+#   memory: 128Mi
+#  requests:
+#   cpu: 0.5
+#   memory: 128Mi
+
+nodeSelector: []
+
+tolerations: []
+
+affinity: {}
+
+env:
+  - name: SITE_ID
+    value: 23
+  - name: REDREPORT_URL
+    value: https://redreport-dev.telecomax.com
+  - name: NEXTAUTH_URL
+    value: https://nextacc-sandbox.telecomax.net
+  - name: GOOGLE_CLIENT_ID
+    value: 991863475034-o8k6b7sbp7ttc6769pfealsi6t76r71g.apps.googleusercontent.com
+  - name: KEYCLOAK_CLIENT_ID
+    value: target-client
+  - name: KEYCLOAK_REALM
+    value: https://keycloak.telecomax.net/auth/realms/blabla
+  - name: KEYCLOAK_REALM_NAME
+    value: blabla
+  - name: KEYCLOAK_ADMIN_ID
+    value: admin-cli
+  - name: KEYCLOAK_ADMIN_REALM
+    value: https://keycloak.telecomax.net/auth/admin/realms/blabla

@@ -1,0 +1,56 @@
+# Declare variables to be passed into your templates.
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/betacompany/voiceaiagent
+  tag: prod1
+  pullPolicy: IfNotPresent
+  secretName: gitlab-voiceaiage
+  secretCr: ICB7CiAgICAiYXV0aHMiOiB7CiAgICAgICJyZWdpc3RyeS5naXRsYWIuY29tIjogewogICAgICAgICJhdXRoIjogIloybDBiR0ZpSzJSbGNHeHZlUzEwYjJ0bGJpMDFNREUxTmpNNU9tZHNaSFF0VmkxNVVHUjZVRFIxTkhkNGVWTnZSMkUxWTNFPSIKICAgICAgfQogICAgfQogIH0K
+
+ingress:
+  host: voiceagent.telecomax.net
+
+env:
+  - name: POSTGRES_USER
+    value: postgres
+  - name: POSTGRES_PASSWORD
+    value: XxjrE0kS8d
+  - name: POSTGRES_DB
+    value: voiceagent
+  - name: POSTGRES_HOST
+    value: main-postgresql
+  - name: DATABASE_URL
+    value: 'postgresql+asyncpg://postgres:XxjrE0kS8d@main-postgresql/voiceagent'
+  - name: API_URL
+    value: 'https://flowise.telecomax.net/api/v1/prediction/16bb0f4d-be2a-4766-bf45-75d4ae80a901'
+  - name: AUTHORIZATION_TOKEN
+    value: 'Bearer VW-NCiAUw8AKht9rNyAigWoIkdkoIY4jogaN3aHoBPI'
+  - name: RETELL_API_KEY
+    value: 'b6d997df-6bcd-4375-a9f4-fdb48f17a5ab'
+  - name: RETELL_AGENT_ID
+    value: 'a40ba1176814b25f9dc237d4ec5ba814'
+  - name: OPENAI_API_KEY
+    value: 'sk-proj-FEepTrmFApcOEwwbHEawT3BlbkFJ0XLqWZL1Pk4mVpj5T8sf'
+  - name: SERVER_URL
+    value: voiceagent.telecomax.net
+  - name: API_BASE_URL
+    value: 'https://voiceagent.telecomax.net'
+
+
+service:
+  http: 8080
+
+#resources:
+#  limits:
+#   cpu: 0.5
+#   memory: 128Mi
+#  requests:
+#   cpu: 0.5
+#   memory: 128Mi
+
+nodeSelector: []
+
+tolerations: []
+
+affinity: {}
