@@ -17,8 +17,7 @@ docker-build:
 #    SECURE_FILES_DOWNLOAD_PATH: './src/'
   before_script:
 # SECURE_FILES_DOWNLOAD_PATH
-#    - apk update && apk add curl && apk add --no-cache bash && chsh -s /bin/bash && exec /bin/bash
-#    - apk add curl
+#    - apt install -y curl unzip jq
 #    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
 # SECURE_FILES_DOWNLOAD_PATH end
     - echo $CI_REGISTRY_IMAGE && echo $CI_COMMIT_REF_SLUG

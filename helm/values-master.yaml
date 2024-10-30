@@ -47,3 +47,15 @@ env:
     value: admin-cli
   - name: KEYCLOAK_ADMIN_REALM
     value: https://keycloak.telecomax.net/auth/admin/realms/blabla
+# secrets from file secrets-<branchname>.yaml in gitlab "Secure files"
+#envSecrets:
+#  - name: REDREPORT_TOKEN
+#    value: 1111111111111
+#  - name: NEXTAUTH_SECRET
+#    value: 1111111111111
+#  - name: GOOGLE_CLIENT_SECRET
+#    value: 1111111111111
+#  - name: KEYCLOAK_CLIENT_SECRET
+#    value: 1111111111111
+#  - name: KEYCLOAK_ADMIN_SECRET
+#    value: 1111111111111

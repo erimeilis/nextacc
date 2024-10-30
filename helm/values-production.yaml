@@ -2,44 +2,17 @@
 replicaCount: 1
 
 image:
-  repository: registry.gitlab.com/betacompany/voiceaiagent
-  tag: prod1
+  repository: registry.gitlab.com/betacompany/freeje/nextacc
+  tag: prod
   pullPolicy: IfNotPresent
-  secretName: gitlab-voiceaiage
-  secretCr: ICB7CiAgICAiYXV0aHMiOiB7CiAgICAgICJyZWdpc3RyeS5naXRsYWIuY29tIjogewogICAgICAgICJhdXRoIjogIloybDBiR0ZpSzJSbGNHeHZlUzEwYjJ0bGJpMDFNREUxTmpNNU9tZHNaSFF0VmkxNVVHUjZVRFIxTkhkNGVWTnZSMkUxWTNFPSIKICAgICAgfQogICAgfQogIH0K
+  secretName: gitlab-nextacc
+  secretCr: ICB7CiAgICAiYXV0aHMiOiB7CiAgICAgICJyZWdpc3RyeS5naXRsYWIuY29tIjogewogICAgICAgICJhdXRoIjogIloybDBiR0ZpSzJSbGNHeHZlUzEwYjJ0bGJpMDFNemd3TkRNek9tZHNaSFF0UVZSNFdITjZXa2N0WTNoNVNuRmxUbVZ3WVZBPSIKICAgICAgfQogICAgfQogIH0K
 
 ingress:
-  host: voiceagent.telecomax.net
-
-env:
-  - name: POSTGRES_USER
-    value: postgres
-  - name: POSTGRES_PASSWORD
-    value: XxjrE0kS8d
-  - name: POSTGRES_DB
-    value: voiceagent
-  - name: POSTGRES_HOST
-    value: main-postgresql
-  - name: DATABASE_URL
-    value: 'postgresql+asyncpg://postgres:XxjrE0kS8d@main-postgresql/voiceagent'
-  - name: API_URL
-    value: 'https://flowise.telecomax.net/api/v1/prediction/16bb0f4d-be2a-4766-bf45-75d4ae80a901'
-  - name: AUTHORIZATION_TOKEN
-    value: 'Bearer VW-NCiAUw8AKht9rNyAigWoIkdkoIY4jogaN3aHoBPI'
-  - name: RETELL_API_KEY
-    value: 'b6d997df-6bcd-4375-a9f4-fdb48f17a5ab'
-  - name: RETELL_AGENT_ID
-    value: 'a40ba1176814b25f9dc237d4ec5ba814'
-  - name: OPENAI_API_KEY
-    value: 'sk-proj-FEepTrmFApcOEwwbHEawT3BlbkFJ0XLqWZL1Pk4mVpj5T8sf'
-  - name: SERVER_URL
-    value: voiceagent.telecomax.net
-  - name: API_BASE_URL
-    value: 'https://voiceagent.telecomax.net'
-
+  host: nextacc.telecomax.net
 
 service:
-  http: 8080
+  http: 3000
 
 #resources:
 #  limits:
@@ -54,3 +27,35 @@ nodeSelector: []
 tolerations: []
 
 affinity: {}
+
+env:
+  - name: SITE_ID
+    value: 23
+  - name: REDREPORT_URL
+    value: https://redreport.telecomax.com
+  - name: NEXTAUTH_URL
+    value: https://nextacc.telecomax.net
+  - name: GOOGLE_CLIENT_ID
+    value: 991863475034-o8k6b7sbp7ttc6769pfealsi6t76r71g.apps.googleusercontent.com
+  - name: KEYCLOAK_CLIENT_ID
+    value: target-client
+  - name: KEYCLOAK_REALM
+    value: https://keycloak.telecomax.net/auth/realms/blabla
+  - name: KEYCLOAK_REALM_NAME
+    value: blabla
+  - name: KEYCLOAK_ADMIN_ID
+    value: admin-cli
+  - name: KEYCLOAK_ADMIN_REALM
+    value: https://keycloak.telecomax.net/auth/admin/realms/blabla
+# secrets from file secrets-<branchname>.yaml in gitlab "Secure files"
+#envSecrets:
+#  - name: REDREPORT_TOKEN
+#    value: 1111111111111
+#  - name: NEXTAUTH_SECRET
+#    value: 1111111111111
+#  - name: GOOGLE_CLIENT_SECRET
+#    value: 1111111111111
+#  - name: KEYCLOAK_CLIENT_SECRET
+#    value: 1111111111111
+#  - name: KEYCLOAK_ADMIN_SECRET
+#    value: 1111111111111

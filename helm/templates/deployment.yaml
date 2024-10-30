@@ -35,6 +35,10 @@ spec:
         - name: {{ .name }}
           value: {{ .value | quote}}
         {{- end }}
+          {{- range .Values.envSecrets }}
+        - name: {{ .name }}
+          value: {{ .value | quote}}
+        {{- end }}
         readinessProbe:
           httpGet:
             path: /en
