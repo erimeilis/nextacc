@@ -1,6 +1,6 @@
 'use server'
-import './globals.css'
-import {AuthProvider} from './AuthProvider'
+import '@/app/[locale]/globals.css'
+import {AuthProvider} from '@/app/[locale]/AuthProvider'
 import React from 'react'
 import {routing} from '@/i18n/routing'
 import {notFound} from 'next/navigation'
@@ -84,7 +84,7 @@ export default async function RootLayout({
         listGroup: {
             root: {
                 base: 'list-none flex flex-col sm:flex-row items-center w-full text-sm font-medium text-gray-900 bg-gray-100 rounded-md ' +
-                    'dark:text-slate-300 dark:bg-indigo-900 border-0 border-gray-200 dark:border-indigo-600'
+                    'dark:text-slate-400 dark:bg-indigo-900 border-0 border-gray-200 dark:border-indigo-600'
             },
             item: {
                 base: 'w-full border-gray-300 dark:border-indigo-800 ' +
@@ -159,6 +159,18 @@ export default async function RootLayout({
                     'default': 'text-orange-500 focus:ring-orange-400 dark:text-indigo-600 dark:ring-offset-indigo-800 dark:focus:ring-indigo-600',
                 }
             }
+        },
+        card: {
+            root: {
+                base: 'flex rounded-md w-full border border-gray-200 bg-gray-100 drop-shadow text-gray-800 ' +
+                    'dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200',
+                children: 'flex h-full flex-col justify-center gap-4 p-6',
+                horizontal: {
+                    'off': 'flex-col',
+                    'on': 'flex-col md:max-w-xl md:flex-row'
+                },
+                href: 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }
         }
     }
 
@@ -173,8 +185,8 @@ export default async function RootLayout({
             <NextIntlClientProvider messages={messages}>
                 <Flowbite theme={{theme: indigoOrangeTheme}}>
                     <Nav/>
-                    <main className="flex items-center justify-center px-4 pt-32 pb-96 bg-stone-200 dark:bg-slate-900">
-                        <div className="sm:w-full md:w-3/4 lg:w-1/2 max-w-4xl">
+                    <main className="flex items-center justify-center px-4 pt-4 pb-96 bg-stone-200 dark:bg-slate-900">
+                        <div className="flex flex-col sm:w-full md:w-3/4 lg:w-1/2 max-w-4xl gap-4">
                             {offers}
                             {profile}
                             {children}

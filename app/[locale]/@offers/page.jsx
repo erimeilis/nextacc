@@ -1,12 +1,13 @@
 'use client'
-import DropdownSelect from '/app/[locale]/components/DropdownSelect'
-import NumberTypeSelector from '/app/[locale]/components/NumberTypeSelector'
+import TwoColumnButtonList from '@/app/[locale]//components/TwoColumnButtonList'
+import DropdownSelect from '@/app/[locale]/components/DropdownSelect'
+import NumberTypeSelector from '@/app/[locale]/components/NumberTypeSelector'
+import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
+import {Card} from 'flowbite-react'
 import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {useState} from 'react'
 import useSWR from 'swr'
-import {getAreas, getCountries, getNumbers} from '../../api/redreport/offers'
-import TwoColumnButtonList from '../components/TwoColumnButtonList'
 
 const types = [
     'voice', 'sms', 'tollfree', 'reg'
@@ -23,6 +24,7 @@ export default function Offers() {
     const [numberInfo, setNumberInfo] = useState(null)
     const [loadingCountries, setLoadingCountries] = useState(false)
     const [loadingAreas, setLoadingAreas] = useState(false)
+    const [loadingNumbers, setLoadingNumbers] = useState(false)
 
     function Countries() {
         const {data} = useSWR(searchParams.has('type') ? {
@@ -83,41 +85,43 @@ export default function Offers() {
 
     return (
         <>
-            <NumberTypeSelector options={types} onSelect={handleType} selectedOption={searchParams.get('type')}/>
-            <div className="flex flex-row items-center gap-4 justify-between my-4">
-                <DropdownSelect
-                    selectId="country"
-                    selectTitle={t('select_country')}
-                    data={Countries()}
-                    onSelect={handleCountry}
-                    selectedOption={searchParams.get('country')}
-                    loading={loadingCountries}
-                />
-                <DropdownSelect
-                    selectId="area"
-                    selectTitle={t('select_area')}
-                    data={Areas()}
-                    onSelect={handleArea}
-                    selectedOption={searchParams.get('area')}
-                    loading={loadingAreas}
-                />
-            </div>
-            <div className="flex items-center mb-4 transition duration-300">
-                <TwoColumnButtonList
-                    options={Numbers()}
-                    onSelect={handleNumber}
-                    selectedOption={searchParams.get('number')}
-                />
-            </div>
-            <div className="flex flex-col mb-4 p-2 transition duration-300 text-gray-900 dark:text-gray-300">
-                <div>
-                    {(numberInfo) ? t('setupfee') + ': ' + numberInfo.setuprate + '$ / '
-                        + t('monthlyfee') + ': ' + numberInfo.fixrate + '$' : ''}
+            <Card id="offers" className="bg-gray-200 dark:bg-indigo-800">
+                <NumberTypeSelector options={types} onSelect={handleType} selectedOption={searchParams.get('type')}/>
+                <div className="flex flex-row items-center gap-4 justify-between my-4">
+                    <DropdownSelect
+                        selectId="country"
+                        selectTitle={t('select_country')}
+                        data={Countries()}
+                        onSelect={handleCountry}
+                        selectedOption={searchParams.get('country')}
+                        loading={loadingCountries}
+                    />
+                    <DropdownSelect
+                        selectId="area"
+                        selectTitle={t('select_area')}
+                        data={Areas()}
+                        onSelect={handleArea}
+                        selectedOption={searchParams.get('area')}
+                        loading={loadingAreas}
+                    />
                 </div>
-                <div>
-                    {(numberInfo) ? GetDocs(numberInfo) : ''}
+                <div className="flex items-center transition duration-300">
+                    <TwoColumnButtonList
+                        options={Numbers()}
+                        onSelect={handleNumber}
+                        selectedOption={searchParams.get('number')}
+                    />
                 </div>
-            </div>
+                <div className="flex flex-col px-2 transition duration-300 text-gray-900 dark:text-gray-300">
+                    <div>
+                        {(numberInfo) ? t('setupfee') + ': ' + numberInfo.setuprate + '$ / '
+                            + t('monthlyfee') + ': ' + numberInfo.fixrate + '$' : ''}
+                    </div>
+                    <div>
+                        {(numberInfo) ? GetDocs(numberInfo) : ''}
+                    </div>
+                </div>
+            </Card>
         </>
     )
 }

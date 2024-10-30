@@ -3,7 +3,9 @@ import {jwtDecode} from 'jwt-decode'
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcLoginCreds, kcLoginToken, redExists, redLoginToken} from './restRequests'
+import {getLocale} from 'next-intl/server'
+import {string} from 'zod'
+import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcGetUser, kcLoginCreds, kcLoginToken, kcUpdateUser, redExists, redLoginToken} from './restRequests'
 
 const handler = NextAuth({
     session: {
@@ -18,6 +20,14 @@ const handler = NextAuth({
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            authorization: {
+                params: {
+                    prompt: 'consent',
+                    access_type: 'offline',
+                    response_type: 'code',
+                    lang: string
+                }
+            }
         }),
         CredentialsProvider({
             id: 'kccreds',
@@ -65,7 +75,8 @@ const handler = NextAuth({
                                         if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists and creds are ok as we've got ID
                                             try {
                                                 const adminToken = await kcGetAdminToken() //Get Admin token on KC
-                                                const res = await kcCreateUser(credentials.username, credentials.password, adminToken) //Create user on KC
+                                                const locale = await getLocale()
+                                                const res = await kcCreateUser(adminToken, credentials.username, credentials.password, '', locale) //Create user on KC
                                                 if (res === 201) { //Success
                                                     try {
                                                         const res = await kcLoginCreds(credentials.username, credentials.password) //Second try KC
@@ -141,16 +152,45 @@ const handler = NextAuth({
         })
     ],
     callbacks: {
-        async signIn({user, account}) {
+        async signIn({user, account, credentials}) {
             if (user?.error) {
                 throw new Error(user.error)
             }
             if (account && account.provider === 'google') {
                 try {
-                    const res = await kcLoginToken(account.access_token) //First try KC
+                    let res = await kcLoginToken(account.access_token) //First try KC
+                    const access_token = jwtDecode(res.access_token)
+                    console.log(' ', credentials)
+                    if (access_token.email_verified === false) { //this is just for newbies
+                        const adminToken = await kcGetAdminToken() //Get Admin token on KC
+                        res = await kcGetUser(adminToken, access_token.sub)
+                        try {
+                            res = await kcUpdateUser(
+                                adminToken,
+                                access_token.sub,
+                                {
+                                    'email': user.email,
+                                    'emailVerified': true,
+                                    'attributes': {
+                                        'phone': '',
+                                        'telegram': '',
+                                        'lang': lang,
+                                    }
+                                }
+                            ) //Set email as verified as we believe Google at this point
+                        } catch (error) {
+                            if (axios.isAxiosError(error)) {
+                                console.log('kcUpdateUser ' + error.status)
+                                console.error(error.response.data.error_description)
+                                // Do something with this error...
+                            } else {
+                                console.error(error)
+                            }
+                        }
+                        res = await kcLoginToken(account.access_token) //Second login KC to get token with verified email
+                    }
                     try {
                         const req = await redLoginToken(res.access_token)
-                        console.log(req)
                         user.access_token = res.access_token
                         user.id = req
                         //user.maxAge = 30 * 24 * 60 * 60
@@ -165,8 +205,8 @@ const handler = NextAuth({
                     }
                 } catch (error) {
                     if (axios.isAxiosError(error)) {
-                        console.log('kcToken ' + error.status)
-                        console.log(error.response.data.error_description)
+                        console.log('kcLoginToken ' + error.status)
+                        console.log(error)
                         if (error.status === 400
                             && error.response
                             && error.response.data.error_description === 'User already exists') {

@@ -48,7 +48,7 @@ export default function Input({
                     required={isRequired}
                 />
                 <div className={'absolute flex border border-transparent right-0 top-0 h-full w-10 ' + displayEye}>
-                    <button type="button" className="flex items-center justify-center rounded-tl rounded-bl z-10
+                    <button type="button" tabIndex="-1" aria-hidden="true" className="flex items-center justify-center rounded-tl rounded-bl z-10
                     text-stone-500 dark:text-indigo-200 text-xs h-full w-full" onClick={switchPass}>
                         {typeState === 'password' ? <Icon.Eye/> : <Icon.EyeSlash/>}
                     </button>

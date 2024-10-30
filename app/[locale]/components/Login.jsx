@@ -11,11 +11,10 @@ import {schemaSignup} from '@/app/[locale]/schemas/signup.schema'
 import usePersistState from '@/app/[locale]/usePersistState'
 import {validateFormData} from '@/app/[locale]/utils/validation'
 import {kcEmail, registerUser} from '@/app/api/auth/[...nextauth]/restRequests'
-import {Checkbox, Label, Modal} from 'flowbite-react'
-import {signIn, signOut, useSession} from 'next-auth/react'
+import {Card, Checkbox, Label, Modal} from 'flowbite-react'
+import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {useState} from 'react'
-import {ThreeDots} from 'react-loader-spinner'
 
 let loginFieldsState = {}
 loginFields.forEach(field => loginFieldsState[field.id] = '')
@@ -26,8 +25,8 @@ forgotFields.forEach(field => forgotFieldsState[field.id] = '')
 
 export default function Login() {
 
-    const session = useSession()
     const t = useTranslations('login')
+    const c = useTranslations('common')
 
     const [mode, setMode] = usePersistState('')
     const handleToggle = () => {
@@ -79,8 +78,9 @@ export default function Login() {
             setSignupErrors({})
             const res = await registerUser(
                 signupState['signupEmail'],
+                signupState['signupPassword'],
                 signupState['signupPhone'],
-                signupState['signupPassword']
+                c('locale')
             )
             if (res?.error) {
                 setGlobalError(res.error)
@@ -107,30 +107,10 @@ export default function Login() {
         }
     }
 
-    if (session && session.status === 'authenticated') {
-        return (
-            <div className="flex items-center justify-between text-gray-800 dark:text-indigo-200 w-full bg-gray-100 dark:bg-indigo-950 p-10 rounded-md drop-shadow">
-                <div>{t('signed_in_as')} {session.data.user.email} ({session.data.user.id})</div>
-                <Button onClick={() => signOut()}>
-                    {t('signout')}
-                </Button>
-            </div>
-        )
-    } else if (session && session.status === 'loading') {
-        return (
-            <ThreeDots
-                visible={true}
-                height="48"
-                width="48"
-                color="#64748b"
-                radius="4"
-                ariaLabel="three-dots-loading"
-                wrapperClass="flex items-center justify-center w-full p-10"
-            />
-        )
-    } else {
-        return (
-            <div className="text-gray-800 dark:text-indigo-200 w-full bg-gray-100 dark:bg-indigo-950 p-10 rounded-md drop-shadow">
+
+    return (
+        <>
+            <Card id="login">
                 <div className="flex items-center justify-between">
                     <div>{t('not_signed_in')}<br/></div>
                     <Toggle
@@ -227,7 +207,7 @@ export default function Login() {
                         </div>
                         <Button
                             type="button"
-                            onClick={() => signIn('google')}
+                            onClick={() => signIn('google', null, {lang: c['locale']})}
                         >
                             {t('google')}
                         </Button>
@@ -269,13 +249,13 @@ export default function Login() {
                         </div>
                         <Button
                             type="button"
-                            onClick={() => signIn('google')}
+                            onClick={() => signIn('google', null, {lang: c['locale']})}
                         >
                             {t('google')}
                         </Button>
                     </div>
                 </form>
-            </div>
-        )
-    }
+            </Card>
+        </>
+    )
 }
