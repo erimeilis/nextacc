@@ -1,5 +1,5 @@
-"use server"
-import axios from "axios";
+'use server'
+import axios from 'axios'
 
 export async function kcLoginToken(token) {
     const response = await axios.post(
@@ -49,10 +49,11 @@ export async function kcGetAdminToken() {
             }
         }
     )
+    //console.log(response.data)
     return response.data.access_token
 }
 
-export async function kcCreateUser(username, password, adminToken, phone = '') {
+export async function kcCreateUser(adminToken, username, password, phone = '', locale = 'en') {
     //console.log(phone)
     const request = await axios.post(
         process.env.KEYCLOAK_ADMIN_REALM + '/users',
@@ -67,7 +68,8 @@ export async function kcCreateUser(username, password, adminToken, phone = '') {
                 'value': password
             }],
             'attributes': {
-                'phone': phone
+                'phone': phone,
+                'lang': locale,
             }
         },
         {
@@ -75,8 +77,34 @@ export async function kcCreateUser(username, password, adminToken, phone = '') {
                 'Authorization': 'Bearer ' + adminToken,
             }
         }
-    );
+    )
     return request.status
+}
+
+export async function kcUpdateUser(adminToken, userId, userRepresentation) {
+    const request = await axios.put(
+        process.env.KEYCLOAK_ADMIN_REALM + '/users/' + userId,
+        userRepresentation,
+        {
+            headers: {
+                'Authorization': 'Bearer ' + adminToken,
+            }
+        }
+    )
+    //console.log(request.data)
+    return request.status
+}
+
+export async function kcGetUser(adminToken, userId) {
+    const request = await axios.get(
+        process.env.KEYCLOAK_ADMIN_REALM + '/users/' + userId + '/?userProfileMetadata=true',
+        {
+            headers: {
+                'Authorization': 'Bearer ' + adminToken,
+            }
+        }
+    )
+    return request.data
 }
 
 export async function redLoginToken(token) {
@@ -109,6 +137,7 @@ export async function redExists(username, password = '') {
             }
         }
     )
+    //console.log(response.data)
     return response.data
 }
 
@@ -124,20 +153,20 @@ export async function kcExists(username, adminToken) {
     return response.data
 }
 
-export async function registerUser(username, phone, password) {
+export async function registerUser(username, password, phone, locale) {
     try {
         const adminToken = await kcGetAdminToken() //Get Admin token on KC
         const req = await kcExists(username, adminToken)
         if (req.length > 0) {
             console.log('User already exists on KC')
-            return {error: "user_exist"}
+            return {error: 'user_exist'}
         } else {
             try {
                 console.log('Look for user on Red')
                 const req = await redExists(username)
                 if (!isNaN(parseFloat(req)) && isFinite(req)) {
                     console.log('User already exists on Red')
-                    return {error: "user_exist"}
+                    return {error: 'user_exist'}
                 }
             } catch (error) {
                 if (axios.isAxiosError(error)) {
@@ -145,9 +174,10 @@ export async function registerUser(username, phone, password) {
                     if (error.response && error.response.status === 404) {
                         console.log('Let us register user')
                         try {
-                            const kc = await kcCreateUser(username, password, adminToken, phone)
+                            const kc = await kcCreateUser(adminToken, username, password, phone, locale)
                             if (kc === 201) { //Success
                                 console.log('User created on KC')
+                                //But it won't be able to login until verify email
                                 //it's enough as Red users are created automatically on successful login via KC
                             }
                         } catch (error) {

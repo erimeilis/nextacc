@@ -38,5 +38,29 @@
     "select_area": "Виберіть район",
     "setupfee": "Підключення",
     "monthlyfee": "Щомісячна плата"
+  },
+  "docs": {
+    "name_lastname": "First name, last name",
+    "birth": "Date of birth, place of birth",
+    "company_name": "First name, last name",
+    "company_inc": "Company incorporation certificate copy",
+    "company_inc_country": "Company incorporation certificate copy in the same country in which the virtual number is needed",
+    "phone_number": "Contact phone number",
+    "address": "Full address (street, building number, postal code, city and country)",
+    "address_country": "Full address in the same country in which the virtual number is needed",
+    "address_city": "Full address in the same country, in the same city in which the virtual number is needed",
+    "pass_or_id": "Passport or ID copy",
+    "pass_or_id_country": "Passport or ID copy in the same country in which the virtual number is needed",
+    "company_id": "Company's certificate of incorporation",
+    "address_proof": "Proof of address less than 6 months old (a copy of a utility bill)",
+    "address_proof_city": "Proof of address less than 6 months old, must be from the same city as the virtual number ordered",
+    "address_proof_country": "Proof of address less than 6 months old, must be from the same country as the virtual number ordered",
+    "address_proof_country_3": "Proof of address less than 3 months old, must be from the same country as the virtual number ordered",
+    "loi": "LOI (Letter of intent)",
+    "usage": "Service usage description",
+    "tax_id": "Tax ID (Taxpayer Identification Number)",
+    "pass_id_x2": "2 forms Passport or ID copy",
+    "address_proof_x2": "2 forms of proof of address (a copy of utility bill no older than of 6 months)",
+    "photo": "Photo verification (high definition colored photo of you holding your opened on the first page passport)"
   }
 }
