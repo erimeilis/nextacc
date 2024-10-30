@@ -24,7 +24,8 @@ export default function Offers() {
     const [numberInfo, setNumberInfo] = useState(null)
     const [loadingCountries, setLoadingCountries] = useState(false)
     const [loadingAreas, setLoadingAreas] = useState(false)
-    const [loadingNumbers, setLoadingNumbers] = useState(false)
+
+    //const [loadingNumbers, setLoadingNumbers] = useState(false)
 
     function Countries() {
         const {data} = useSWR(searchParams.has('type') ? {
