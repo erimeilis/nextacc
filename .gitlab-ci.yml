@@ -71,7 +71,7 @@ deploy-dev:
     - kubectl get ns --kubeconfig helm/sandbox_config.yaml
   script:
     - cd helm && ls -la
-    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml && cat values-$CI_COMMIT_BRANCH.yaml
+    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml
     - helm upgrade --install $RELEASE_NAME --wait --values=values-$CI_COMMIT_BRANCH.yaml --set image.tag=$TAG_NU --namespace $KUBE_NAMESPACE --create-namespace --kubeconfig sandbox_config.yaml .
   after_script:
     - sleep 3
@@ -109,7 +109,7 @@ deploy-prod:
     - kubectl get ns --kubeconfig helm/prod_config.yaml
   script:
     - cd helm && ls -la
-    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml && cat values-$CI_COMMIT_BRANCH.yaml
+    - cat secrets-$CI_COMMIT_BRANCH.yaml >> values-$CI_COMMIT_BRANCH.yaml
     - helm upgrade --install $RELEASE_NAME --wait --values=values-$CI_COMMIT_BRANCH.yaml --set image.tag=$TAG_NU --namespace $KUBE_NAMESPACE --create-namespace --kubeconfig prod_config.yaml .
   after_script:
     - sleep 3
