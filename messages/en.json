@@ -28,7 +28,10 @@
     "passwords_mismatch": "Passwords not match",
     "no_user": "User not found",
     "bad_credentials": "Bad credentials",
-    "user_exist": "User already registered"
+    "user_exist": "User already registered",
+    "email_unverified": "You cannot login until you verify your email",
+    "resend_verify": "Resend verification email",
+    "verify_sent": "Please, follow instructions in email sent to you"
   },
   "offers": {
     "voice": "Voice",

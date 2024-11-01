@@ -5,9 +5,11 @@ import Toggle from '@/app/[locale]/components/Toggle'
 import {forgotFields} from '@/app/[locale]/constants/forgotFields'
 import {loginFields} from '@/app/[locale]/constants/loginFields'
 import {signupFields} from '@/app/[locale]/constants/signupFields'
+import {verifyFields} from '@/app/[locale]/constants/verifyFields'
 import {schemaForgot} from '@/app/[locale]/schemas/forgot.schema'
 import {schemaLogin} from '@/app/[locale]/schemas/login.schema'
 import {schemaSignup} from '@/app/[locale]/schemas/signup.schema'
+import {schemaVerify} from '@/app/[locale]/schemas/verify.schema'
 import usePersistState from '@/app/[locale]/usePersistState'
 import {validateFormData} from '@/app/[locale]/utils/validation'
 import {kcEmail, registerUser} from '@/app/api/auth/[...nextauth]/restRequests'
@@ -22,6 +24,8 @@ let signupFieldsState = {}
 signupFields.forEach(field => signupFieldsState[field.id] = '')
 let forgotFieldsState = {}
 forgotFields.forEach(field => forgotFieldsState[field.id] = '')
+let verifyFieldsState = {}
+verifyFields.forEach(field => verifyFieldsState[field.id] = '')
 
 export default function Login() {
 
@@ -38,12 +42,15 @@ export default function Login() {
     }
 
     const [globalError, setGlobalError] = useState(null)
-    const [loginState, setLoginState] = useState(loginFieldsState)
     const [loginErrors, setLoginErrors] = useState({})
     const [signupErrors, setSignupErrors] = useState({})
     const [forgotErrors, setForgotErrors] = useState({})
-    const [openModal, setOpenModal] = useState(false)
+    const [verifyErrors, setVerifyErrors] = useState({})
+    const [openForgotModal, setOpenForgotModal] = useState(false)
+    const [openWarningVerifyModal, setOpenWarningVerifyModal] = useState(false)
+    const [warningVerifyModalSent, setWarningVerifyModalSent] = useState(false)
 
+    const [loginState, setLoginState] = useState(loginFieldsState)
     const handleLoginChange = (e) => {
         setLoginState({...loginState, [e.target.id]: e.target.value})
         setGlobalError(null)
@@ -63,6 +70,12 @@ export default function Login() {
             })
             if (res?.error) {
                 setGlobalError(res.error)
+                if (res.error === 'email_unverified') {
+                    setVerifyState({
+                        'verifyEmail': loginState['loginEmail'],
+                    })
+                    setOpenWarningVerifyModal(true)
+                }
             }
         }
     }
@@ -84,6 +97,13 @@ export default function Login() {
             )
             if (res?.error) {
                 setGlobalError(res.error)
+                if (res.error === 'email_verify_sent') {
+                    setVerifyState({
+                        'verifyEmail': loginState['loginEmail'],
+                    })
+                    setWarningVerifyModalSent(true)
+                    setOpenWarningVerifyModal(true)
+                }
             }
         }
     }
@@ -107,6 +127,27 @@ export default function Login() {
         }
     }
 
+    const [verifyState, setVerifyState] = useState(verifyFieldsState)
+    const handleVerifyChange = (e) => setVerifyState({...verifyState, [e.target.id]: e.target.value})
+    const handleVerifySubmit = async (e) => {
+        e.preventDefault()
+        const {errors} = validateFormData(schemaVerify, verifyState)
+        if (errors) {
+            setVerifyErrors(errors)
+        } else {
+            setVerifyErrors({})
+            const res = await kcEmail({
+                email: verifyState['verifyEmail'],
+                reason: 'VERIFY_EMAIL'
+            })
+            if (res?.error) {
+                setGlobalError(res.error)
+            } else {
+                setWarningVerifyModalSent(true)
+            }
+        }
+    }
+
 
     return (
         <>
@@ -120,7 +161,12 @@ export default function Login() {
                         handleToggle={handleToggle}
                     />
                 </div>
-                <form id="loginForm" name="loginForm" className="mt-8 space-y-6 transition-transform duration-500" style={{display: mode ? 'none' : 'block'}}>
+                <form
+                    id="loginForm"
+                    name="loginForm"
+                    className="mt-8 space-y-6 transition-transform duration-500"
+                    style={{display: mode ? 'none' : 'block'}}
+                >
                     <div className="space-y-4">
                         {
                             loginFields.map(field =>
@@ -156,40 +202,8 @@ export default function Login() {
                         <div className="text-sm">
                             <Button
                                 className="font-medium text-blue-800 dark:text-orange-400 hover:text-indigo-600 dark:hover:text-orange-300"
-                                onClick={() => setOpenModal(true)}>{t('forgot_password')}
+                                onClick={() => setOpenForgotModal(true)}>{t('forgot_password')}
                             </Button>
-                            <Modal dismissible show={openModal} onClose={() => setOpenModal(false)}>
-                                <Modal.Body>
-                                    <form id="forgotForm" name="forgotForm" className="items-center space-y-6 transition-transform duration-500">
-                                        {
-                                            forgotFields.map(field =>
-                                                <Input
-                                                    key={field.id}
-                                                    handleChange={handleForgotChange}
-                                                    value={loginState[field.id]}
-                                                    labelText={t(field.labelText)}
-                                                    labelFor={field.labelFor}
-                                                    id={field.id}
-                                                    name={field.name}
-                                                    type={field.type}
-                                                    isRequired={field.isRequired}
-                                                    placeholder={t(field.placeholder)}
-                                                    icon={field.icon}
-                                                    error={t.has(`${forgotErrors[field.id]}`) ? t(`${forgotErrors[field.id]}`) : ''}
-                                                />
-                                            )
-                                        }
-
-                                        <Button
-                                            type="submit"
-                                            className="group flex m-auto"
-                                            onClick={handleForgotSubmit}
-                                        >
-                                            {t('restore')}
-                                        </Button>
-                                    </form>
-                                </Modal.Body>
-                            </Modal>
                         </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -207,7 +221,7 @@ export default function Login() {
                         </div>
                         <Button
                             type="button"
-                            onClick={() => signIn('google', null, {lang: c['locale']})}
+                            onClick={() => signIn('google')}
                         >
                             {t('google')}
                         </Button>
@@ -249,13 +263,91 @@ export default function Login() {
                         </div>
                         <Button
                             type="button"
-                            onClick={() => signIn('google', null, {lang: c['locale']})}
+                            onClick={() => signIn('google')}
                         >
                             {t('google')}
                         </Button>
                     </div>
                 </form>
             </Card>
+
+            <Modal dismissible show={openForgotModal} onClose={() => {
+                setForgotErrors({})
+                setOpenForgotModal(false)
+            }}>
+                <Modal.Body>
+                    <form id="forgotForm" name="forgotForm" className="items-center space-y-6 transition-transform duration-500">
+                        {
+                            forgotFields.map(field =>
+                                <Input
+                                    key={field.id}
+                                    handleChange={handleForgotChange}
+                                    value={forgotState[field.id]}
+                                    labelText={t(field.labelText)}
+                                    labelFor={field.labelFor}
+                                    id={field.id}
+                                    name={field.name}
+                                    type={field.type}
+                                    isRequired={field.isRequired}
+                                    placeholder={t(field.placeholder)}
+                                    icon={field.icon}
+                                    error={t.has(`${forgotErrors[field.id]}`) ? t(`${forgotErrors[field.id]}`) : ''}
+                                />
+                            )
+                        }
+
+                        <Button
+                            type="submit"
+                            className="group flex m-auto"
+                            onClick={handleForgotSubmit}
+                        >
+                            {t('restore')}
+                        </Button>
+                    </form>
+                </Modal.Body>
+            </Modal>
+
+            <Modal dismissible show={openWarningVerifyModal} onClose={() => {
+                setVerifyErrors({})
+                setOpenWarningVerifyModal(false)
+                setWarningVerifyModalSent(false)
+            }}>
+                {!warningVerifyModalSent ?
+                    <Modal.Body>
+                        <div className="content-center">{t('email_unverified')}</div>
+                        <form id="verifyForm" name="verifyForm" className="items-center space-y-6 transition-transform duration-500">
+                            {
+                                verifyFields.map(field =>
+                                    <Input
+                                        key={field.id}
+                                        handleChange={handleVerifyChange}
+                                        value={verifyState[field.id]}
+                                        labelText={t(field.labelText)}
+                                        labelFor={field.labelFor}
+                                        id={field.id}
+                                        name={field.name}
+                                        type={field.type}
+                                        isRequired={field.isRequired}
+                                        placeholder={t(field.placeholder)}
+                                        icon={field.icon}
+                                        error={t.has(`${verifyErrors[field.id]}`) ? t(`${verifyErrors[field.id]}`) : ''}
+                                    />
+                                )
+                            }
+
+                            <Button
+                                type="submit"
+                                className="group flex m-auto"
+                                onClick={handleVerifySubmit}
+                            >
+                                {t('resend_verify')}
+                            </Button>
+                        </form>
+                    </Modal.Body> :
+                    <Modal.Body>
+                        <div className="content-center">{t('verify_sent')}</div>
+                    </Modal.Body>}
+            </Modal>
         </>
     )
 }
