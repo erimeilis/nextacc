@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import {getLocale} from 'next-intl/server'
 import qs from 'querystring'
-import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcGetUser, kcLoginCreds, kcLoginToken, kcUpdateUser, redExists, redLoginToken} from './restRequests'
+import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcLoginCreds, kcLoginToken, kcUpdateUser, redExists, redLoginToken} from './restRequests'
 
 export const authOptions = (req) => ({
     //session: {
@@ -63,10 +63,10 @@ export const authOptions = (req) => ({
                             console.log('No such user on KC')
                             try {
                                 const req = await redExists(credentials.username) //Check if user exist on Red
-                                if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists as we've got ID
+                                if (!isNaN(parseFloat(req.id)) && isFinite(req.id)) { //User exists as we've got ID
                                     try {
                                         const req = await redExists(credentials.username, credentials.password) //Check if user exist on Red and creds are right
-                                        if (!isNaN(parseFloat(req)) && isFinite(req)) { //User exists and creds are ok as we've got ID
+                                        if (!isNaN(parseFloat(req.id)) && isFinite(req.id)) { //User exists and creds are ok as we've got ID
                                             try {
                                                 const adminToken = await kcGetAdminToken() //Get Admin token on KC
                                                 const locale = await getLocale()
@@ -153,18 +153,18 @@ export const authOptions = (req) => ({
             if (user?.warning) {
                 throw new Error(user.warning)
             }
-            const cookies = qs.decode(req.headers.get('cookie'), '; ')
-            const ip = req.headers.get('x-forwarded-for')
-            const geoIp = await fetch('https://geolocation-db.com/json/' + ip).then((response) => response.json())
-            const country = geoIp.country_code === 'Not found' ? 'HN' : geoIp.country_code
-            const lang = cookies.NEXT_LOCALE
             if (account && account.provider === 'google') {
                 try {
                     let res = await kcLoginToken(account.access_token) //First try KC
                     const access_token = jwtDecode(res.access_token)
                     if (access_token.email_verified === false) { //this is just for newbies
+                        const cookies = qs.decode(req.headers.get('cookie'), '; ')
+                        const ip = req.headers.get('x-forwarded-for')
+                        const geoIp = await fetch('https://geolocation-db.com/json/' + ip).then((response) => response.json())
+                        const country = geoIp.country_code === 'Not found' ? 'HN' : geoIp.country_code
+                        const lang = cookies.NEXT_LOCALE
                         const adminToken = await kcGetAdminToken() //Get Admin token on KC
-                        res = await kcGetUser(adminToken, access_token.sub)
+                        //res = await kcGetUser(adminToken, access_token.sub)
                         try {
                             res = await kcUpdateUser(
                                 adminToken,
@@ -194,7 +194,7 @@ export const authOptions = (req) => ({
                     try {
                         const req = await redLoginToken(res.access_token)
                         user.access_token = res.access_token
-                        user.id = req
+                        user.id = req.id
                         //user.maxAge = 30 * 24 * 60 * 60
                     } catch (error) {
                         if (axios.isAxiosError(error)) {
@@ -227,9 +227,9 @@ export const authOptions = (req) => ({
                                         const res = await kcLoginToken(account.access_token) //Second try KC
                                         try {
                                             const req = await redLoginToken(res.access_token)
-                                            console.log(req)
+                                            console.log(req.id)
                                             user.access_token = res.access_token
-                                            user.id = req
+                                            user.id = req.id
                                             //user.maxAge = 30 * 24 * 60 * 60
                                         } catch (error) {
                                             if (axios.isAxiosError(error)) {
@@ -265,11 +265,10 @@ export const authOptions = (req) => ({
                     }
                 }
             } else if (account && account.provider === 'kccreds' && user && user.access_token) {
-                console.log(user, account)
                 try {
                     const req = await redLoginToken(user.access_token)
                     user.access_token = req.access_token
-                    user.id = req
+                    user.id = req.id
                 } catch (error) {
                     if (axios.isAxiosError(error)) {
                         console.log(error.status)

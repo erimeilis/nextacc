@@ -237,7 +237,27 @@ export async function kcAddSocial({
                         }
                     }
                 )
-                if (response.data === '') return true
+                if (response.data === '') {
+                    try {
+                        await kcUpdateUser(
+                            adminToken,
+                            req[0].id,
+                            {
+                                'email': email,
+                                'emailVerified': true,
+                            }
+                        ) //Set email as verified as we believe Google at this point
+                        return true
+                    } catch (error) {
+                        if (axios.isAxiosError(error)) {
+                            console.log('kcUpdateUser ' + error.status)
+                            console.error(error.response.data.error_description)
+                            // Do something with this error...
+                        } else {
+                            console.error(error)
+                        }
+                    }
+                }
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     console.log('link account ' + error.status)
