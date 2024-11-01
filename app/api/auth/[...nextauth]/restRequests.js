@@ -20,6 +20,22 @@ export async function kcLoginToken(token) {
     return response.data
 }
 
+export async function kcRefreshToken(token) {
+    const response = await axios.post(
+        process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
+        'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
+        '&client_secret=' + process.env.KEYCLOAK_CLIENT_SECRET +
+        '&grant_type=refresh_token' +
+        '&refresh_token=' + token,
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+    )
+    return response.data
+}
+
 export async function kcLoginCreds(username, password) {
     const response = await axios.post(
         process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
@@ -34,7 +50,7 @@ export async function kcLoginCreds(username, password) {
             }
         }
     )
-    console.log(response.data)
+    //console.log(response.data)
     return response.data
 }
 
@@ -120,7 +136,7 @@ export async function redLoginToken(token) {
             }
         }
     )
-    //console.log(response)
+    console.log(response.status)
     return response.data
 }
 

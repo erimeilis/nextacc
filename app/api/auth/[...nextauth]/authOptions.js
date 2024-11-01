@@ -4,12 +4,10 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import {getLocale} from 'next-intl/server'
 import qs from 'querystring'
-import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcLoginCreds, kcLoginToken, kcUpdateUser, redExists, redLoginToken} from './restRequests'
+import {refreshAccessToken} from './refresh'
+import {kcAddSocial, kcCreateUser, kcExists, kcGetAdminToken, kcLoginCreds, kcLoginToken, kcUpdateUser, redExists} from './restRequests'
 
 export const authOptions = (req) => ({
-    //session: {
-    //    strategy: 'jwt',
-    //},
     pages: {
         signIn: '/',
         error: '/'
@@ -47,6 +45,7 @@ export const authOptions = (req) => ({
                                     username: access_token.email,
                                     phone: access_token.phone,
                                     access_token: res.access_token,
+                                    refresh_token: res.refresh_token,
                                     maxAge: credentials.rememberMe === 'true' ? 30 * 24 * 60 * 60 : 24 * 60 * 60
                                 }
                             } catch (error) { //Bad credentials
@@ -81,6 +80,7 @@ export const authOptions = (req) => ({
                                                             email: access_token.email,
                                                             username: access_token.email,
                                                             access_token: res.access_token,
+                                                            refresh_token: res.refresh_token,
                                                             maxAge: maxAge
                                                         }
                                                     } catch (error) {
@@ -191,20 +191,21 @@ export const authOptions = (req) => ({
                         }
                         res = await kcLoginToken(account.access_token) //Second login KC to get token with verified email
                     }
-                    try {
-                        const req = await redLoginToken(res.access_token)
-                        user.access_token = res.access_token
-                        user.id = req.id
-                        //user.maxAge = 30 * 24 * 60 * 60
-                    } catch (error) {
-                        if (axios.isAxiosError(error)) {
-                            console.log(error.status)
-                            console.error(error.response)
-                            // Do something with this error...
-                        } else {
-                            console.error(error)
-                        }
-                    }
+                    //try {
+                    //    const req = await redLoginToken(res.access_token)
+                    user.access_token = res.access_token
+                    user.refresh_token = res.refresh_token
+                    user.id = req.id
+                    //    //user.maxAge = 30 * 24 * 60 * 60
+                    //} catch (error) {
+                    //    if (axios.isAxiosError(error)) {
+                    //        console.log(error.status)
+                    //        console.error(error.response)
+                    //        // Do something with this error...
+                    //    } else {
+                    //        console.error(error)
+                    //    }
+                    //}
                 } catch (error) {
                     if (axios.isAxiosError(error)) {
                         console.log('kcLoginToken ' + error.status)
@@ -225,21 +226,22 @@ export const authOptions = (req) => ({
                                 if (req) {
                                     try {
                                         const res = await kcLoginToken(account.access_token) //Second try KC
-                                        try {
-                                            const req = await redLoginToken(res.access_token)
-                                            console.log(req.id)
-                                            user.access_token = res.access_token
-                                            user.id = req.id
-                                            //user.maxAge = 30 * 24 * 60 * 60
-                                        } catch (error) {
-                                            if (axios.isAxiosError(error)) {
-                                                console.log(error.status)
-                                                console.error(error.response)
-                                                // Do something with this error...
-                                            } else {
-                                                console.error(error)
-                                            }
-                                        }
+                                        //try {
+                                        //    const req = await redLoginToken(res.access_token)
+                                        //    console.log(req.id)
+                                        user.access_token = res.access_token
+                                        user.refresh_token = res.refresh_token
+                                        user.id = req.id
+                                        //    //user.maxAge = 30 * 24 * 60 * 60
+                                        //} catch (error) {
+                                        //    if (axios.isAxiosError(error)) {
+                                        //        console.log(error.status)
+                                        //        console.error(error.response)
+                                        //        // Do something with this error...
+                                        //    } else {
+                                        //        console.error(error)
+                                        //    }
+                                        //}
                                     } catch (error) {
                                         if (axios.isAxiosError(error)) {
                                             console.log('ksToken ' + error.status)
@@ -264,42 +266,47 @@ export const authOptions = (req) => ({
                         console.error(error)
                     }
                 }
-            } else if (account && account.provider === 'kccreds' && user && user.access_token) {
-                try {
-                    const req = await redLoginToken(user.access_token)
-                    user.access_token = req.access_token
-                    user.id = req.id
-                } catch (error) {
-                    if (axios.isAxiosError(error)) {
-                        console.log(error.status)
-                        console.error(error.response)
-                        // Do something with this error...
-                    } else {
-                        console.error(error)
-                    }
-                }
             }
             return true
         },
-        async jwt({token, user}) {
-            //console.log(token)
+        async jwt({token, user, account}) {
+            console.log({token, user, account})
+            const nowTimeStamp = Math.floor(Date.now() / 1000)
+            // initial sign in
             if (user) {
-                token.sub = user.id
-                token.accessToken = user.access_token
-                token.expires = user.maxAge ?
-                    new Date(Date.now() + user.maxAge * 1000).toISOString() :
-                    new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                token.accessToken = user.access_token ?? ''
+                token.idToken = user.id_token
+                token.expiresAt = nowTimeStamp + 300
+                console.log('Expires at ', token.expiresAt)
+                token.refreshToken = user.refresh_token ?? ''
+                return token
+            } else if (nowTimeStamp < (token.expiresAt)) {
+                // token has not expired yet, return it
+                return token
+            } else {
+                // token is expired, try to refresh it
+                console.log('Token has expired. Will refresh...')
+                try {
+                    const refreshedToken = await refreshAccessToken(token)
+                    console.log('Token is refreshed.')
+                    return refreshedToken
+                } catch (error) {
+                    console.error('Error refreshing access token', error)
+                    return {...token, error: 'refreshAccessTokenError'}
+                }
             }
-            return token
         },
         async session({session, token}) {
-            //console.log(token)
-            if (token) {
-                session.user.id = token.sub
-                session.accessToken = token.accessToken
-                session.expires = token.expires
+            // Send properties to the client
+            if (session) {
+                session = Object.assign({}, session, {
+                    token: token.accessToken,
+                    idToken: token.idToken,
+                    error: token.error,
+                })
             }
             return session
-        }
+        },
     }
+
 })
