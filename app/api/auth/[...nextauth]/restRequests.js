@@ -1,5 +1,6 @@
 'use server'
 import axios from 'axios'
+import {headers} from 'next/headers'
 
 export async function kcLoginToken(token) {
     const response = await axios.post(
@@ -10,6 +11,22 @@ export async function kcLoginToken(token) {
         '&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token' +
         '&subject_token=' + token +
         '&subject_issuer=google',
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+    )
+    return response.data
+}
+
+export async function kcRefreshToken(token) {
+    const response = await axios.post(
+        process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token',
+        'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
+        '&client_secret=' + process.env.KEYCLOAK_CLIENT_SECRET +
+        '&grant_type=refresh_token' +
+        '&refresh_token=' + token,
         {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -33,7 +50,7 @@ export async function kcLoginCreds(username, password) {
             }
         }
     )
-    console.log(response.data)
+    //console.log(response.data)
     return response.data
 }
 
@@ -53,7 +70,7 @@ export async function kcGetAdminToken() {
     return response.data.access_token
 }
 
-export async function kcCreateUser(adminToken, username, password, phone = '', locale = 'en') {
+export async function kcCreateUser(adminToken, username, password, phone = '', locale = 'en', country = 'hn') {
     //console.log(phone)
     const request = await axios.post(
         process.env.KEYCLOAK_ADMIN_REALM + '/users',
@@ -70,6 +87,7 @@ export async function kcCreateUser(adminToken, username, password, phone = '', l
             'attributes': {
                 'phone': phone,
                 'lang': locale,
+                'country': country,
             }
         },
         {
@@ -118,7 +136,7 @@ export async function redLoginToken(token) {
             }
         }
     )
-    //console.log(response)
+    console.log(response.status)
     return response.data
 }
 
@@ -153,7 +171,7 @@ export async function kcExists(username, adminToken) {
     return response.data
 }
 
-export async function registerUser(username, password, phone, locale) {
+export async function registerUser(username, password, phone, locale = 'en') {
     try {
         const adminToken = await kcGetAdminToken() //Get Admin token on KC
         const req = await kcExists(username, adminToken)
@@ -173,10 +191,19 @@ export async function registerUser(username, password, phone, locale) {
                     console.log('redCreds ' + error.status)
                     if (error.response && error.response.status === 404) {
                         console.log('Let us register user')
+                        const ip = headers().get('x-forwarded-for')
+                        console.log(ip)
+                        const geoIp = await fetch('https://geolocation-db.com/json/' + ip).then((response) => response.json())
+                        const country = geoIp.country_code === 'Not found' ? 'HN' : geoIp.country_code
                         try {
-                            const kc = await kcCreateUser(adminToken, username, password, phone, locale)
+                            const kc = await kcCreateUser(adminToken, username, password, phone, locale, country)
                             if (kc === 201) { //Success
                                 console.log('User created on KC')
+                                await kcEmail({
+                                    email: username,
+                                    reason: 'VERIFY_EMAIL'
+                                })
+                                return {error: 'email_verify_sent'}
                                 //But it won't be able to login until verify email
                                 //it's enough as Red users are created automatically on successful login via KC
                             }
@@ -226,7 +253,27 @@ export async function kcAddSocial({
                         }
                     }
                 )
-                if (response.data === '') return true
+                if (response.data === '') {
+                    try {
+                        await kcUpdateUser(
+                            adminToken,
+                            req[0].id,
+                            {
+                                'email': email,
+                                'emailVerified': true,
+                            }
+                        ) //Set email as verified as we believe Google at this point
+                        return true
+                    } catch (error) {
+                        if (axios.isAxiosError(error)) {
+                            console.log('kcUpdateUser ' + error.status)
+                            console.error(error.response.data.error_description)
+                            // Do something with this error...
+                        } else {
+                            console.error(error)
+                        }
+                    }
+                }
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     console.log('link account ' + error.status)

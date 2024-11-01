@@ -5,7 +5,7 @@ import {routing} from './i18n/routing'
 const handleI18nRouting = createMiddleware(routing)
 
 export default function middleware(request: NextRequest) {
-    console.log(request.ip)
+    //console.log('Nextrequest ', request)
     const {pathname} = request.nextUrl
 
     const shouldHandle =
@@ -20,7 +20,6 @@ export default function middleware(request: NextRequest) {
     response.headers.append('request-ip', request.ip ?? '')
     response.headers.append('request-url', request.url)
     response.headers.append('request-geo', JSON.stringify(request.geo))
-    console.log(request.ip)
     return response
 }
 

@@ -13,10 +13,13 @@ export default function LocaleSwitcher() {
     const search = `?${searchParams.toString()}`
 
     const redirectedPathName = (locale) => {
-        if (!pathName) return '/'
-        const segments = pathName.split('/')
-        segments[1] = locale
-        return segments.join('/')
+        if (!pathName) {
+            return '/'
+        } else {
+            const segments = pathName.split('/')
+            segments[1] = locale
+            return segments.join('/')
+        }
     }
 
     return (

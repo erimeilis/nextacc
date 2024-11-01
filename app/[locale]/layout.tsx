@@ -24,6 +24,7 @@ export default async function RootLayout({
         notFound()
     }
     const messages = await getMessages()
+
     const indigoOrangeTheme: CustomFlowbiteTheme = {
         navbar: {
             root: {

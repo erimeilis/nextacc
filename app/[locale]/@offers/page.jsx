@@ -13,7 +13,7 @@ const types = [
     'voice', 'sms', 'tollfree', 'reg'
 ]
 
-export default function Offers() {
+export default function Page() {
     const router = useRouter()
     const pathName = usePathname()
     const searchParams = useSearchParams()
@@ -24,8 +24,7 @@ export default function Offers() {
     const [numberInfo, setNumberInfo] = useState(null)
     const [loadingCountries, setLoadingCountries] = useState(false)
     const [loadingAreas, setLoadingAreas] = useState(false)
-
-    //const [loadingNumbers, setLoadingNumbers] = useState(false)
+    const [loadingNumbers, setLoadingNumbers] = useState(false)
 
     function Countries() {
         const {data} = useSWR(searchParams.has('type') ? {
@@ -69,15 +68,18 @@ export default function Offers() {
         setNumberInfo(null)
         setLoadingCountries(true)
         setLoadingAreas(false)
+        setLoadingNumbers(false)
         router.push(pathName + '?' + 'type=' + t)
     }
     const handleCountry = async (country) => {
         setNumberInfo(null)
         setLoadingAreas(true)
+        setLoadingNumbers(false)
         router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + country)
     }
     const handleArea = async (area) => {
         setNumberInfo(null)
+        setLoadingNumbers(true)
         router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + searchParams.get('country') + '&area=' + area)
     }
     const handleNumber = async (number) => {
@@ -106,14 +108,20 @@ export default function Offers() {
                         loading={loadingAreas}
                     />
                 </div>
-                <div className="flex items-center transition duration-300">
+                <div
+                    className="flex items-center transition duration-300"
+                    style={{display: (searchParams.has('type') && searchParams.has('country') && searchParams.has('area')) ? 'block' : 'none'}}
+                >
                     <TwoColumnButtonList
                         options={Numbers()}
                         onSelect={handleNumber}
                         selectedOption={searchParams.get('number')}
+                        loading={loadingNumbers}
                     />
                 </div>
-                <div className="flex flex-col px-2 transition duration-300 text-gray-900 dark:text-gray-300">
+                <div
+                    className="flex flex-col px-2 transition duration-300 text-gray-900 dark:text-gray-300"
+                >
                     <div>
                         {(numberInfo) ? t('setupfee') + ': ' + numberInfo.setuprate + '$ / '
                             + t('monthlyfee') + ': ' + numberInfo.fixrate + '$' : ''}
