@@ -8,6 +8,7 @@ import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {useState} from 'react'
 import useSWR from 'swr'
+import {NumberInfo} from '@/app/api/types/NumberInfo'
 
 const types = [
     'voice', 'sms', 'tollfree', 'reg'
@@ -21,7 +22,7 @@ export default function Page() {
     const t = useTranslations('offers')
     const d = useTranslations('docs')
 
-    const [numberInfo, setNumberInfo] = useState(null)
+    const [numberInfo, setNumberInfo] = useState<NumberInfo | null>(null)
     const [loadingCountries, setLoadingCountries] = useState(false)
     const [loadingAreas, setLoadingAreas] = useState(false)
     const [loadingNumbers, setLoadingNumbers] = useState(false)
@@ -53,7 +54,7 @@ export default function Page() {
         return data ?? []
     }
 
-    function GetDocs(numberInfo) {
+    function GetDocs(numberInfo: NumberInfo) {
         let res = ''
         const docs = JSON.parse(numberInfo.docs)
         for (const key in docs) {
@@ -64,25 +65,25 @@ export default function Page() {
         return res
     }
 
-    const handleType = async (t) => {
+    const handleType = async (t: string) => {
         setNumberInfo(null)
         setLoadingCountries(true)
         setLoadingAreas(false)
         setLoadingNumbers(false)
         router.push(pathName + '?' + 'type=' + t)
     }
-    const handleCountry = async (country) => {
+    const handleCountry = async (country: number) => {
         setNumberInfo(null)
         setLoadingAreas(true)
         setLoadingNumbers(false)
         router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + country)
     }
-    const handleArea = async (area) => {
+    const handleArea = async (area: number) => {
         setNumberInfo(null)
         setLoadingNumbers(true)
         router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + searchParams.get('country') + '&area=' + area)
     }
-    const handleNumber = async (number) => {
+    const handleNumber = async (number: NumberInfo) => {
         setNumberInfo(number)
     }
 

@@ -17,13 +17,10 @@ export default function middleware(request: NextRequest) {
 
     const response = handleI18nRouting(request)
     // Add new request headers
-    response.headers.append('request-ip', request.ip ?? '')
+    //response.headers.append('request-ip', request.ip ?? '')
     response.headers.append('request-url', request.url)
-    response.headers.append('request-geo', JSON.stringify(request.geo))
+    //response.headers.append('request-geo', JSON.stringify(request.geo))
     return response
 }
 
-/*export const config = {
-    // Matcher ignoring `/_next/` and `/api/`
-    matcher: ['/', '/(en|pl|ua)/:path*', '/((?!api|_next/static|_next/image|favicon.png).*)'],
-}*/
+export {auth as middleware} from '@/auth'
