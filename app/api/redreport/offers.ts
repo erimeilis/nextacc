@@ -1,7 +1,10 @@
 'use server'
 import axios from 'axios'
+import {CountryInfo} from '@/app/api/types/CountryInfo'
+import {AreaInfo} from '@/app/api/types/AreaInfo'
+import {NumberInfo} from '@/app/api/types/NumberInfo'
 
-export async function getCountries({type}) {
+export async function getCountries({type}: { type: string }) {
     try {
         const response = await axios.post(
             process.env.REDREPORT_URL + '/api/did/countries',
@@ -15,10 +18,10 @@ export async function getCountries({type}) {
             }
         )
         if (response.data && response.data.data && response.data.data.length > 0) {
-            //console.log(response.data.data.length)
-            return response.data.data.map(country => ({
+            const countries: CountryInfo[] = response.data.data
+            return countries.map(country => ({
                 id: country.id,
-                name: country.countryname + ' (+' + country.countryprefix + ')',
+                name: country.countryname + ' +' + country.countryprefix.toString(),
             }))
         }
     } catch (error) {
@@ -32,7 +35,7 @@ export async function getCountries({type}) {
     }
 }
 
-export async function getAreas({type, country}) {
+export async function getAreas({type, country}: { type: string, country: number }) {
     try {
         const response = await axios.post(
             process.env.REDREPORT_URL + '/api/did/areas',
@@ -46,10 +49,10 @@ export async function getAreas({type, country}) {
             }
         )
         if (response.data && response.data.data && response.data.data.length > 0) {
-            //console.log(response.data.data.length)
-            return response.data.data.map(area => ({
+            const areas: AreaInfo[] = response.data.data
+            return areas.map(area => ({
                 id: area.areaprefix,
-                name: area.areaname + ' (+' + area.areaprefix + ')',
+                name: '(' + area.areaprefix.toString() + ') ' + area.areaname,
             }))
         }
     } catch (error) {
@@ -63,7 +66,7 @@ export async function getAreas({type, country}) {
     }
 }
 
-export async function getNumbers({type, country, area}) {
+export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
     try {
         const response = await axios.post(
             process.env.REDREPORT_URL + '/api/did/numbers',
@@ -77,10 +80,9 @@ export async function getNumbers({type, country, area}) {
             }
         )
         if (response.data && response.data.data && response.data.data.length > 0) {
-            //console.log(response.data.data.length)
-            //console.log(response.data)
-            return response.data.data.map(number => ({
-                id: number.did,
+            const numbers: NumberInfo[] = response.data.data
+            return numbers.map(number => ({
+                did: number.did,
                 name: number.did + ' (' + number.where_did + ')',
                 where_did: number.where_did,
                 setuprate: number.setuprate,
@@ -89,15 +91,14 @@ export async function getNumbers({type, country, area}) {
                 tollfree_rate_in_min: number.tollfree_rate_in_min,
                 incoming_rate_sms: number.incoming_rate_sms,
                 docs: JSON.stringify(number.docs)
-            }))
+            } as NumberInfo))
         }
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.log('getNumbers ' + error.status)
-            return null
         } else {
             console.error(error)
-            return null
         }
     }
+    return []
 }

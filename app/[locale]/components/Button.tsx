@@ -1,3 +1,5 @@
+import React from 'react'
+
 const fixedButtonClass = 'flex relative w-fit cursor-pointer transition-all ease-in-out ' +
     'before:transition-[width] before:ease-in-out before:duration-300 before:absolute ' +
     'before:bg-black dark:before:bg-white ' +
@@ -14,7 +16,12 @@ export default function Button({
                                    className = '',
                                    onClick,
                                    children
-                               }) {
+                               }: {
+    type: 'button' | 'submit' | 'reset' | undefined
+    className?: string
+    onClick?: () => void
+    children?: React.ReactNode
+}) {
     return (
         <button
             type={type}

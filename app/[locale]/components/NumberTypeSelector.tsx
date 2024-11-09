@@ -5,12 +5,15 @@ import React from 'react'
 
 export default function NumberTypeSelector({
                                                options,
-                                               onSelect,
+                                               onSelectAction,
                                                selectedOption
-                                           }) {
-    const handleOptionChange = (event) => {
-        const value = event.target.value
-        onSelect(value)
+                                           }: {
+    options: string[]
+    onSelectAction: (type: string) => void
+    selectedOption: string | null
+}) {
+    const handleOptionChange = (option: string) => {
+        onSelectAction(option)
     }
     const t = useTranslations('offers')
     return (
@@ -21,7 +24,7 @@ export default function NumberTypeSelector({
                         key={option}
                         id={option}
                         value={option}
-                        onClick={handleOptionChange}
+                        onClick={() => handleOptionChange(option)}
                         active={selectedOption === option}
                     >
                         {t(option)}

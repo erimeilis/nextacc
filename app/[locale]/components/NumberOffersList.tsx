@@ -1,17 +1,24 @@
 'use client'
 import {Label, Radio} from 'flowbite-react'
-import React from 'react'
+import React, {ChangeEvent} from 'react'
 import Loading from './Loading'
+import {NumberInfo} from '@/app/api/types/NumberInfo'
 
-export default function TwoColumnButtonList({
-                                                options,
-                                                onSelect,
-                                                selectedOption,
-                                                loading = false
-                                            }) {
-    const handleOptionChange = (event) => {
-        onSelect({
+export default function NumberOffersList({
+                                             options,
+                                             onSelectAction,
+                                             selectedOption,
+                                             loading = false
+                                         }: {
+    options: NumberInfo[]
+    onSelectAction: (number: NumberInfo) => void
+    selectedOption: string | null
+    loading: boolean
+}) {
+    const handleOptionChange = (event: ChangeEvent<HTMLInputElement>) => {
+        onSelectAction({
             did: event.target.value,
+            name: event.target.value,
             where_did: event.target.getAttribute('data-where_did'),
             setuprate: event.target.getAttribute('data-setuprate'),
             fixrate: event.target.getAttribute('data-fixrate'),
@@ -19,18 +26,17 @@ export default function TwoColumnButtonList({
             tollfree_rate_in_min: event.target.getAttribute('data-tollfree_rate_in_min'),
             incoming_rate_sms: event.target.getAttribute('data-incoming_rate_sms'),
             docs: event.target.getAttribute('data-docs')
-        })
+        } as NumberInfo)
     }
     return (
         (!loading || options.length > 0) ?
             <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 px-4">
                 {
                     options.map((option) =>
-                        <div key={option.id} className="flex flex-row items-center gap-2">
+                        <div key={option.did} className="flex flex-row items-center gap-2">
                             <Radio
-                                id={option.id}
-                                type="radio"
-                                value={option.id}
+                                id={option.did}
+                                value={option.did}
                                 data-where_did={option.where_did}
                                 data-setuprate={option.setuprate}
                                 data-fixrate={option.fixrate}
@@ -41,15 +47,15 @@ export default function TwoColumnButtonList({
                                 name="list-radio"
                                 //className="w-2 h-2"
                                 onChange={handleOptionChange}
-                                defaultChecked={selectedOption === option.id}
+                                defaultChecked={selectedOption === option.did}
                             />
-                            <Label htmlFor={option.id} className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            <Label htmlFor={option.did} className="w-full cursor-pointer py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
                                 {option.name}
                             </Label>
                         </div>
                     )
                 }
             </div> :
-            <Loading height="32"/>
+            <Loading height={32}/>
     )
 };

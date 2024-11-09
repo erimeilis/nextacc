@@ -2,6 +2,8 @@ import {NextRequest} from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import {routing} from './i18n/routing'
 
+export {auth} from '@/auth'
+
 const handleI18nRouting = createMiddleware(routing)
 
 export default function middleware(request: NextRequest) {
@@ -23,4 +25,6 @@ export default function middleware(request: NextRequest) {
     return response
 }
 
-export {auth as middleware} from '@/auth'
+export const config = {
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}

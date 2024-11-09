@@ -11,7 +11,7 @@ export default function ProfileGadol() {
         (session.status === 'authenticated') ?
             <ProfileKatan/> :
             (session.status === 'loading') ?
-                <Loading height="350"/> :
+                <Loading height={350}/> :
                 <Login/> :
         <Login/>
 }

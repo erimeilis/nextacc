@@ -1,4 +1,7 @@
-const loginFields = [
+import {At, Key} from '@phosphor-icons/react'
+import {InputField} from '@/app/api/types/InputField'
+
+const loginFields: InputField[] = [
     {
         labelText: 'email',
         labelFor: 'loginEmail',
@@ -8,7 +11,7 @@ const loginFields = [
         autoComplete: 'email',
         isRequired: true,
         placeholder: 'email',
-        icon: 'At',
+        icon: At,
     },
     {
         labelText: 'password',
@@ -19,7 +22,8 @@ const loginFields = [
         autoComplete: 'current-password',
         isRequired: true,
         placeholder: 'password',
-        icon: 'Key',
+        //icon: 'Key',
+        icon: Key
     }
 ]
 export {loginFields}

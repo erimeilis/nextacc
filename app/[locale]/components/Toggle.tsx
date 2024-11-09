@@ -5,12 +5,21 @@ export default function Toggle({
                                    rightLabel,
                                    checked,
                                    handleToggle
-                               }) {
+                               }: {
+    leftLabel: string
+    rightLabel: string
+    checked: boolean
+    handleToggle: (event: boolean) => void
+}) {
     return (
         <div className="inline-flex items-center gap-2">
             <Label htmlFor="switch-component-on" className="text-sm cursor-pointer">{leftLabel}</Label>
             <div className="flex">
-                <ToggleSwitch id="switch-component-on" onClick={handleToggle} checked={checked}/>
+                <ToggleSwitch
+                    id="switch-component-on"
+                    onChange={handleToggle}
+                    checked={checked}
+                />
             </div>
             <Label htmlFor="switch-component-on" className="text-sm cursor-pointer">{rightLabel}</Label>
         </div>

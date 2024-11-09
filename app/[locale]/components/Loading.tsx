@@ -2,7 +2,9 @@ import {ThreeDots} from 'react-loader-spinner'
 
 export default function Loading({
                                     height
-                                }) {
+                                }: {
+    height: number
+}) {
     return (
         <ThreeDots
             visible={true}

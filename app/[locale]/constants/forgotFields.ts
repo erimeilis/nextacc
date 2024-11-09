@@ -1,4 +1,7 @@
-const forgotFields = [
+import {At} from '@phosphor-icons/react'
+import {InputField} from '@/app/api/types/InputField'
+
+const forgotFields: InputField[] = [
     {
         labelText: 'email',
         labelFor: 'forgotEmail',
@@ -8,7 +11,7 @@ const forgotFields = [
         autoComplete: 'email',
         isRequired: true,
         placeholder: 'email',
-        icon: 'At',
+        icon: At,
     }
 ]
 export {forgotFields}

@@ -1,5 +1,5 @@
 'use client'
-import TwoColumnButtonList from '@/app/[locale]//components/TwoColumnButtonList'
+import NumberOffersList from '@/app/[locale]/components/NumberOffersList'
 import DropdownSelect from '@/app/[locale]/components/DropdownSelect'
 import NumberTypeSelector from '@/app/[locale]/components/NumberTypeSelector'
 import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
@@ -10,7 +10,7 @@ import {useState} from 'react'
 import useSWR from 'swr'
 import {NumberInfo} from '@/app/api/types/NumberInfo'
 
-const types = [
+const numberTypes = [
     'voice', 'sms', 'tollfree', 'reg'
 ]
 
@@ -27,36 +27,42 @@ export default function Page() {
     const [loadingAreas, setLoadingAreas] = useState(false)
     const [loadingNumbers, setLoadingNumbers] = useState(false)
 
-    function Countries() {
+    function Countries(): { id: number, name: string }[] {
         const {data} = useSWR(searchParams.has('type') ? {
             type: searchParams.get('type'),
-        } : null, getCountries)
+        } : null, getCountries, {})
         return data ?? []
     }
 
-    function Areas() {
+    function Areas(): { id: number, name: string }[] {
         const {data} = useSWR(searchParams.has('type') && searchParams.has('country') ? {
             type: searchParams.get('type'),
             country: searchParams.get('country')
-        } : null, getAreas)
-        if (data && data.length === 1) {
+        } : null, getAreas, {})
+        if (
+            data &&
+            data.length === 1 &&
+            !searchParams.has('area')
+        ) {
             router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + searchParams.get('country') + '&area=' + data[0].id)
         }
         return data ?? []
     }
 
-    function Numbers() {
-        const {data} = useSWR(searchParams.has('type') && searchParams.has('country') && searchParams.has('area') ? {
-            type: searchParams.get('type'),
-            country: searchParams.get('country'),
-            area: searchParams.get('area'),
-        } : null, getNumbers)
+    function Numbers(): NumberInfo[] {
+        const {data} = useSWR(searchParams.has('type') && searchParams.has('country') && searchParams.has('area') ?
+            {
+                type: searchParams.get('type'),
+                country: parseInt(searchParams.get('country')!),
+                area: parseInt(searchParams.get('area')!),
+            } :
+            null, getNumbers, {})
         return data ?? []
     }
 
     function GetDocs(numberInfo: NumberInfo) {
         let res = ''
-        const docs = JSON.parse(numberInfo.docs)
+        const docs = JSON.parse(numberInfo.docs as string)
         for (const key in docs) {
             if (docs.hasOwnProperty(key) && docs[key] === 1) {
                 res += d(key) + ' '
@@ -72,16 +78,16 @@ export default function Page() {
         setLoadingNumbers(false)
         router.push(pathName + '?' + 'type=' + t)
     }
-    const handleCountry = async (country: number) => {
+    const handleCountry = async (value: number) => {
         setNumberInfo(null)
         setLoadingAreas(true)
         setLoadingNumbers(false)
-        router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + country)
+        router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + value)
     }
-    const handleArea = async (area: number) => {
+    const handleArea = async (value: number) => {
         setNumberInfo(null)
         setLoadingNumbers(true)
-        router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + searchParams.get('country') + '&area=' + area)
+        router.push(pathName + '?' + 'type=' + searchParams.get('type') + '&country=' + searchParams.get('country') + '&area=' + value)
     }
     const handleNumber = async (number: NumberInfo) => {
         setNumberInfo(number)
@@ -90,13 +96,13 @@ export default function Page() {
     return (
         <>
             <Card id="offers" className="bg-gray-200 dark:bg-indigo-800">
-                <NumberTypeSelector options={types} onSelect={handleType} selectedOption={searchParams.get('type')}/>
+                <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={searchParams.get('type')}/>
                 <div className="flex flex-row items-center gap-4 justify-between my-4">
                     <DropdownSelect
                         selectId="country"
                         selectTitle={t('select_country')}
                         data={Countries()}
-                        onSelect={handleCountry}
+                        onSelectAction={handleCountry}
                         selectedOption={searchParams.get('country')}
                         loading={loadingCountries}
                     />
@@ -104,7 +110,7 @@ export default function Page() {
                         selectId="area"
                         selectTitle={t('select_area')}
                         data={Areas()}
-                        onSelect={handleArea}
+                        onSelectAction={handleArea}
                         selectedOption={searchParams.get('area')}
                         loading={loadingAreas}
                     />
@@ -113,9 +119,9 @@ export default function Page() {
                     className="flex items-center transition duration-300"
                     style={{display: (searchParams.has('type') && searchParams.has('country') && searchParams.has('area')) ? 'block' : 'none'}}
                 >
-                    <TwoColumnButtonList
+                    <NumberOffersList
                         options={Numbers()}
-                        onSelect={handleNumber}
+                        onSelectAction={handleNumber}
                         selectedOption={searchParams.get('number')}
                         loading={loadingNumbers}
                     />

@@ -1,4 +1,7 @@
-const verifyFields = [
+import {At} from '@phosphor-icons/react'
+import {InputField} from '@/app/api/types/InputField'
+
+const verifyFields: InputField[] = [
     {
         labelText: 'email',
         labelFor: 'verifyEmail',
@@ -8,7 +11,7 @@ const verifyFields = [
         autoComplete: 'email',
         isRequired: true,
         placeholder: 'email',
-        icon: 'At',
+        icon: At,
     }
 ]
 export {verifyFields}

@@ -8,6 +8,8 @@ import {signOut, useSession} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
 import React from 'react'
+import {createHash} from 'crypto'
+import Link from 'next/link'
 
 export default function Nav() {
 
@@ -18,7 +20,7 @@ export default function Nav() {
         <Navbar
             fluid
         >
-            <Navbar.Brand>
+            <Navbar.Brand as={Link} href="/">
                 <Image
                     src={logo}
                     width={48}
@@ -37,15 +39,22 @@ export default function Nav() {
             <div className="flex md:order-2 gap-2">
                 <LocaleSwitcher/>
                 <DarkThemeToggle iconDark={Sun} iconLight={Moon}/>
-                {(session && session.status === 'authenticated') ? <Dropdown
+                {(session &&
+                    session.status === 'authenticated' &&
+                    session.data &&
+                    session.data.user
+                ) ? <Dropdown
                     arrowIcon={false}
                     inline
                     label={
                         <Avatar
                             alt="User settings"
-                            img={session.data.user.image}
-                            rounded
-                        />
+                            img={
+                                session.data.user.image ??
+                                'https://gravatar.com/avatar/' + createHash('sha256').update(session.data.user.email!.toLowerCase()).digest('hex')
+                            }
+                            rounded>
+                        </Avatar>
                     }
                 >
                     <Dropdown.Header>

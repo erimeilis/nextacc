@@ -1,4 +1,7 @@
-const signupFields = [
+import {At, Checks, Key, Phone} from '@phosphor-icons/react'
+import {InputField} from '@/app/api/types/InputField'
+
+const signupFields: InputField[] = [
     {
         labelText: 'phone',
         labelFor: 'signupPhone',
@@ -8,7 +11,7 @@ const signupFields = [
         autoComplete: 'phone',
         isRequired: true,
         placeholder: 'phone',
-        icon: 'Phone',
+        icon: Phone,
     },
     {
         labelText: 'email',
@@ -19,7 +22,7 @@ const signupFields = [
         autoComplete: 'email',
         isRequired: true,
         placeholder: 'email',
-        icon: 'At',
+        icon: At,
     },
     {
         labelText: 'password',
@@ -30,7 +33,7 @@ const signupFields = [
         autoComplete: 'current-password',
         isRequired: true,
         placeholder: 'password',
-        icon: 'Key',
+        icon: Key,
     },
     {
         labelText: 'confirm',
@@ -41,7 +44,7 @@ const signupFields = [
         autoComplete: 'confirm-password',
         isRequired: true,
         placeholder: 'confirm',
-        icon: 'Checks',
+        icon: Checks,
     }
 ]
 

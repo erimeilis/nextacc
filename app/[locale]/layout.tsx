@@ -9,17 +9,26 @@ import {NextIntlClientProvider} from 'next-intl'
 import {CustomFlowbiteTheme, Flowbite, ThemeModeScript} from 'flowbite-react'
 import Nav from '@/app/[locale]/components/Nav'
 
-export default async function RootLayout({
-                                             children,
-                                             profile,
-                                             offers,
-                                             params: {locale}
-                                         }: {
-    children: React.ReactNode,
-    profile: React.ReactNode,
-    offers: React.ReactNode,
-    params: { locale: string }
-}) {
+export default async function RootLayout(
+    props: {
+        children: React.ReactNode,
+        profile: React.ReactNode,
+        offers: React.ReactNode,
+        params: Promise<{ locale: string }>
+    }
+) {
+    const params = await props.params
+
+    const {
+        locale
+    } = params
+
+    const {
+        children,
+        profile,
+        offers
+    } = props
+
     if (!routing.locales.includes(locale as never)) {
         notFound()
     }
@@ -107,7 +116,7 @@ export default async function RootLayout({
         },
         radio: {
             root: {
-                base: 'h-4 w-4 border border-sone-600 bg-stone-400 focus:ring-1 focus:ring-orange-500 text-orange-500 focus:bg-white' +
+                base: 'h-4 w-4 cursor-pointer border border-sone-600 bg-stone-400 focus:ring-1 focus:ring-orange-500 text-orange-500 focus:bg-white' +
                     'dark:border-slate-500 dark:bg-slate-700 dark:focus:bg-indigo-800 dark:focus:ring-indigo-600 dark:text-indigo-600 dark:focus:bg-black'
             },
         },

@@ -1,20 +1,28 @@
 import Loading from '@/app/[locale]/components/Loading'
 import {Label} from 'flowbite-react'
+import {ChangeEvent} from 'react'
 
 export default function DropdownSelect({
                                            selectId,
                                            selectTitle = '',
                                            data = [],
-                                           onSelect,
+                                           onSelectAction,
                                            selectedOption,
                                            loading = false
-                                       }) {
+                                       }: {
+    selectId: string
+    selectTitle: string
+    data: { id: number, name: string }[]
+    onSelectAction: (value: number) => void
+    selectedOption: string | null
+    loading?: boolean
+}) {
     const items = data.map(item => (
-        <option value={parseInt(item.id)} key={item.id}>{item.name}</option>
+        <option value={item.id} key={item.id}>{item.name}</option>
     ))
-    const handleOptionChange = (event) => {
-        const value = event.target.value
-        onSelect(value)
+    const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        const value: number = parseInt(event.target.value)
+        onSelectAction(value)
     }
 
     return (
@@ -40,6 +48,6 @@ export default function DropdownSelect({
                     {items}
                 </select>
             </div> :
-            <Loading height="8"/>
+            <Loading height={8}/>
     )
 }

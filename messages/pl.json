@@ -31,7 +31,9 @@
     "user_exist": "Użytkownik już zarejestrowany",
     "email_unverified": "Nie możesz się zalogować, dopóki nie zweryfikujesz swojego adresu e-mail",
     "resend_verify": "Wyślij ponownie e-mail weryfikacyjny",
-    "verify_sent": "Proszę postępować zgodnie z instrukcjami zawartymi w wiadomości e-mail"
+    "email_verify_sent": "Proszę postępować zgodnie z instrukcjami zawartymi w wiadomości e-mail",
+    "email_restore_sent": "Proszę postępować zgodnie z instrukcjami zawartymi w wiadomości e-mail",
+    "unknown": "???"
   },
   "offers": {
     "voice": "Połączenia",

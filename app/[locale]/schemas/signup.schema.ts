@@ -1,6 +1,6 @@
-import {z} from 'zod'
+import {z, ZodEffects, ZodObject, ZodString} from 'zod'
 
-export const schemaSignup = z.object({
+export const schemaSignup: ZodEffects<ZodObject<{ [index: string]: ZodString }>> = z.object({
     signupPhone: z.string().min(10, {message: 'invalid_phone'})
         .max(14, {message: 'invalid_phone'}),
     signupEmail: z.string().email({message: 'invalid_email'}),

@@ -12,65 +12,66 @@ import {schemaSignup} from '@/app/[locale]/schemas/signup.schema'
 import {schemaVerify} from '@/app/[locale]/schemas/verify.schema'
 import usePersistState from '@/app/[locale]/usePersistState'
 import {validateFormData} from '@/app/[locale]/utils/validation'
-import {kcEmail, registerUser} from '@/app/api/auth/[...nextauth]/restRequests'
+import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
 import {Card, Checkbox, Label, Modal} from 'flowbite-react'
 import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
-import {useState} from 'react'
+import {ChangeEvent, SyntheticEvent, useState} from 'react'
+import {InputField} from '@/app/api/types/InputField'
 
-let loginFieldsState = {}
-loginFields.forEach(field => loginFieldsState[field.id] = '')
-let signupFieldsState = {}
-signupFields.forEach(field => signupFieldsState[field.id] = '')
-let forgotFieldsState = {}
-forgotFields.forEach(field => forgotFieldsState[field.id] = '')
-let verifyFieldsState = {}
-verifyFields.forEach(field => verifyFieldsState[field.id] = '')
+const loginFieldsState: { [index: string]: string } = {}
+loginFields.forEach((field: InputField) => loginFieldsState[field.id] = '')
+const signupFieldsState: { [index: string]: string } = {}
+signupFields.forEach((field: InputField) => signupFieldsState[field.id] = '')
+const forgotFieldsState: { [index: string]: string } = {}
+forgotFields.forEach((field: InputField) => forgotFieldsState[field.id] = '')
+const verifyFieldsState: { [index: string]: string } = {}
+verifyFields.forEach((field: InputField) => verifyFieldsState[field.id] = '')
 
 export default function Login() {
 
     const t = useTranslations('login')
     const c = useTranslations('common')
 
-    const [mode, setMode] = usePersistState('')
+    const [mode, setMode] = usePersistState(false, 'loginMode')
     const handleToggle = () => {
-        setMode(mode === 'checked' ? '' : 'checked')
+        setMode(!mode)
         setLoginErrors({})
         setSignupErrors({})
         setForgotErrors({})
         setGlobalError(null)
     }
 
-    const [globalError, setGlobalError] = useState(null)
-    const [loginErrors, setLoginErrors] = useState({})
-    const [signupErrors, setSignupErrors] = useState({})
-    const [forgotErrors, setForgotErrors] = useState({})
-    const [verifyErrors, setVerifyErrors] = useState({})
+    const [globalError, setGlobalError] = useState<string | null>(null)
+    const [loginErrors, setLoginErrors] = useState<{ [index: string]: string[] | undefined }>({})
+    const [signupErrors, setSignupErrors] = useState<{ [index: string]: string[] | undefined }>({})
+    const [forgotErrors, setForgotErrors] = useState<{ [index: string]: string[] | undefined }>({})
+    const [verifyErrors, setVerifyErrors] = useState<{ [index: string]: string[] | undefined }>({})
     const [openForgotModal, setOpenForgotModal] = useState(false)
     const [openWarningVerifyModal, setOpenWarningVerifyModal] = useState(false)
     const [warningVerifyModalSent, setWarningVerifyModalSent] = useState(false)
 
     const [loginState, setLoginState] = useState(loginFieldsState)
-    const handleLoginChange = (e) => {
+    const handleLoginChange = (e: ChangeEvent<HTMLInputElement>) => {
         setLoginState({...loginState, [e.target.id]: e.target.value})
         setGlobalError(null)
     }
-    const handleLoginSubmit = async (e) => {
+
+    const handleLoginSubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
         const {errors} = validateFormData(schemaLogin, loginState)
-        if (errors) {
-            setLoginErrors(errors)
-        } else {
-            setLoginErrors({})
-            const res = await signIn('kccreds', {
+        setLoginErrors(errors ?? {})
+        if (!errors) {
+            const rem = document.getElementById('rememberMe') as HTMLInputElement
+            const data = await signIn('kccreds', {
                 username: loginState['loginEmail'],
                 password: loginState['loginPassword'],
-                rememberMe: document.getElementById('rememberMe').checked,
+                rememberMe: rem.checked,
                 redirect: false
             })
-            if (res?.error) {
-                setGlobalError(res.error)
-                if (res.error === 'email_unverified') {
+            if (data && data.error) {
+                setGlobalError(data.error)
+                if (data.error === 'email_unverified') {
                     setVerifyState({
                         'verifyEmail': loginState['loginEmail'],
                     })
@@ -81,23 +82,21 @@ export default function Login() {
     }
 
     const [signupState, setSignupState] = useState(signupFieldsState)
-    const handleSignupChange = (e) => setSignupState({...signupState, [e.target.id]: e.target.value})
-    const handleSignupSubmit = async (e) => {
+    const handleSignupChange = (e: ChangeEvent<HTMLInputElement>) => setSignupState({...signupState, [e.target.id]: e.target.value})
+    const handleSignupSubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
         const {errors} = validateFormData(schemaSignup, signupState)
-        if (errors) {
-            setSignupErrors(errors)
-        } else {
-            setSignupErrors({})
-            const res = await registerUser(
-                signupState['signupEmail'],
-                signupState['signupPassword'],
-                signupState['signupPhone'],
-                c('locale')
-            )
-            if (res?.error) {
-                setGlobalError(res.error)
-                if (res.error === 'email_verify_sent') {
+        setSignupErrors(errors ?? {})
+        if (!errors) {
+            const data = await registerUser({
+                username: signupState['signupEmail'],
+                password: signupState['signupPassword'],
+                phone: signupState['signupPhone'],
+                locale: c('locale')
+            })
+            if (data && data.error) {
+                setGlobalError(data.error)
+                if (data.error === 'email_verify_sent') {
                     setVerifyState({
                         'verifyEmail': loginState['loginEmail'],
                     })
@@ -109,39 +108,35 @@ export default function Login() {
     }
 
     const [forgotState, setForgotState] = useState(forgotFieldsState)
-    const handleForgotChange = (e) => setForgotState({...forgotState, [e.target.id]: e.target.value})
-    const handleForgotSubmit = async (e) => {
+    const handleForgotChange = (e: ChangeEvent<HTMLInputElement>) => setForgotState({...forgotState, [e.target.id]: e.target.value})
+    const handleForgotSubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
         const {errors} = validateFormData(schemaForgot, forgotState)
-        if (errors) {
-            setForgotErrors(errors)
-        } else {
-            setForgotErrors({})
-            const res = await kcEmail({
+        setForgotErrors(errors ?? {})
+        if (!errors) {
+            const data = await kcSendServiceEmail({
                 email: forgotState['forgotEmail'],
                 reason: 'UPDATE_PASSWORD'
             })
-            if (res?.error) {
-                setGlobalError(res.error)
+            if (data) {
+                setGlobalError('email_restore_sent')
             }
         }
     }
 
     const [verifyState, setVerifyState] = useState(verifyFieldsState)
-    const handleVerifyChange = (e) => setVerifyState({...verifyState, [e.target.id]: e.target.value})
-    const handleVerifySubmit = async (e) => {
+    const handleVerifyChange = (e: ChangeEvent<HTMLInputElement>) => setVerifyState({...verifyState, [e.target.id]: e.target.value})
+    const handleVerifySubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
         const {errors} = validateFormData(schemaVerify, verifyState)
-        if (errors) {
-            setVerifyErrors(errors)
-        } else {
-            setVerifyErrors({})
-            const res = await kcEmail({
+        setVerifyErrors(errors ?? {})
+        if (!errors) {
+            const data = await kcSendServiceEmail({
                 email: verifyState['verifyEmail'],
                 reason: 'VERIFY_EMAIL'
             })
-            if (res?.error) {
-                setGlobalError(res.error)
+            if (data) {
+                setGlobalError('email_verify_sent')
             } else {
                 setWarningVerifyModalSent(true)
             }
@@ -166,24 +161,27 @@ export default function Login() {
                     name="loginForm"
                     className="mt-8 space-y-6 transition-transform duration-500"
                     style={{display: mode ? 'none' : 'block'}}
+                    onSubmit={handleLoginSubmit}
+                    method="post"
                 >
                     <div className="space-y-4">
                         {
-                            loginFields.map(field =>
-                                <Input
-                                    key={field.id}
-                                    handleChange={handleLoginChange}
-                                    value={loginState[field.id]}
-                                    labelText={t(field.labelText)}
-                                    labelFor={field.labelFor}
-                                    id={field.id}
-                                    name={field.name}
-                                    type={field.type}
-                                    isRequired={field.isRequired}
-                                    placeholder={t(field.placeholder)}
-                                    icon={field.icon}
-                                    error={t.has(`${loginErrors[field.id]}`) ? t(`${loginErrors[field.id]}`) : ''}
-                                />
+                            loginFields.map(field => {
+                                    return <Input
+                                        key={field.id}
+                                        handleChange={handleLoginChange}
+                                        value={loginState[field.id]}
+                                        labelText={t(field.labelText)}
+                                        labelFor={field.labelFor}
+                                        id={field.id}
+                                        name={field.name}
+                                        type={field.type}
+                                        isRequired={field.isRequired}
+                                        placeholder={t(field.placeholder)}
+                                        icon={field.icon}
+                                        error={t.has(loginErrors[field.id]) ? t(loginErrors[field.id]) : ''}
+                                    />
+                                }
                             )
                         }
                     </div>
@@ -192,7 +190,7 @@ export default function Login() {
                             <Checkbox
                                 id="rememberMe"
                                 name="rememberMe"
-                                type="checkbox"
+                                //type="checkbox"
                                 className="h-4 w-4 border-gray-300 rounded"
                             />
                             <Label htmlFor="rememberMe" className="ml-2 block text-sm">
@@ -201,6 +199,7 @@ export default function Login() {
                         </div>
                         <div className="text-sm">
                             <Button
+                                type="button"
                                 className="font-medium text-blue-800 dark:text-orange-400 hover:text-indigo-600 dark:hover:text-orange-300"
                                 onClick={() => setOpenForgotModal(true)}>{t('forgot_password')}
                             </Button>
@@ -210,14 +209,14 @@ export default function Login() {
                         <Button
                             type="submit"
                             className="group relative"
-                            onClick={handleLoginSubmit}
+                            //onClick={HandleLoginSubmit}
                         >
                             {t('login')}
                         </Button>
                         <div className="flex items-center w-fit transition-transform duration-500
                         font-medium tracking-wide text-white text-xs mt-1 ml-1 px-2 py-0.5
                         bg-red-500 dark:bg-red-600" style={{display: globalError === null ? 'none' : 'block'}}>
-                            {t(globalError)}
+                            {globalError ? t(globalError) : ''}
                         </div>
                         <Button
                             type="button"
@@ -227,7 +226,14 @@ export default function Login() {
                         </Button>
                     </div>
                 </form>
-                <form id="signupForm" name="signupForm" className="mt-8 space-y-6 transition-transform duration-500" style={{display: mode ? 'block' : 'none'}}>
+                <form
+                    id="signupForm"
+                    name="signupForm"
+                    className="mt-8 space-y-6 transition-transform duration-500"
+                    style={{display: mode ? 'block' : 'none'}}
+                    onSubmit={handleSignupSubmit}
+                    method="post"
+                >
                     <div className="space-y-4">
                         {
                             signupFields.map(field =>
@@ -252,14 +258,14 @@ export default function Login() {
                         <Button
                             type="submit"
                             className="group relative"
-                            onClick={handleSignupSubmit}
+                            //onClick={handleSignupSubmit}
                         >
                             {t('signup')}
                         </Button>
                         <div className="flex items-center w-fit transition-transform duration-500
                         font-medium tracking-wide text-white text-xs mt-1 ml-1 px-2 py-0.5
                         bg-red-500 dark:bg-red-600" style={{display: globalError === null ? 'none' : 'block'}}>
-                            {t(globalError)}
+                            {globalError ? t(globalError) : ''}
                         </div>
                         <Button
                             type="button"
@@ -276,7 +282,13 @@ export default function Login() {
                 setOpenForgotModal(false)
             }}>
                 <Modal.Body>
-                    <form id="forgotForm" name="forgotForm" className="items-center space-y-6 transition-transform duration-500">
+                    <form
+                        id="forgotForm"
+                        name="forgotForm"
+                        className="items-center space-y-6 transition-transform duration-500"
+                        onSubmit={handleForgotSubmit}
+                        method="post"
+                    >
                         {
                             forgotFields.map(field =>
                                 <Input
@@ -295,11 +307,10 @@ export default function Login() {
                                 />
                             )
                         }
-
                         <Button
                             type="submit"
                             className="group flex m-auto"
-                            onClick={handleForgotSubmit}
+                            //onClick={handleForgotSubmit}
                         >
                             {t('restore')}
                         </Button>
@@ -315,7 +326,13 @@ export default function Login() {
                 {!warningVerifyModalSent ?
                     <Modal.Body>
                         <div className="content-center">{t('email_unverified')}</div>
-                        <form id="verifyForm" name="verifyForm" className="items-center space-y-6 transition-transform duration-500">
+                        <form
+                            id="verifyForm"
+                            name="verifyForm"
+                            className="items-center space-y-6 transition-transform duration-500"
+                            onSubmit={handleVerifySubmit}
+                            method="post"
+                        >
                             {
                                 verifyFields.map(field =>
                                     <Input
@@ -334,18 +351,17 @@ export default function Login() {
                                     />
                                 )
                             }
-
                             <Button
                                 type="submit"
                                 className="group flex m-auto"
-                                onClick={handleVerifySubmit}
+                                //onClick={handleVerifySubmit}
                             >
                                 {t('resend_verify')}
                             </Button>
                         </form>
                     </Modal.Body> :
                     <Modal.Body>
-                        <div className="content-center">{t('verify_sent')}</div>
+                        <div className="content-center">{t('email_verify_sent')}</div>
                     </Modal.Body>}
             </Modal>
         </>
