@@ -1,9 +1,9 @@
 'use server'
-import {KCApiExchangeToken} from '@/app/api/types/KCApiExchangeToken'
-import {UserRepresentation} from '@/app/api/types/UserRepresentation'
-import {geoip} from '@/app/[locale]/utils/geoip'
+import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
+import {KCUserRepresentation} from '@/types/KCUserRepresentation'
+import {geoip} from '@/utils/geoip'
 import axios, {AxiosError, AxiosResponse} from 'axios'
-import {FederatedIdentityRepresentation} from '@/app/api/types/FederatedIdentityRepresentation'
+import {KCFederatedIdentityRepresentation} from '@/types/KCFederatedIdentityRepresentation'
 
 const urlKcToken: string = process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token'
 const urlKcUsers: string = process.env.KEYCLOAK_ADMIN_REALM + '/users/'
@@ -157,7 +157,7 @@ export async function kcCreateUser(adminToken: string, username: string, passwor
         })
 }
 
-export async function kcUpdateUser(adminToken: string, userId: string, userRepresentation: UserRepresentation): Promise<boolean> {
+export async function kcUpdateUser(adminToken: string, userId: string, userRepresentation: KCUserRepresentation): Promise<boolean> {
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PUT',
@@ -180,7 +180,7 @@ export async function kcUpdateUser(adminToken: string, userId: string, userRepre
         })
 }
 
-export async function kcGetUserById(adminToken: string, userId: string): Promise<UserRepresentation | null> {
+export async function kcGetUserById(adminToken: string, userId: string): Promise<KCUserRepresentation | null> {
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -199,7 +199,7 @@ export async function kcGetUserById(adminToken: string, userId: string): Promise
         })
         .then((data) => {
             //console.log('kcGetUserById success: ', data)
-            return data as UserRepresentation
+            return data as KCUserRepresentation
         })
         .catch((err) => {
             console.log('kcGetUserById error: ', err)
@@ -207,7 +207,7 @@ export async function kcGetUserById(adminToken: string, userId: string): Promise
         })
 }
 
-export async function kcGetUserByUsername(username: string, adminToken: string): Promise<Array<UserRepresentation> | null> {
+export async function kcGetUserByUsername(username: string, adminToken: string): Promise<Array<KCUserRepresentation> | null> {
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -225,8 +225,8 @@ export async function kcGetUserByUsername(username: string, adminToken: string):
             return res.json()
         })
         .then((data) => {
-            console.log('kcGetUserByUsername success: ', data)
-            return data as Array<UserRepresentation>
+            //console.log('kcGetUserByUsername success: ', data)
+            return data as Array<KCUserRepresentation>
         })
         .catch((err) => {
             console.log('kcGetUserByUsername error: ', err)
@@ -234,7 +234,7 @@ export async function kcGetUserByUsername(username: string, adminToken: string):
         })
 }
 
-export async function kcGetUserSocials(userid: string, adminToken: string): Promise<Array<FederatedIdentityRepresentation> | null> {
+export async function kcGetUserSocials(userid: string, adminToken: string): Promise<Array<KCFederatedIdentityRepresentation> | null> {
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -252,8 +252,8 @@ export async function kcGetUserSocials(userid: string, adminToken: string): Prom
             return res.json()
         })
         .then((data) => {
-            console.log('kcGetUserSocials success: ', data)
-            return data as Array<FederatedIdentityRepresentation>
+            //console.log('kcGetUserSocials success: ', data)
+            return data as Array<KCFederatedIdentityRepresentation>
         })
         .catch((err) => {
             console.log('kcGetUserSocials error: ', err)
@@ -264,9 +264,11 @@ export async function kcGetUserSocials(userid: string, adminToken: string): Prom
 export async function kcAddSocial({
                                       email,
                                       provider = 'google',
+                                      rep
                                   }: {
     email: string
     provider: string
+    rep: { [index: string]: string }
 }): Promise<boolean> {
     const adminToken = await kcGetAdminAccessToken()
     if (!adminToken) return false
@@ -278,9 +280,9 @@ export async function kcAddSocial({
     }
 
     console.log('User exists on KC')
-    const found: UserRepresentation = search[0]
+    const found: KCUserRepresentation = search[0]
     console.log('Found user representation: ', found.id)
-    const checkIDP: FederatedIdentityRepresentation[] | null = await kcGetUserSocials(found.id!, adminToken)
+    const checkIDP: KCFederatedIdentityRepresentation[] | null = await kcGetUserSocials(found.id!, adminToken)
 
     console.log('Check IDP: ', checkIDP)
     if (checkIDP && checkIDP.length > 0) {
@@ -293,11 +295,7 @@ export async function kcAddSocial({
     }
     return axios.post(
         urlKcUsers + found.id + '/federated-identity/' + provider,
-        {
-            identityProvider: 'google',
-            userId: found.id,
-            userName: email
-        },
+        rep,
         {
             headers: {
                 'Authorization': 'Bearer ' + adminToken,
@@ -333,13 +331,13 @@ export async function kcSendServiceEmail({
     if (!adminToken) return false
     console.log('kcSendServiceEmail got admin token')
 
-    const search: Array<UserRepresentation> | null = await kcGetUserByUsername(email, adminToken)
+    const search: Array<KCUserRepresentation> | null = await kcGetUserByUsername(email, adminToken)
     console.log('kcSendServiceEmail searched user: ', search)
 
     if (!search || search.length !== 1) return false
 
     console.log('User exists on KC')
-    const found: UserRepresentation = search[0]
+    const found: KCUserRepresentation = search[0]
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PUT',
@@ -367,7 +365,7 @@ export async function kcSendServiceEmail({
 export async function redLoginOrSignupWithToken(token: string): Promise<number | null> {
     const options: RequestInit = {
         cache: 'no-store',
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
@@ -419,39 +417,12 @@ export async function redGetUserByCreds(username: string, password = ''): Promis
             return res.json()
         })
         .then((data) => {
+            if (!data || parseInt(data) == 0) return null
             console.log('redGetUserByCreds success: ', data)
             return parseInt(data)
         })
         .catch((err) => {
             console.log('redGetUserByCreds error: ', err)
-            return null
-        })
-}
-
-export async function redGetUserProfile(token: string) {
-    const options: RequestInit = {
-        cache: 'no-store',
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Authorization': 'Bearer ' + token,
-        },
-        body: JSON.stringify({
-            'site': process.env.SITE_ID
-        })
-    }
-    return fetch(process.env.REDREPORT_URL + '/api/kc/profile', options)
-        .then((res: Response) => {
-            console.log('redGetUserProfile: ', res.status)
-            return res.json()
-        })
-        .then((data) => {
-            //console.log('redGetUserProfile success: ', data)
-            return data
-        })
-        .catch((err) => {
-            console.log('redGetUserProfile error: ', err)
             return null
         })
 }
@@ -471,7 +442,7 @@ export async function registerUser({
     if (!adminToken) return null
 
     console.log('Look for user on Kc')
-    const search: Array<UserRepresentation> | null = await kcGetUserByUsername(username, adminToken)
+    const search: Array<KCUserRepresentation> | null = await kcGetUserByUsername(username, adminToken)
     if (search && search.length > 0) {
         console.log('User already exists on KC')
         return {error: 'user_exist'}

@@ -1,4 +1,4 @@
-import NextAuth, {Account, Profile, User} from 'next-auth'
+import NextAuth, {Account, AuthError, Profile, User} from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import {
@@ -11,15 +11,15 @@ import {
     kcUpdateUser,
     redGetUserByCreds
 } from '@/app/api/auth/[...nextauth]/requests'
-import {UserRepresentation} from '@/app/api/types/UserRepresentation'
+import {KCUserRepresentation} from '@/types/KCUserRepresentation'
 import {jwtDecode} from 'jwt-decode'
-import {KCApiAccessToken} from '@/app/api/types/KCApiAccessToken'
+import {KCApiAccessToken} from '@/types/KCApiAccessToken'
 import {getLocale} from 'next-intl/server'
-import {geoip} from '@/app/[locale]/utils/geoip'
+import {geoip} from '@/utils/geoip'
 import qs from 'querystring'
 import {headers} from 'next/headers'
 import {AdapterUser} from '@auth/core/adapters'
-import {KCApiExchangeToken} from '@/app/api/types/KCApiExchangeToken'
+import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
 import {refreshAccessToken} from '@/app/api/auth/[...nextauth]/refresh'
 
 declare module 'next-auth' {
@@ -76,10 +76,10 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                     const adminToken = await kcGetAdminAccessToken() //Get Admin token on KC
                     if (!adminToken) return null
 
-                    const kcSearch: Array<UserRepresentation> | null = await kcGetUserByUsername(username, adminToken)
+                    const kcSearch: Array<KCUserRepresentation> | null = await kcGetUserByUsername(username, adminToken)
                     if (kcSearch && kcSearch.length === 1) {
                         console.log('User exists on KC')
-                        const found: UserRepresentation = kcSearch[0]
+                        const found: KCUserRepresentation = kcSearch[0]
                         if (!found.emailVerified) throw new Error('email_unverified')
 
                         const kcApiToken = await kcLoginWithCreds(username, password)
@@ -105,12 +105,18 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                         if (!redSearch) {
                             console.log('No such user on Red')
                             console.log('User not found')
-                            throw new Error('no_user')
+                            return {
+                                error: 'no_user'
+                            } as User
+                            //throw new AuthError('no_user')
                         }
                         redSearch = await redGetUserByCreds(username, password) //Check if user exist on Red and creds are right
                         if (!redSearch) {
                             console.log('Bad credentials')
-                            throw new Error('bad_credentials')
+                            return {
+                                error: 'bad_credentials'
+                            } as User
+                            //throw new AuthError('bad_credentials')
                         }
 
                         //User exists and creds are ok as we've got ID
@@ -136,7 +142,10 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                     }
                 } else {
                     console.log('Bad credentials')
-                    throw new Error('bad_credentials')
+                    return {
+                        error: 'bad_credentials'
+                    } as User
+                    //throw new AuthError('bad_credentials')
                 }
                 return null
             }
@@ -152,7 +161,8 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             } | undefined,
         }): Promise<boolean> {
             if (params.user.error) {
-                throw new Error(params.user.error)
+                console.log('catch error on callback')
+                throw new AuthError(params.user.error)
             }
             if (!params.account || params.account.provider !== 'google') return true
             if (!params.account.access_token) return false
@@ -162,9 +172,15 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
 
             const email = params.user.email!
             console.log('Try to add social to ' + email)
+
             const addsocial = await kcAddSocial({
                 email: email,
                 provider: 'google',
+                rep: {
+                    identityProvider: 'google',
+                    userId: params.user.id!,
+                    userName: params.user.name!
+                }
             })
             if (addsocial) console.log('Social added, log in KC')
 
@@ -230,12 +246,12 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 //console.log(newToken)
                 return newToken
             }
-            if (Date.now() < token.accessTokenExpires) {
+            if (Date.now() < token.accessTokenExpires - 1000) {
                 // token has not expired yet, return it
                 return token
             }
             const refreshedToken = await refreshAccessToken(token)
-            console.log('Token is refreshed')
+            console.log('🐥')
             return refreshedToken
         },
         async session({session, token}) {

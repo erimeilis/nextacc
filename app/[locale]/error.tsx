@@ -1,7 +1,8 @@
 'use client'
-import {ThreeDots} from 'react-loader-spinner'
-import Button from '@/app/[locale]/components/Button'
+import Button from '@/components/shared/Button'
 import {useTranslations} from 'next-intl'
+import Loader from '@/components/service/Loader'
+import React from 'react'
 
 export default function Error({
                                   error,
@@ -17,16 +18,9 @@ export default function Error({
         rounded-md bg-slate-200 dark:bg-slate-800 shadow-sm">
             <h2 className="text-slate-500 dark:text-slate-400">{error.message}</h2>
             <div className="flex items-center justify-center w-full px-10">
-                <ThreeDots
-                    visible={true}
-                    height="48"
-                    width="48"
-                    color="#64748b"
-                    radius="4"
-                    ariaLabel="three-dots-loading"
-                />
+                <Loader height={50}/>
             </div>
-            <Button onClick={() => reset()}>
+            <Button type="button" onClick={() => reset()}>
                 {t('refresh')}
             </Button>
         </div>

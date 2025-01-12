@@ -1,18 +1,17 @@
 'use server'
 import '@/app/[locale]/globals.css'
-import {AuthProvider} from '@/app/[locale]/AuthProvider'
+import {AuthProvider} from '@/AuthProvider'
 import React from 'react'
 import {routing} from '@/i18n/routing'
 import {notFound} from 'next/navigation'
 import {getMessages} from 'next-intl/server'
 import {NextIntlClientProvider} from 'next-intl'
 import {CustomFlowbiteTheme, Flowbite, ThemeModeScript} from 'flowbite-react'
-import Nav from '@/app/[locale]/components/Nav'
+import Nav from '@/components/service/Nav'
 
 export default async function RootLayout(
     props: {
-        children: React.ReactNode,
-        profile: React.ReactNode,
+        dashboard: React.ReactNode,
         offers: React.ReactNode,
         params: Promise<{ locale: string }>
     }
@@ -24,8 +23,7 @@ export default async function RootLayout(
     } = params
 
     const {
-        children,
-        profile,
+        dashboard,
         offers
     } = props
 
@@ -112,7 +110,18 @@ export default async function RootLayout(
             }
         },
         select: {
-            base: 'seem not working so use simple select for the time'
+            base: 'border-none bg-transparent dark:bg-transparent w-full p-0 m-0',
+            addon: 'border-none bg-transparent dark:bg-transparent w-full p-0 m-0',
+            field: {
+                base: 'border-none bg-transparent dark:bg-transparent w-full p-0 m-0',
+                icon: {
+                    base: 'border-none',
+                    svg: 'border-none',
+                },
+                select: {
+                    base: 'border-none bg-transparent dark:bg-transparent w-full p-0 m-0',
+                }
+            }
         },
         radio: {
             root: {
@@ -139,26 +148,36 @@ export default async function RootLayout(
         textInput: {
             base: 'flex',
             field: {
-                base: 'relative w-full',
+                base: 'relative w-full rounded-full m-0',
                 icon: {
                     base: 'pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3',
-                    svg: 'h-5 w-5 text-gray-500 dark:text-gray-400'
+                    svg: 'h-4 w-4 text-gray-500 dark:text-gray-400'
                 },
                 rightIcon: {
                     base: 'pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3',
-                    svg: 'h-5 w-5 text-gray-500 dark:text-gray-400'
+                    svg: 'h-4 w-4 text-gray-500 dark:text-gray-400'
                 },
                 input: {
-                    base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50',
+                    base: 'block w-full border disabled:cursor-not-allowed disabled:opacity-50 rounded-none',
+                    'sizes': {
+                        'sm': 'pt-2 pb-1 px-1 text-sm',
+                        'md': 'p-1.5',
+                        'lg': 'p-4'
+                    },
                     colors: {
-                        gray: 'border-gray-300 bg-gray-50 text-gray-900 focus:border-orange-300 focus:ring-orange-400 ' +
+                        gray: 'rounded-lg border-gray-300 bg-gray-50 text-gray-900 focus:border-orange-300 focus:ring-orange-400 ' +
                             'dark:border-indigo-800 dark:bg-slate-900 dark:text-gray-200' +
                             ' dark:placeholder-gray-400 dark:focus:border-indigo-700 dark:focus:ring-indigo-600',
-                        info: 'border-cyan-500 bg-cyan-50 text-cyan-900 placeholder-cyan-700 focus:border-cyan-500 focus:ring-cyan-500 dark:border-cyan-400 dark:bg-cyan-100 dark:focus:border-cyan-500 dark:focus:ring-cyan-500',
+                        info: 'rounded-none border-x-0 border-t-0 border-b focus:border-b focus:ring-0 bg-transparent m-0 ' +
+                            'border-gray-400 border-opacity-30 dark:border-indigo-800 dark:border-opacity-40 focus:border-orange-300 dark:focus:border-indigo-700',
                         failure: 'border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:border-red-500 dark:focus:ring-red-500',
                         warning: 'border-yellow-500 bg-yellow-50 text-yellow-900 placeholder-yellow-700 focus:border-yellow-500 focus:ring-yellow-500 dark:border-yellow-400 dark:bg-yellow-100 dark:focus:border-yellow-500 dark:focus:ring-yellow-500',
                         success: 'border-green-500 bg-green-50 text-green-900 placeholder-green-700 focus:border-green-500 focus:ring-green-500 dark:border-green-400 dark:bg-green-100 dark:focus:border-green-500 dark:focus:ring-green-500'
-                    }
+                    },
+                    withAddon: {
+                        'on': '',
+                        'off': ''
+                    },
                 }
             }
         },
@@ -181,31 +200,95 @@ export default async function RootLayout(
                 },
                 href: 'hover:bg-gray-100 dark:hover:bg-gray-700'
             }
+        },
+        tabs: {
+            base: 'flex flex-col rounded-md w-full border border-gray-200 bg-gray-100 drop-shadow text-gray-800 ' +
+                'dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200',
+            tablist: {
+                base: 'flex text-center shadow-none',
+                variant: {
+                    'default': 'flex-wrap border-b border-gray-200 dark:border-gray-700',
+                    'underline': '-mb-px flex-wrap border-b border-gray-200 dark:border-gray-700',
+                    'pills': 'flex-wrap space-x-2 text-sm font-medium text-gray-500 dark:text-gray-400',
+                    'fullWidth': 'grid w-full grid-flow-col divide-x divide-gray-200 text-sm font-medium dark:divide-indigo-900 dark:text-gray-400'
+                },
+                tabitem: {
+                    base: 'flex items-center justify-center rounded-t-md p-4 text-sm font-medium first:ml-0 focus:outline-none focus:ring-none' +
+                        ' disabled:cursor-not-allowed disabled:text-gray-400 disabled:dark:text-gray-500',
+                    variant: {
+                        default: {
+                            base: 'rounded-t-md',
+                            active: {
+                                'on': 'shadow-none bg-gray-100 text-cyan-600 dark:bg-gray-800 dark:text-cyan-500',
+                                'off': 'text-gray-500 hover:bg-gray-50 hover:text-gray-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+                            }
+                        },
+                        underline: {
+                            base: 'rounded-t-lg',
+                            active: {
+                                on: 'active rounded-t-lg border-b-2 border-cyan-600 text-cyan-600 dark:border-cyan-500 dark:text-cyan-500',
+                                off: 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300'
+                            }
+                        },
+                        pills: {
+                            base: '',
+                            active: {
+                                on: 'rounded-lg bg-cyan-600 text-white',
+                                off: 'rounded-lg hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
+                            }
+                        },
+                        fullWidth: {
+                            base: 'ml-0 flex w-full first:ml-0',
+                            active: {
+                                on: 'active border-b-0 bg-gray-100 p-4 text-gray-900 ' +
+                                    'dark:bg-indigo-950 dark:text-white',
+                                off: 'shadow-inner shadow-sm bg-white hover:bg-gray-50 hover:text-gray-700 ' +
+                                    'dark:bg-indigo-900 dark:hover:bg-indigo-800 dark:hover:text-white'
+                            }
+                        }
+                    },
+                    icon: 'mr-2 h-5 w-5'
+                }
+            },
+            tabitemcontainer: {
+                base: '',
+                variant: {
+                    default: '',
+                    underline: '',
+                    pills: '',
+                    fullWidth: ''
+                }
+            },
+            tabpanel: 'h-full justify-center gap-4 p-6'
+        },
+        label: {
+            root: {
+                base: 'text-opacity-40 dark:text-opacity-60'
+            }
         }
     }
 
     return (
+        <html lang={locale} suppressHydrationWarning>
+        <head>
+            <ThemeModeScript/>
+            <title>NextAcc</title>
+        </head>
+        <body className="bg-stone-200 dark:bg-slate-900">
         <AuthProvider>
-            <html lang={locale} suppressHydrationWarning>
-            <head>
-                <ThemeModeScript/>
-                <title>NextAcc</title>
-            </head>
-            <body className="bg-stone-200 dark:bg-slate-900">
             <NextIntlClientProvider messages={messages}>
                 <Flowbite theme={{theme: indigoOrangeTheme}}>
                     <Nav/>
                     <main className="flex items-center justify-center px-4 pt-4 pb-96 bg-stone-200 dark:bg-slate-900">
                         <div className="flex flex-col sm:w-full md:w-3/4 lg:w-1/2 max-w-4xl gap-4">
                             {offers}
-                            {profile}
-                            {children}
+                            {dashboard}
                         </div>
                     </main>
                 </Flowbite>
             </NextIntlClientProvider>
-            </body>
-            </html>
         </AuthProvider>
+        </body>
+        </html>
     )
 }

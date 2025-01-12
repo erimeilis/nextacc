@@ -1,0 +1,73 @@
+import {Buildings, Copyright, DeviceMobile, FlagBanner, UserFocus} from '@phosphor-icons/react'
+import {InputField} from '@/types/InputField'
+
+const profileFields: InputField[] = [
+    {
+        labelText: 'firstname',
+        labelFor: 'profileFirstname',
+        id: 'profileFirstname',
+        name: 'profileFirstname',
+        type: 'text',
+        autoComplete: 'firstname',
+        isRequired: false,
+        placeholder: 'firstname',
+        icon: UserFocus,
+    },
+    {
+        labelText: 'lastname',
+        labelFor: 'profileLastname',
+        id: 'profileLastname',
+        name: 'profileLastname',
+        type: 'text',
+        autoComplete: 'lastname',
+        isRequired: false,
+        placeholder: 'lastname',
+        icon: UserFocus,
+    },
+    {
+        labelText: 'company',
+        labelFor: 'profileCompany',
+        id: 'profileCompany',
+        name: 'profileCompany',
+        type: 'text',
+        autoComplete: 'company',
+        isRequired: false,
+        placeholder: 'company',
+        icon: Copyright,
+    },
+    {
+        labelText: 'country',
+        labelFor: 'profileCountry',
+        id: 'profileCountry',
+        name: 'profileCountry',
+        type: 'text',
+        autoComplete: 'country',
+        isRequired: false,
+        placeholder: 'country',
+        icon: FlagBanner,
+    },
+    {
+        labelText: 'address',
+        labelFor: 'profileAddress',
+        id: 'profileAddress',
+        name: 'profileAddress',
+        type: 'text',
+        autoComplete: 'address',
+        isRequired: false,
+        placeholder: 'address',
+        icon: Buildings,
+    },
+    {
+        labelText: 'phone',
+        labelFor: 'profilePhone',
+        id: 'profilePhone',
+        name: 'profilePhone',
+        type: 'text',
+        autoComplete: 'phone',
+        isRequired: false,
+        placeholder: 'phone',
+        icon: DeviceMobile,
+    },
+
+]
+export {profileFields}
