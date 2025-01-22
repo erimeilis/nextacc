@@ -59,7 +59,10 @@
     "invalid_phone": "Nieprawidłowy numer telefonu",
     "invalid_telegram_username": "Nieprawidłowa nazwa użytkownika Telegram",
     "invalid_sip": "Nieprawidłowy SIP",
-    "invalid_url": "Nieprawidłowy URL"
+    "invalid_url": "Nieprawidłowy URL",
+    "pay_for": "Zapłać za:",
+    "month": "{count, plural, one {miesiąc} few {miesiące} many {miesiący} other {miesiąca}}",
+    "select_qnty": "Ilość"
   },
   "docs": {
     "name_lastname": "Imię, nazwisko",

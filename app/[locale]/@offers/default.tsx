@@ -1,6 +1,6 @@
 'use client'
 import NumberOffersList from '@/components/NumberOffersList'
-import DropdownSelect from '@/components/shared/DropdownSelect'
+import DropdownSelectNumber from '@/components/shared/DropdownSelectNumber'
 import NumberTypeSelector from '@/components/NumberTypeSelector'
 import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
 import {Card} from 'flowbite-react'
@@ -30,7 +30,7 @@ export default function Page() {
     const [loadingAreas, setLoadingAreas] = useState(false)
     const [loadingNumbers, setLoadingNumbers] = useState(false)
 
-    function Countries(): { id: string, name: string }[] {
+    function Countries(): { id: number, name: string }[] {
         const {data} = useSWR(searchParams.has('type') ? {
             type: searchParams.get('type'),
         } : null, getCountries, {})
@@ -39,16 +39,16 @@ export default function Page() {
 
     const countries = Countries()
     const slugCountry = countries.find(e => getSlug(e.name) == searchParams.get('country'))
-    const getCountry = searchParams.has('country') ?
+    const getCountry: number | null = searchParams.has('country') ?
         (!isNaN(+searchParams.get('country')!) ?
-            searchParams.get('country') :
+            Number(searchParams.get('country')) :
             (slugCountry ?
-                slugCountry.id :
+                Number(slugCountry.id) :
                 null)) :
         null
 
-    function Areas(): { id: string, name: string }[] {
-        const {data} = useSWR(searchParams.has('type') && searchParams.has('country') ? {
+    function Areas(): { id: number, name: string }[] {
+        const {data} = useSWR(searchParams.has('type') && getCountry !== null ? {
             type: searchParams.get('type'),
             //country: searchParams.get('country')
             country: getCountry
@@ -65,16 +65,16 @@ export default function Page() {
 
     const areas = Areas()
     const slugArea = areas.find(e => getSlug(e.name) == searchParams.get('area'))
-    const getArea = searchParams.has('area') ?
+    const getArea: number | null = searchParams.has('area') ?
         (!isNaN(+searchParams.get('area')!) ?
-            searchParams.get('area') :
+            Number(searchParams.get('area')) :
             (slugArea ?
-                slugArea.id :
+                Number(slugArea.id) :
                 null)) :
         null
 
     function Numbers(): NumberInfo[] {
-        const {data} = useSWR(searchParams.has('type') && searchParams.has('country') && searchParams.has('area') ?
+        const {data} = useSWR(searchParams.has('type') && getCountry !== null && getArea !== null ?
             {
                 type: searchParams.get('type'),
                 //country: searchParams.get('country')
@@ -97,14 +97,14 @@ export default function Page() {
         setLoadingNumbers(false)
         router.push(pathName + '?' + CQS('type', t, searchParams, ['country', 'area', 'number']))
     }
-    const handleCountry = async (value: string) => {
+    const handleCountry = async (value: number) => {
         //setNumberInfo(null)
         setLoadingAreas(true)
         setLoadingNumbers(false)
         const slug = countries.find(e => e.id == value)
         router.push(pathName + '?' + CQS('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
     }
-    const handleArea = async (value: string) => {
+    const handleArea = async (value: number) => {
         //setNumberInfo(null)
         setLoadingNumbers(true)
         router.push(pathName + '?' + CQS('area', value, searchParams, ['number']))
@@ -118,7 +118,7 @@ export default function Page() {
         <Card id="offers" className="bg-gray-200 dark:bg-indigo-800">
             <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={searchParams.get('type')}/>
             <div className="flex flex-row items-center gap-4 justify-between my-4">
-                <DropdownSelect
+                <DropdownSelectNumber
                     selectId="country"
                     selectTitle={t('select_country')}
                     data={countries}
@@ -127,7 +127,7 @@ export default function Page() {
                     loading={loadingCountries}
                     customClass="w-full"
                 />
-                <DropdownSelect
+                <DropdownSelectNumber
                     selectId="area"
                     selectTitle={t('select_area')}
                     data={Areas()}

@@ -59,7 +59,12 @@
     "invalid_phone": "Invalid phone number",
     "invalid_telegram_username": "Invalid telegram username",
     "invalid_sip": "Invalid SIP",
-    "invalid_url": "Invalid URL"
+    "invalid_url": "Invalid URL",
+    "pay_for": "Pay for:",
+    "month": "{count, plural, one {month} other {months}}",
+    "select_qnty": "Qnty",
+    "discount": "Discount: ",
+    "more_than": "more than"
   },
   "docs": {
     "name_lastname": "First name, last name",

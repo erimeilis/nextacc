@@ -5,9 +5,12 @@ import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
 
+const instance = Axios.create()
+const axios = setupCache(instance)
+
 export async function getCountries({type}: { type: string }) {
-    const instance = Axios.create()
-    const axios = setupCache(instance)
+    //const instance = Axios.create()
+    //const axios = setupCache(instance)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/countries',
         'type=' + type,
@@ -16,13 +19,17 @@ export async function getCountries({type}: { type: string }) {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
+            },
+            cache: {
+                ttl: 24 * 60 * 60 * 1000,
             }
         }
     )
     if (response.data && response.data.data && response.data.data.length > 0) {
         const countries: CountryInfo[] = response.data.data
+        //console.log('getCountries: ', countries)
         return countries.map(country => ({
-            id: String(country.id),
+            id: country.id,
             name: country.countryname + ' +' + country.countryprefix.toString(),
         }))
     }
@@ -35,8 +42,9 @@ export async function getCountries({type}: { type: string }) {
 }
 
 export async function getAreas({type, country}: { type: string, country: number }) {
-    const instance = Axios.create()
-    const axios = setupCache(instance)
+    //const instance = Axios.create()
+    //const axios = setupCache(instance)
+    //console.log('getAreas: ', type, country)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/areas',
         'type=' + type + '&country_id=' + country,
@@ -45,13 +53,17 @@ export async function getAreas({type, country}: { type: string, country: number 
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
+            },
+            cache: {
+                ttl: 2 * 60 * 60 * 1000,
             }
         }
     )
     if (response.data && response.data.data && response.data.data.length > 0) {
         const areas: AreaInfo[] = response.data.data
+        //console.log('getAreas: ', areas)
         return areas.map(area => ({
-            id: String(area.areaprefix),
+            id: area.areaprefix,
             name: '(' + area.areaprefix.toString() + ') ' + area.areaname,
         }))
     }
@@ -64,8 +76,9 @@ export async function getAreas({type, country}: { type: string, country: number 
 }
 
 export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
-    const instance = Axios.create()
-    const axios = setupCache(instance)
+    //const instance = Axios.create()
+    //const axios = setupCache(instance)
+    //console.log('getNumbers: ', type, country, area)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/numbers',
         'type=' + type + '&country_id=' + country + '&area_prefix=' + area,
@@ -74,6 +87,9 @@ export async function getNumbers({type, country, area}: { type: string, country:
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
+            },
+            cache: {
+                ttl: 30 * 60 * 1000,
             }
         }
     )
@@ -102,4 +118,36 @@ export async function getNumbers({type, country, area}: { type: string, country:
             console.log('getNumbers ' + error.status)
         })
     return []
+}
+
+export async function getDiscounts() {
+    //const instance = Axios.create()
+    //const axios = setupCache(instance)
+    const response = await axios.get(
+        process.env.REDREPORT_URL + '/api/did/discounts',
+        {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
+            },
+            cache: {
+                ttl: 30 * 24 * 60 * 60 * 1000,
+            }
+        }
+    )
+    if (response.data && response.data.length > 0) {
+        const discounts: { months: number, percent: number }[] = response.data
+        //console.log('getDiscounts: ', discounts)
+        return discounts.map(discount => ({
+            id: discount.percent,
+            name: discount.months.toString(),
+        }))
+    }
+    axios.interceptors.response.use(
+        response => response,
+        error => {
+            console.log('getDiscounts ' + error.status)
+            return null
+        })
 }

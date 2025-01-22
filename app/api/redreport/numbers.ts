@@ -4,6 +4,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 
 export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     const session = await auth()
+    if (!session) return []
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -18,7 +19,7 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/numbers', options)
         .then((res: Response) => {
-            console.log('redGetMyNumbers: ', res.status)
+            //console.log('redGetMyNumbers: ', res.status)
             if (!res.ok) return []
             return res.json()
         })

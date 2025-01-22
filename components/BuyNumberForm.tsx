@@ -1,7 +1,7 @@
 'use client'
 import React, {ChangeEvent, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
-import DropdownSelect from '@/components/shared/DropdownSelect'
+import DropdownSelectString from '@/components/shared/DropdownSelectString'
 import {useTranslations} from 'next-intl'
 import Button from '@/components/shared/Button'
 import Input from '@/components/shared/Input'
@@ -13,6 +13,10 @@ import {schemaTelegram} from '@/schemas/telegram.schema'
 import {schemaSip} from '@/schemas/sip.schema'
 import {schemaEmail} from '@/schemas/email.schema'
 import {schemaHttps} from '@/schemas/https.schema'
+import useSWR from 'swr'
+import {getDiscounts} from '@/app/api/redreport/offers'
+import DropdownSelectNumber from '@/components/shared/DropdownSelectNumber'
+import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 
 export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | null }) {
     const t = useTranslations('offers')
@@ -26,6 +30,13 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
     })
     const handleChoice = () => {
     }
+
+    function Discounts(): { id: number, name: string }[] {
+        const {data} = useSWR({}, getDiscounts, {})
+        return data ?? []
+    }
+
+    const discounts = Discounts()
 
     function GetDocs(numberInfo: NumberInfo | null) {
         if (!numberInfo) return null
@@ -45,6 +56,7 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
     const [smsDestinationState, setSmsDestinationState] = useState('')
     const [voiceDestinationErrorState, setVoiceDestinationErrorState] = useState<string>('')
     const [smsDestinationErrorState, setSmsDestinationErrorState] = useState<string>('')
+    const [discountState, setDiscountState] = useState<number>(0)
 
     const handleVoiceTypeChange = (value: string) => {
         setVoiceTypeState(value)
@@ -110,6 +122,11 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
         }
     }
 
+    const qnty = discounts.find(q => q.id == discountState)
+    const handleQntyChange = (value: number) => {
+        setDiscountState(value)
+    }
+
     return numberInfo ? (
         <form
             id="buyNumberForm"
@@ -124,14 +141,15 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
                         {t('setupfee') + ': ' + numberInfo.setuprate + '$ / ' + t('monthlyfee') + ': ' + numberInfo.fixrate + '$'}
                     </div>
                     {numberInfo.voice || numberInfo.tollfree ?
-                        <div className="w-full flex flex-row items-center gap-2">
-                            <DropdownSelect
+                        <div className="flex w-full flex-row items-center gap-2">
+                            <PhoneTransfer size={48}/>
+                            <DropdownSelectString
                                 selectId="voiceType"
                                 selectTitle={t('select_voice_destination')}
                                 data={voice}
                                 onSelectAction={handleVoiceTypeChange}
                                 selectedOption={voiceTypeState}
-                                customClass="w-fit"
+                                customClass="min-w-20 w-fit"
                             />
                             <Input
                                 handleChangeAction={handleVoiceDestinationChange}
@@ -150,14 +168,15 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
                         </div> :
                         ''}
                     {numberInfo.sms ?
-                        <div className="w-full flex flex-row items-center gap-2">
-                            <DropdownSelect
+                        <div className="flex w-full flex-row items-center gap-2">
+                            <ChatText size={48}/>
+                            <DropdownSelectString
                                 selectId="smsType"
                                 selectTitle={t('select_sms_destination')}
                                 data={sms}
                                 onSelectAction={handleSmsTypeChange}
                                 selectedOption={smsTypeState}
-                                customClass="w-fit"
+                                customClass="min-w-20 w-fit"
                             />
                             <Input
                                 handleChangeAction={handleSmsDestinationChange}
@@ -179,23 +198,40 @@ export default function BuyNumberForm({numberInfo}: { numberInfo: NumberInfo | n
                         {GetDocs(numberInfo)}
                     </div>
                 </div>
-                <div className="flex flex-row gap-2">
-                    <Button
-                        type="button"
-                        style="pillow"
-                        onClick={() => {
-                        }}
-                    >
-                        {t('add_to_cart')}
-                    </Button>
-                    <Button
-                        type="button"
-                        style="pillow"
-                        onClick={() => {
-                        }}
-                    >
-                        {t('buy')}
-                    </Button>
+                <div className="flex flex-col gap-2 min-w-64 w-fit">
+                    <div className="flex flex-row gap-2 justify-end items-center">
+                        <div className="whitespace-nowrap">{t('pay_for')}</div>
+                        <DropdownSelectNumber
+                            selectId="discount"
+                            selectTitle={t('select_qnty')}
+                            data={discounts}
+                            onSelectAction={handleQntyChange}
+                            selectedOption={discountState}
+                            customClass="min-w-max w-fit"
+                        />
+                        <div className="whitespace-nowrap">{t('month', {count: qnty !== undefined ? qnty.name : 1})}</div>
+                    </div>
+                    <div className="flex flex-row gap-2 justify-end items-center text-sm">
+                        
+                    </div>
+                    <div className="flex w-full flex-row justify-end gap-2">
+                        <Button
+                            type="button"
+                            style="pillow"
+                            onClick={() => {
+                            }}
+                        >
+                            {t('add_to_cart')}
+                        </Button>
+                        <Button
+                            type="button"
+                            style="pillow"
+                            onClick={() => {
+                            }}
+                        >
+                            {t('buy')}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </form>

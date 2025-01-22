@@ -4,6 +4,7 @@ import {auth} from '@/auth'
 
 export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]> {
     const session = await auth()
+    if (!session) return []
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -20,7 +21,7 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/transactions', options)
         .then((res: Response) => {
-            console.log('redGetMoneyTransactionReport: ', res.status)
+            //console.log('redGetMoneyTransactionReport: ', res.status)
             if (!res.ok) return []
             return res.json()
         })

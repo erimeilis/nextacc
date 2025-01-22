@@ -3,7 +3,7 @@
     "welcome": "Ласкаво просимо"
   },
   "common": {
-    "locale": "ua",
+    "locale": "uk",
     "refresh": "Відновити сторінку"
   },
   "login": {
@@ -58,7 +58,10 @@
     "invalid_phone": "Недійсний номер телефону",
     "invalid_telegram_username": "Недійсне ім'я користувача Telegram",
     "invalid_sip": "Недійсний SIP",
-    "invalid_url": "Недійсна URL"
+    "invalid_url": "Недійсна URL",
+    "pay_for": "Оплатити за:",
+    "month": "{count, plural, one {місяць} few {місяці} many {місяців} other {місяця}}",
+    "select_qnty": "Кму-сть"
   },
   "docs": {
     "name_lastname": "Ім'я, прізвище",

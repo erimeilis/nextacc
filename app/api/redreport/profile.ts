@@ -8,6 +8,7 @@ import {auth} from '@/auth'
 
 export async function redGetUserProfile(): Promise<UserProfile | null> {
     const session = await auth()
+    if (!session) return null
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -22,7 +23,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/profile', options)
         .then((res: Response) => {
-            console.log('redGetUserProfile: ', res.status)
+            //console.log('redGetUserProfile: ', res.status)
             if (!res.ok) return null
             return res.json()
         })
@@ -37,6 +38,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
 
 export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<UserProfile | null> {
     const session = await auth()
+    if (!session) return null
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PATCH',
@@ -52,7 +54,7 @@ export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<U
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/profile', options)
         .then((res: Response) => {
-            console.log('redSetUserProfile: ', res.status)
+            //console.log('redSetUserProfile: ', res.status)
             if (!res.ok) return null
             return res.json()
         })
