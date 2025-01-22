@@ -17,8 +17,9 @@ export async function refreshAccessToken(token: JWT) {
     const formData = formBody.join('&')
     const url = process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token'
 
-    console.log('Sending refresh token request to:', url)
-    console.log('Request body:', formData)
+    //console.log('Sending refresh request to:', url)
+    //console.log('Request body:', formData)
+
 
     const response = await fetch(url, {
         method: 'POST',
@@ -30,10 +31,10 @@ export async function refreshAccessToken(token: JWT) {
 
     const refreshedTokens = await response.json()
 
-    console.log('Refresh token response:', refreshedTokens)
+    //console.log('Refresh token response:', refreshedTokens)
 
     if (!response.ok) {
-        console.log('Failed to refresh token:', refreshedTokens)
+        //console.log('Failed to refresh token:', refreshedTokens)
         throw refreshedTokens
     }
     return {

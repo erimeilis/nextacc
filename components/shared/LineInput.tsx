@@ -1,0 +1,84 @@
+'use client'
+import {Label, TextInput} from 'flowbite-react'
+import React, {ChangeEvent, useState} from 'react'
+import {Eye, EyeSlash} from '@phosphor-icons/react'
+
+const fixedErrorClass = 'flex items-center w-fit transition-transform duration-500 ' +
+    'font-medium tracking-wide text-white text-xs ' +
+    'mt-1 ml-1 px-2 py-0.5 ' +
+    'bg-red-500 dark:bg-red-600 '
+
+export default function LineInput({
+                                      handleAction = () => {
+                                      },
+                                      value,
+                                      labelText,
+                                      labelFor,
+                                      id,
+                                      name,
+                                      type,
+                                      isRequired = false,
+                                      placeholder,
+                                      customClass,
+                                      error = '',
+                                      size = 'md',
+                                      disabled = false
+                                  }: {
+    handleAction?: (event: ChangeEvent<HTMLInputElement>) => void
+    value: string
+    labelText?: string
+    labelFor?: string
+    id: string
+    name: string
+    type: string
+    isRequired?: boolean
+    placeholder?: string
+    customClass?: string
+    error?: string
+    size?: 'sm' | 'md' | 'lg'
+    disabled?: boolean
+}) {
+    const displayErr = error === '' ? 'invisible' : 'visible'
+    const displayEye = type === 'password' ? 'visible' : 'invisible'
+    const [typeState, setTypeState] = useState(type)
+
+    const switchPass = () => {
+        setTypeState(typeState === 'password' ? 'text' : 'password')
+    }
+
+    return (
+        <div className="flex flex-row">
+            <Label
+                htmlFor={labelFor}
+                className="flex text-sm p-2 items-center font-normal"
+            >
+                {labelText}:
+            </Label>
+            <div className="relative">
+                <TextInput
+                    color="info"
+                    onChange={handleAction}
+                    value={value}
+                    id={id}
+                    name={name}
+                    type={typeState}
+                    className={customClass}
+                    placeholder={placeholder}
+                    required={isRequired}
+                    sizing={size}
+                    disabled={disabled}
+                    readOnly={disabled}
+                />
+                <div className={'absolute flex border border-transparent right-0 top-0 h-full w-10 ' + displayEye}>
+                    <button type="button" tabIndex={-1} aria-hidden="true" className="flex items-center justify-center rounded-tl rounded-bl z-10
+                    text-stone-500 dark:text-indigo-200 text-xs h-full w-full" onClick={switchPass}>
+                        {typeState === 'password' ? <Eye/> : <EyeSlash/>}
+                    </button>
+                </div>
+            </div>
+            <span className={fixedErrorClass + displayErr}>
+                {error}
+            </span>
+        </div>
+    )
+}
