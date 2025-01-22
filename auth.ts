@@ -54,6 +54,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         error: '/'
     },
     secret: process.env.NEXTAUTH_SECRET,
+    trustHost: true,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
