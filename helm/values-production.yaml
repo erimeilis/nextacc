@@ -22,11 +22,11 @@ service:
 #   cpu: 0.5
 #   memory: 128Mi
 
-nodeSelector: []
+nodeSelector: [ ]
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
 
 env:
   - name: SITE_ID
@@ -47,6 +47,8 @@ env:
     value: admin-cli
   - name: KEYCLOAK_ADMIN_REALM
     value: https://keycloak.telecomax.net/auth/admin/realms/blabla
+  - name: SLACK_WEBHOOK
+    value: https://hooks.slack.com/services/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
 # secrets from file secrets-<branchname>.yaml in gitlab "Secure files"
 #envSecrets:
 #  - name: REDREPORT_TOKEN
