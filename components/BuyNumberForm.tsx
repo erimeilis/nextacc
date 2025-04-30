@@ -16,7 +16,14 @@ import {schemaHttps} from '@/schemas/https.schema'
 import useSWR from 'swr'
 import {getDiscounts} from '@/app/api/redreport/offers'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
-import {Table} from 'flowbite-react'
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell
+} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/buy'
 import {getPersistState} from '@/usePersistState'
 
@@ -253,25 +260,27 @@ export default function BuyNumberForm({
                         <div className="whitespace-nowrap">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
                     </div>
                     <Table striped>
-                        <Table.Head>
-                            <Table.HeadCell colSpan={4}>{t('discount')}</Table.HeadCell>
-                        </Table.Head>
-                        <Table.Body className="divide-y">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead colSpan={4}>{t('discount')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {
                                 discounts.map(d => {
                                         return (d.id !== '0') ?
-                                            <Table.Row key={d.name} className="text-xs bg-white dark:border-gray-700 dark:bg-gray-800">
-                                                <Table.Cell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</Table.Cell>
-                                                <Table.Cell>-{d.id}%</Table.Cell>
-                                                <Table.Cell>=</Table.Cell>
-                                                <Table.Cell
-                                                    className="whitespace-nowrap text-right">{Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$</Table.Cell>
-                                            </Table.Row> :
+                                            <TableRow key={d.name} className="text-xs bg-white dark:border-gray-700 dark:bg-gray-800">
+                                                <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
+                                                <TableCell>-{d.id}%</TableCell>
+                                                <TableCell>=</TableCell>
+                                                <TableCell
+                                                    className="whitespace-nowrap text-right">{Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$</TableCell>
+                                            </TableRow> :
                                             ''
                                     }
                                 )
                             }
-                        </Table.Body>
+                        </TableBody>
                     </Table>
                     <div key={d.name} className="flex flex-row gap-2 justify-end items-center whitespace-nowrap">
                         {t('total_price')} {Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$

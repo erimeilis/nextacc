@@ -1,7 +1,8 @@
 'use client'
-import {Label, TextInput} from 'flowbite-react'
 import React, {ChangeEvent, useState} from 'react'
 import {Eye, EyeSlash} from '@phosphor-icons/react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 const fixedErrorClass = 'flex items-center w-fit transition-transform duration-500 ' +
     'font-medium tracking-wide text-white text-xs ' +
@@ -55,17 +56,15 @@ export default function LineInput({
                 {labelText}:
             </Label>
             <div className="relative">
-                <TextInput
-                    color="info"
+                <Input
                     onChange={handleAction}
                     value={value}
                     id={id}
                     name={name}
                     type={typeState}
-                    className={customClass}
+                    className={`${customClass} ${size === 'sm' ? 'h-8 text-sm' : size === 'lg' ? 'h-12 text-lg' : 'h-10'}`}
                     placeholder={placeholder}
                     required={isRequired}
-                    sizing={size}
                     disabled={disabled}
                     readOnly={disabled}
                 />

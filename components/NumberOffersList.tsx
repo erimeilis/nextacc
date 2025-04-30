@@ -3,7 +3,8 @@ import React, {ChangeEvent} from 'react'
 import Loader from './service/Loader'
 import {NumberInfo} from '@/types/NumberInfo'
 import Show from '@/components/service/Show'
-import {Label, Radio} from 'flowbite-react'
+import { Label } from '@/components/ui/label'
+import { Radio, RadioGroup } from '@/components/ui/radio-group'
 import {ChatCircleText, Headset, Phone, Printer} from '@phosphor-icons/react'
 
 export default function NumberOffersList({
@@ -37,39 +38,39 @@ export default function NumberOffersList({
     return (
         <Show when={!loading || options.length > 0}
               fallback={<Loader height={32}/>}>
-            <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 px-4">
-                {
-                    options.map((option) =>
-                        <div key={option.did} className="flex flex-row items-center gap-2">
-                            <Radio
-                                id={option.did}
-                                value={option.did}
-                                data-where_did={option.where_did}
-                                data-setup_rate={option.setup_rate}
-                                data-fix_rate={option.fix_rate}
-                                data-voice={option.voice.toString()}
-                                data-sms={option.sms.toString()}
-                                data-fax={option.fax.toString()}
-                                data-toll_free={option.toll_free.toString()}
-                                data-incoming_per_minute={option.incoming_per_minute}
-                                data-toll_free_rate_in_min={option.toll_free_rate_in_min}
-                                data-incoming_rate_sms={option.incoming_rate_sms}
-                                data-docs={option.docs}
-                                name="list-radio"
-                                //className="w-2 h-2"
-                                onChange={handleOptionChange}
-                                defaultChecked={selectedOption === option.did}
-                            />
-                            <Label htmlFor={option.did}
-                                   className="w-full flex flex-row items-center cursor-pointer py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 text-opacity-100 dark:text-opacity-100">
-                                {option.name}&nbsp;{option.voice ? <Phone weight="thin"/> : ''}{option.sms ? <ChatCircleText weight="thin"/> : ''}{option.fax ?
-                                <Printer weight="thin"/> : ''}{option.toll_free ?
-                                <Headset weight="thin"/> : ''}
-                            </Label>
-                        </div>
-                    )
-                }
-            </div>
+            <RadioGroup value={selectedOption || undefined} name="list-radio">
+                <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 px-4">
+                    {
+                        options.map((option) =>
+                            <div key={option.did} className="flex flex-row items-center gap-2">
+                                <Radio
+                                    id={option.did}
+                                    value={option.did}
+                                    data-where_did={option.where_did}
+                                    data-setup_rate={option.setup_rate}
+                                    data-fix_rate={option.fix_rate}
+                                    data-voice={option.voice.toString()}
+                                    data-sms={option.sms.toString()}
+                                    data-fax={option.fax.toString()}
+                                    data-toll_free={option.toll_free.toString()}
+                                    data-incoming_per_minute={option.incoming_per_minute}
+                                    data-toll_free_rate_in_min={option.toll_free_rate_in_min}
+                                    data-incoming_rate_sms={option.incoming_rate_sms}
+                                    data-docs={option.docs}
+                                    onChange={handleOptionChange}
+                                    checked={selectedOption === option.did}
+                                />
+                                <Label htmlFor={option.did}
+                                       className="w-full flex flex-row items-center cursor-pointer py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 text-opacity-100 dark:text-opacity-100">
+                                    {option.name}&nbsp;{option.voice ? <Phone weight="thin"/> : ''}{option.sms ? <ChatCircleText weight="thin"/> : ''}{option.fax ?
+                                    <Printer weight="thin"/> : ''}{option.toll_free ?
+                                    <Headset weight="thin"/> : ''}
+                                </Label>
+                            </div>
+                        )
+                    }
+                </div>
+            </RadioGroup>
         </Show>
     )
 };

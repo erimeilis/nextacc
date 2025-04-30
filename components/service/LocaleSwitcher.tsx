@@ -1,7 +1,7 @@
 'use client'
 import {routing} from '@/i18n/routing'
 //import {CaretDown} from '@phosphor-icons/react'
-import {Dropdown} from 'flowbite-react'
+import { Dropdown } from '@/components/ui/dropdown'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
 

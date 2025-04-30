@@ -1,6 +1,6 @@
 'use client'
 import Loader from '@/components/service/Loader'
-import {Label} from 'flowbite-react'
+import { Label } from '@/components/ui/label'
 import {ChangeEvent} from 'react'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'

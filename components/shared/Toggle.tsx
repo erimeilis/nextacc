@@ -1,5 +1,6 @@
 'use client'
-import {Label, ToggleSwitch} from 'flowbite-react'
+import { Label } from '@/components/ui/label'
+import { ToggleSwitch } from '@/components/ui/switch'
 
 export default function Toggle({
                                    leftLabel,

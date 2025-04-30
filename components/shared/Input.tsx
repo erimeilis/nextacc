@@ -1,5 +1,6 @@
 'use client'
-import {Label, TextInput} from 'flowbite-react'
+import { Label } from '@/components/ui/label'
+import { Input as TextInput } from '@/components/ui/input'
 import React, {ChangeEvent, FC, SVGProps, useState} from 'react'
 import {Eye, EyeSlash} from '@phosphor-icons/react'
 
@@ -20,7 +21,7 @@ export default function Input({
                                   isRequired = false,
                                   placeholder,
                                   customClass,
-                                  icon,
+                                  icon, // eslint-disable-line @typescript-eslint/no-unused-vars
                                   error = '',
                                   size = 'md',
                                   disabled = false
@@ -63,11 +64,9 @@ export default function Input({
                     id={id}
                     name={name}
                     type={typeState}
-                    //className={customClass}
-                    icon={icon}
+                    className={size === 'sm' ? 'h-8 text-sm' : size === 'lg' ? 'h-12 text-lg' : 'h-10'}
                     placeholder={placeholder}
                     required={isRequired}
-                    sizing={size}
                     disabled={disabled}
                     readOnly={disabled}
                 />

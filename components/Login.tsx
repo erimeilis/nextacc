@@ -13,7 +13,10 @@ import {schemaVerify} from '@/schemas/verify.schema'
 import usePersistState from '@/usePersistState'
 import {validateFormData} from '@/utils/validation'
 import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
-import {Card, Checkbox, Label, Modal} from 'flowbite-react'
+import { Card } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Modal } from '@/components/ui/dialog'
 import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {ChangeEvent, SyntheticEvent, useState} from 'react'
@@ -151,7 +154,7 @@ export default function Login() {
 
     return (
         <>
-            <Card id="login">
+            <Card id="login" className="p-6">
                 <div className="flex items-center justify-between">
                     <div>{t('not_signed_in')}<br/></div>
                     <Toggle
@@ -191,14 +194,12 @@ export default function Login() {
                         }
                     </div>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                             <Checkbox
                                 id="rememberMe"
                                 name="rememberMe"
-                                //type="checkbox"
-                                className="h-4 w-4 border-gray-300 rounded"
                             />
-                            <Label htmlFor="rememberMe" className="ml-2 block text-sm">
+                            <Label htmlFor="rememberMe" className="text-sm">
                                 {t('remember_me')}
                             </Label>
                         </div>
