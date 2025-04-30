@@ -40,33 +40,39 @@ export default function DropdownSelect({
             when={!loading || items.length > 0}
             fallback={<Loader height={8}/>}
         >
-            <div className={'min-w-[200px] ' + customClass}>
+            <div className={`min-w-[200px] ${customClass}`}>
                 <Label
                     htmlFor={selectId}
-                    className="pl-1 mb-1 text-xs sm:text-sm tracking-wide text-gray-600 dark:text-slate-400 hidden">
+                    className="text-sm font-medium mb-2 block">
                     {selectTitle}
                 </Label>
-                <select
-                    id={selectId}
-                    name={selectId}
-                    className="flex rounded-md pl-3 pr-8 py-2 transition duration-300 ease focus:outline-none drop-shadow focus:drop-shadow-md
-                    appearance-none cursor-pointer text-sm h-full w-full border-none
-                    bg-gray-100 text-gray-900 focus:ring-1 focus:ring-gray-300 disabled:text-gray-300 disabled:bg-gray-50
-                    dark:bg-indigo-950 dark:text-slate-300 dark:focus:ring-indigo-500 dark:disabled:text-slate-500 dark:disabled:bg-slate-800"
-                    value={selectedOption ?? 'none'}
-                    onChange={handleOptionChange}
-                    disabled={data.length === 0}
-                >
-                    <option
-                        value="none"
-                        disabled
-                        hidden
-                        className="flex-1 text-wrap"
+                <div className="relative">
+                    <select
+                        id={selectId}
+                        name={selectId}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background 
+                        appearance-none cursor-pointer
+                        focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 
+                        disabled:cursor-not-allowed disabled:opacity-50"
+                        value={selectedOption ?? 'none'}
+                        onChange={handleOptionChange}
+                        disabled={data.length === 0}
                     >
-                        {selectTitle}
-                    </option>
-                    {items}
-                </select>
+                        <option
+                            value="none"
+                            disabled
+                            hidden
+                        >
+                            {selectTitle}
+                        </option>
+                        {items}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+                        <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
             </div>
         </Show>
     )

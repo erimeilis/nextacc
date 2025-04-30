@@ -1,5 +1,5 @@
 'use client'
-import { ListGroup } from '@/components/ui/list-group'
+import Tab from '@/components/shared/Tab'
 import {useTranslations} from 'next-intl'
 import React from 'react'
 
@@ -17,22 +17,17 @@ export default function NumberTypeSelector({
     }
     const t = useTranslations('offers')
     return (
-        <div className="flex justify-center w-full">
-            <ListGroup horizontal className="w-full">
-                {options.map((option) =>
-                    <ListGroup.Item
-                        key={option}
-                        id={option}
-                        value={option}
-                        onClick={() => handleOptionChange(option)}
-                        active={selectedOption === option}
-                        className="flex-1 justify-center text-center"
-                    >
-                        {t(option)}
-                    </ListGroup.Item>
-                )
-                }
-            </ListGroup>
-        </div>
+        <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
+            {options.map((option) =>
+                <Tab
+                    key={option}
+                    type="button"
+                    onClick={() => handleOptionChange(option)}
+                    active={selectedOption === option}
+                >
+                    {t(option)}
+                </Tab>
+            )}
+        </nav>
     )
-};
+}

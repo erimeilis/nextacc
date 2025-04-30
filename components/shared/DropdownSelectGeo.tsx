@@ -44,7 +44,7 @@ export default function DropdownSelectGeo({
             <div className={'min-w-[200px] ' + customClass}>
                 <Label
                     htmlFor={selectId}
-                    className="pl-1 mb-1 text-xs sm:text-sm tracking-wide text-gray-600 dark:text-slate-400 hidden">
+                    className="pl-1 mb-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
                     {selectTitle}
                 </Label>
                 <select
@@ -52,8 +52,8 @@ export default function DropdownSelectGeo({
                     name={selectId}
                     className="flex rounded-md pl-3 pr-8 py-2 transition duration-300 ease focus:outline-none drop-shadow focus:drop-shadow-md
                     appearance-none cursor-pointer text-sm h-full w-full border-none
-                    bg-gray-100 text-gray-900 focus:ring-1 focus:ring-gray-300 disabled:text-gray-300 disabled:bg-gray-50
-                    dark:bg-indigo-950 dark:text-slate-300 dark:focus:ring-indigo-500 dark:disabled:text-slate-500 dark:disabled:bg-slate-800"
+                    bg-accent text-foreground focus:ring-1 focus:ring-ring disabled:text-muted-foreground disabled:bg-muted
+                    dark:bg-accent dark:text-foreground dark:focus:ring-ring dark:disabled:text-muted-foreground dark:disabled:bg-muted"
                     value={selectedOption ?
                         (!isNaN(+selectedOption)) ?
                             selectedOption :

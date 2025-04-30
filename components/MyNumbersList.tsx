@@ -16,8 +16,7 @@ export default function MyNumbersList({
                 {
                     options.map((option, i) =>
                         <div key={option.did.toString()}
-                             className={'flex flex-row w-full justify-between text-sm p-2 gap-2 ' + (i % 2 != 0 ? 'bg-gray-200 dark:bg-indigo-900 bg-opacity-50' +
-                                 ' dark:bg-opacity-40' : '')}>
+                             className={'flex flex-row w-full justify-between text-sm p-2 gap-2 ' + (i % 2 != 0 ? 'bg-muted/50 dark:bg-muted/40' : '')}>
                             <div className="flex">{option.did.toString()}</div>
                             <div className="flex">{option.name}</div>
                             <div className="flex">{option.where_did}</div>

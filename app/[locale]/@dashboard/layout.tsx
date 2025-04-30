@@ -34,9 +34,9 @@ export default function Layout({children}: { children: React.ReactNode }) {
                          <Loader height={350}/>
                      </Show>
                  }>
-        <div className="flex flex-col rounded-md w-full border border-gray-200 bg-gray-100 drop-shadow text-gray-800
-        dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">
-            <nav className="flex flex-row w-full justify-evenly bg-gray-200 dark:bg-indigo-900">
+        <div className="flex flex-col rounded-md w-full border border-border bg-muted drop-shadow text-foreground
+        dark:border-border dark:bg-background dark:text-foreground">
+            <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
                 {profileTabs.map(tab =>
                     <Tab
                         key={tab.slug}

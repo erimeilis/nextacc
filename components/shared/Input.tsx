@@ -5,10 +5,12 @@ import React, {ChangeEvent, FC, SVGProps, useState} from 'react'
 import {Eye, EyeSlash} from '@phosphor-icons/react'
 
 //const fixedInputClass = 'text-sm px-2 py-1 '
-const fixedErrorClass = 'flex items-center w-fit transition-transform duration-500 ' +
-    'font-medium tracking-wide text-white text-xs ' +
-    'mt-1 ml-1 px-2 py-0.5 ' +
-    'bg-red-500 dark:bg-red-600 '
+const fixedErrorClass = `
+    flex items-center w-fit transition-transform duration-300
+    font-medium tracking-wide text-destructive-foreground text-xs
+    mt-1.5 px-2 py-1
+    bg-destructive rounded-md
+`
 
 export default function Input({
                                   handleChangeAction,
@@ -50,10 +52,10 @@ export default function Input({
     }
 
     return (
-        <div className={'flex flex-col mb-3 ' + customClass}>
+        <div className={`flex flex-col space-y-2 mb-4 ${customClass}`}>
             <Label
                 htmlFor={labelFor}
-                className="text-sm pl-1"
+                className="text-sm font-medium"
             >
                 {labelText}
             </Label>
@@ -70,14 +72,19 @@ export default function Input({
                     disabled={disabled}
                     readOnly={disabled}
                 />
-                <div className={'absolute flex border border-transparent right-0 top-0 h-full w-10 ' + displayEye}>
-                    <button type="button" tabIndex={-1} aria-hidden="true" className="flex items-center justify-center rounded-tl rounded-bl z-10
-                    text-stone-500 dark:text-indigo-200 text-xs h-full w-full" onClick={switchPass}>
-                        {typeState === 'password' ? <Eye/> : <EyeSlash/>}
+                <div className={`absolute flex right-0 top-0 h-full w-10 ${displayEye}`}>
+                    <button 
+                        type="button" 
+                        tabIndex={-1} 
+                        aria-hidden="true" 
+                        className="flex items-center justify-center z-10 text-muted-foreground hover:text-foreground text-sm h-full w-full transition-colors" 
+                        onClick={switchPass}
+                    >
+                        {typeState === 'password' ? <Eye size={20}/> : <EyeSlash size={20}/>}
                     </button>
                 </div>
             </div>
-            <span className={fixedErrorClass + displayErr}>
+            <span className={`${fixedErrorClass} ${displayErr}`}>
                 {error}
             </span>
         </div>

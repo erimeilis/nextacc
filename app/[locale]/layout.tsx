@@ -7,9 +7,15 @@ import {notFound} from 'next/navigation'
 import {getMessages} from 'next-intl/server'
 import {NextIntlClientProvider} from 'next-intl'
 import { ThemeProvider } from 'next-themes'
-import Nav from '@/components/service/Nav'
+import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import SWRProvider from '@/providers/SWRProvider'
+
+// Dynamically import Nav component to reduce initial bundle size
+const Nav = dynamic(() => import('@/components/service/Nav'), {
+  ssr: true,
+  loading: () => <div className="h-16"></div> // Simple placeholder while loading
+})
 
 export const metadata: Metadata = {
   title: 'NextAcc',
@@ -36,7 +42,12 @@ export default async function RootLayout(
     if (!routing.locales.includes(locale as never)) {
         notFound()
     }
-    const messages = await getMessages()
+
+    // Get messages with caching
+    const messages = await getMessages({
+        // Use a longer cache time for messages
+        cache: process.env.NODE_ENV === 'production' ? 'force-cache' : 'no-store'
+    })
 
     return (
         <html lang={locale} suppressHydrationWarning>

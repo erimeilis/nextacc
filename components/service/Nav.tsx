@@ -127,16 +127,16 @@ export default function Nav() {
                         <Link href="#" className="block py-2 pl-3 pr-4 text-white bg-primary rounded md:bg-transparent md:p-0 md:text-primary-foreground">
                             Home
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-gray-300 hover:text-gray-100 hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
                             About
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-gray-300 hover:text-gray-100 hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
                             Services
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-gray-300 hover:text-gray-100 hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
                             Pricing
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-gray-300 hover:text-gray-100 hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
                             Contact
                         </Link>
                     </div>

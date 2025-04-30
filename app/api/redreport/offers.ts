@@ -8,6 +8,15 @@ import {NumberInfo} from '@/types/NumberInfo'
 const instance = Axios.create()
 const axios = setupCache(instance)
 
+// Set up error interceptor once
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        console.log('API Error: ' + (error.status || error.message))
+        return Promise.reject(error)
+    }
+)
+
 export async function getCountries({type}: { type: string }) {
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/countries',
@@ -31,12 +40,7 @@ export async function getCountries({type}: { type: string }) {
             name: country.countryname + ' +' + country.countryprefix.toString(),
         }))
     }
-    axios.interceptors.response.use(
-        response => response,
-        error => {
-            console.log('getCountries ' + error.status)
-            return null
-        })
+    return []
 }
 
 export async function getAreas({type, country}: { type: string, country: number }) {
@@ -62,12 +66,7 @@ export async function getAreas({type, country}: { type: string, country: number 
             name: '(' + area.areaprefix.toString() + ') ' + area.areaname,
         }))
     }
-    axios.interceptors.response.use(
-        response => response,
-        error => {
-            console.log('getAreas ' + error.status)
-            return null
-        })
+    return []
 }
 
 export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
@@ -104,11 +103,6 @@ export async function getNumbers({type, country, area}: { type: string, country:
             docs: JSON.stringify(number.docs)
         } as NumberInfo))
     }
-    axios.interceptors.response.use(
-        response => response,
-        error => {
-            console.log('getNumbers ' + error.status)
-        })
     return []
 }
 
@@ -133,10 +127,5 @@ export async function getDiscounts() {
             name: discount.months.toString(),
         }))
     }
-    axios.interceptors.response.use(
-        response => response,
-        error => {
-            console.log('getDiscounts ' + error.status)
-            return null
-        })
+    return []
 }

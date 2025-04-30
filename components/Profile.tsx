@@ -94,7 +94,7 @@ export default function Profile({
         when={typeof userProfile !== 'undefined' && userProfile !== null}
         fallback={<Loader height={350}/>}>
         <div id="profile" className="transition duration-300 ease">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-indigo-900 drop-shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-border dark:border-border drop-shadow-sm">
                 <div className="text-sm px-2 pt-2">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
                 <Button
                     onClick={() => {
@@ -123,7 +123,7 @@ export default function Profile({
                         {profileFields.map((field, i) =>
                             <div
                                 key={field.id}
-                                className={(i % 2 != 0 ? 'bg-gray-200 dark:bg-indigo-900 bg-opacity-50 dark:bg-opacity-40' : '')}
+                                className={(i % 2 != 0 ? 'bg-secondary/50 dark:bg-secondary/40' : '')}
                             >
                                 <Show
                                     when={modeEditProfile}

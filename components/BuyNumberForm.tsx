@@ -175,19 +175,19 @@ export default function BuyNumberForm({
         <form
             id="buyNumberForm"
             name="buyNumberForm"
-            className="mt-8 space-y-6 transition-transform duration-500"
+            className="mt-8 space-y-8 transition-transform duration-300"
             onSubmit={handleAddToCart}
             method="post"
         >
-            <div className="flex flex-col lg:flex-row gap-4 justify-between">
-                <div className="w-full">
-                    <div className="mb-2">
-                        {t('setupfee') + ': ' + numberInfo.setup_rate + ' $ / ' + t('monthlyfee') + ': ' + numberInfo.fix_rate + ' $'}
+            <div className="flex flex-col lg:flex-row gap-6 justify-between">
+                <div className="w-full space-y-6">
+                    <div className="p-4 bg-secondary/50 rounded-lg text-sm font-medium">
+                        {t('setupfee')}: <span className="text-primary font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span className="text-primary font-semibold">{numberInfo.fix_rate} $</span>
                     </div>
-                    {numberInfo.voice || numberInfo.toll_free ?
-                        <div className="flex w-full flex-col xl:flex-row items-center gap-2">
-                            <div className="flex w-full flex-row items-center gap-2">
-                                <PhoneTransfer size={24}/>
+                    {numberInfo.voice || numberInfo.toll_free ? (
+                        <div className="flex w-full flex-col xl:flex-row items-start gap-4">
+                            <div className="flex w-full flex-row items-center gap-3">
+                                <PhoneTransfer size={20} className="text-primary" />
                                 <DropdownSelect
                                     selectId="voiceType"
                                     selectTitle={t('select_voice_destination')}
@@ -211,12 +211,13 @@ export default function BuyNumberForm({
                                 error={t.has(voiceDestinationErrorState) ? t(voiceDestinationErrorState) : ''}
                                 customClass="w-full"
                             />
-                        </div> :
-                        ''}
-                    {numberInfo.sms ?
-                        <div className="flex w-full flex-col xl:flex-row items-center gap-2">
-                            <div className="flex w-full flex-row items-center gap-2">
-                                <ChatText size={24}/>
+                        </div>
+                    ) : null}
+
+                    {numberInfo.sms ? (
+                        <div className="flex w-full flex-col xl:flex-row items-start gap-4">
+                            <div className="flex w-full flex-row items-center gap-3">
+                                <ChatText size={20} className="text-primary" />
                                 <DropdownSelect
                                     selectId="smsType"
                                     selectTitle={t('select_sms_destination')}
@@ -240,15 +241,19 @@ export default function BuyNumberForm({
                                 error={t.has(smsDestinationErrorState) ? t(smsDestinationErrorState) : ''}
                                 customClass="w-full"
                             />
-                        </div> :
-                        ''}
-                    <div>
-                        {GetDocs(numberInfo)}
-                    </div>
+                        </div>
+                    ) : null}
+
+                    {GetDocs(numberInfo) ? (
+                        <div className="text-sm text-muted-foreground">
+                            {GetDocs(numberInfo)}
+                        </div>
+                    ) : null}
                 </div>
-                <div className="flex flex-col gap-4 w-full lg:w-fit">
-                    <div className="flex flex-row gap-2 justify-end items-center">
-                        <div className="whitespace-nowrap">{t('pay_for')}</div>
+
+                <div className="flex flex-col gap-6 w-full lg:w-fit">
+                    <div className="flex flex-row gap-3 justify-end items-center">
+                        <div className="text-sm font-medium">{t('pay_for')}</div>
                         <DropdownSelect
                             selectId="discount"
                             selectTitle={t('select_qty')}
@@ -257,35 +262,40 @@ export default function BuyNumberForm({
                             selectedOption={discountState}
                             customClass="min-w-max w-fit"
                         />
-                        <div className="whitespace-nowrap">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
+                        <div className="text-sm font-medium">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
                     </div>
-                    <Table striped>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead colSpan={4}>{t('discount')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {
-                                discounts.map(d => {
-                                        return (d.id !== '0') ?
-                                            <TableRow key={d.name} className="text-xs bg-white dark:border-gray-700 dark:bg-gray-800">
-                                                <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
-                                                <TableCell>-{d.id}%</TableCell>
-                                                <TableCell>=</TableCell>
-                                                <TableCell
-                                                    className="whitespace-nowrap text-right">{Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$</TableCell>
-                                            </TableRow> :
-                                            ''
-                                    }
-                                )
-                            }
-                        </TableBody>
-                    </Table>
-                    <div key={d.name} className="flex flex-row gap-2 justify-end items-center whitespace-nowrap">
-                        {t('total_price')} {Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
+
+                    <div className="bg-card rounded-lg overflow-hidden shadow-sm border border-border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead colSpan={4} className="bg-muted/50 text-center font-medium">{t('discount')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {discounts.map(d => {
+                                    return (d.id !== '0') ? (
+                                        <TableRow key={d.name} className="text-sm">
+                                            <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
+                                            <TableCell className="text-destructive font-medium">-{d.id}%</TableCell>
+                                            <TableCell>=</TableCell>
+                                            <TableCell className="whitespace-nowrap text-right font-medium">
+                                                {Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : null
+                                })}
+                            </TableBody>
+                        </Table>
                     </div>
-                    <div className="flex w-full flex-row justify-end gap-2">
+
+                    <div className="flex flex-row gap-3 justify-end items-center whitespace-nowrap text-sm font-medium">
+                        {t('total_price')} <span className="text-primary text-lg font-bold">
+                            {Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
+                        </span>
+                    </div>
+
+                    <div className="flex w-full flex-row justify-end gap-3 mt-2">
                         <Button
                             type="submit"
                             style="pillow"
