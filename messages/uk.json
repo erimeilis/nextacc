@@ -61,7 +61,10 @@
     "invalid_url": "Недійсна URL",
     "pay_for": "Оплатити за:",
     "month": "{count, plural, one {місяць} few {місяці} many {місяців} other {місяця}}",
-    "select_qnty": "Кму-сть"
+    "select_qty": "Кму-сть",
+    "discount": "Знижка:",
+    "more_than": "більше ніж",
+    "total_price": "Загальна ціна:"
   },
   "docs": {
     "name_lastname": "Ім'я, прізвище",

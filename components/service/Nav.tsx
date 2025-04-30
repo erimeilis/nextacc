@@ -49,7 +49,8 @@ export default function Nav() {
                 {(session &&
                     session.status === 'authenticated' &&
                     session.data &&
-                    session.data.user
+                    session.data.user &&
+                    (session.data.user.provider !== 'anonymous')
                 ) ? <Dropdown
                     arrowIcon={false}
                     inline

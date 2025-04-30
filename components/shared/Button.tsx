@@ -24,6 +24,8 @@ const disabledButtonClass = 'flex w-fit h-fit cursor-pointer rounded-md px-3 py-
     'dark:text-indigo-950 dark:bg-cyan-100 dark:bg-opacity-80 dark:hover:bg-cyan-50 dark:hover:bg-opacity-100 dark:active:bg-white dark:active:bg-opacity-100 '
 
 export default function Button({
+                                   id,
+                                   name,
                                    type = 'button',
                                    className = '',
                                    onClick,
@@ -32,6 +34,8 @@ export default function Button({
                                    icon,
                                    children
                                }: {
+    id?: string
+    name?: string
     type: 'button' | 'submit' | 'reset' | undefined
     className?: string
     onClick?: () => void
@@ -43,6 +47,8 @@ export default function Button({
 }) {
     return (
         <button
+            id={id}
+            name={name}
             type={type}
             className={style === 'line' ?
                 fixedLineButtonClass + className + (disabled ? disabledLineButtonClass : '') :

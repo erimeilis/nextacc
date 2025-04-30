@@ -4,9 +4,9 @@ import {InputField} from '@/types/InputField'
 const voiceDestinationsFields: InputField[] = [
     {
         labelText: 'phone',
-        labelFor: 'phone',
-        id: 'voiceDestination',
-        name: 'voiceDestination',
+        labelFor: 'voicePhone',
+        id: 'voicePhone',
+        name: 'voicePhone',
         type: 'tel',
         autoComplete: 'tel',
         isRequired: true,
@@ -15,9 +15,9 @@ const voiceDestinationsFields: InputField[] = [
     },
     {
         labelText: 'telegram',
-        labelFor: 'telegram',
-        id: 'voiceDestination',
-        name: 'voiceDestination',
+        labelFor: 'voiceTelegram',
+        id: 'voiceTelegram',
+        name: 'voiceTelegram',
         type: 'text',
         autoComplete: 'telegram',
         isRequired: true,
@@ -26,9 +26,9 @@ const voiceDestinationsFields: InputField[] = [
     },
     {
         labelText: 'sip',
-        labelFor: 'sip',
-        id: 'voiceDestination',
-        name: 'voiceDestination',
+        labelFor: 'voiceSip',
+        id: 'voiceSip',
+        name: 'voiceSip',
         type: 'text',
         autoComplete: 'sip',
         isRequired: true,

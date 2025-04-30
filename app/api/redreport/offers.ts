@@ -9,8 +9,6 @@ const instance = Axios.create()
 const axios = setupCache(instance)
 
 export async function getCountries({type}: { type: string }) {
-    //const instance = Axios.create()
-    //const axios = setupCache(instance)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/countries',
         'type=' + type,
@@ -21,7 +19,7 @@ export async function getCountries({type}: { type: string }) {
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
             cache: {
-                ttl: 24 * 60 * 60 * 1000,
+                ttl: 4 * 60 * 60 * 1000,
             }
         }
     )
@@ -42,9 +40,6 @@ export async function getCountries({type}: { type: string }) {
 }
 
 export async function getAreas({type, country}: { type: string, country: number }) {
-    //const instance = Axios.create()
-    //const axios = setupCache(instance)
-    //console.log('getAreas: ', type, country)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/areas',
         'type=' + type + '&country_id=' + country,
@@ -76,9 +71,6 @@ export async function getAreas({type, country}: { type: string, country: number 
 }
 
 export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
-    //const instance = Axios.create()
-    //const axios = setupCache(instance)
-    //console.log('getNumbers: ', type, country, area)
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/numbers',
         'type=' + type + '&country_id=' + country + '&area_prefix=' + area,
@@ -100,15 +92,15 @@ export async function getNumbers({type, country, area}: { type: string, country:
             did: number.did,
             name: number.did + ' (' + number.where_did + ')',
             where_did: number.where_did,
-            setuprate: number.setuprate,
-            fixrate: number.fixrate,
-            voice: number.voice,
-            sms: number.sms,
-            tollfree: number.tollfree,
-            fax: number.fax,
-            incoming_per_minute: number.incoming_per_minute,
-            tollfree_rate_in_min: number.tollfree_rate_in_min,
-            incoming_rate_sms: number.incoming_rate_sms,
+            setup_rate: Number(number.setup_rate),
+            fix_rate: Number(number.fix_rate),
+            voice: number.voice ?? false,
+            sms: number.sms ?? false,
+            toll_free: number.toll_free ?? false,
+            fax: number.fax ?? false,
+            incoming_per_minute: number.incoming_per_minute ? Number(number.incoming_per_minute) : null,
+            toll_free_rate_in_min: number.toll_free_rate_in_min ? Number(number.toll_free_rate_in_min) : null,
+            incoming_rate_sms: number.incoming_rate_sms ? Number(number.incoming_rate_sms) : null,
             docs: JSON.stringify(number.docs)
         } as NumberInfo))
     }
@@ -121,8 +113,6 @@ export async function getNumbers({type, country, area}: { type: string, country:
 }
 
 export async function getDiscounts() {
-    //const instance = Axios.create()
-    //const axios = setupCache(instance)
     const response = await axios.get(
         process.env.REDREPORT_URL + '/api/did/discounts',
         {
@@ -136,11 +126,10 @@ export async function getDiscounts() {
             }
         }
     )
-    if (response.data && response.data.length > 0) {
-        const discounts: { months: number, percent: number }[] = response.data
-        //console.log('getDiscounts: ', discounts)
+    if (response.data && response.data.data && response.data.data.length > 0) {
+        const discounts: { months: number, percent: number }[] = response.data.data
         return discounts.map(discount => ({
-            id: discount.percent,
+            id: discount.percent.toString(),
             name: discount.months.toString(),
         }))
     }

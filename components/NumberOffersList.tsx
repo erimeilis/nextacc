@@ -21,14 +21,18 @@ export default function NumberOffersList({
         onSelectAction({
             did: event.target.value,
             name: event.target.value,
-            where_did: event.target.getAttribute('data-where_did'),
-            setuprate: event.target.getAttribute('data-setuprate'),
-            fixrate: event.target.getAttribute('data-fixrate'),
-            incoming_per_minute: event.target.getAttribute('data-incoming_per_minute'),
-            tollfree_rate_in_min: event.target.getAttribute('data-tollfree_rate_in_min'),
-            incoming_rate_sms: event.target.getAttribute('data-incoming_rate_sms'),
-            docs: event.target.getAttribute('data-docs')
-        } as NumberInfo)
+            where_did: event.target.getAttribute('data-where_did') ?? '',
+            setup_rate: Number(event.target.getAttribute('data-setup_rate')),
+            fix_rate: Number(event.target.getAttribute('data-fix_rate')),
+            voice: event.target.getAttribute('data-voice') == 'true',
+            sms: event.target.getAttribute('data-sms') == 'true',
+            fax: event.target.getAttribute('data-fax') == 'true',
+            toll_free: event.target.getAttribute('data-toll_free') == 'true',
+            incoming_per_minute: Number(event.target.getAttribute('data-incoming_per_minute')),
+            toll_free_rate_in_min: Number(event.target.getAttribute('data-toll_free_rate_in_min')),
+            incoming_rate_sms: Number(event.target.getAttribute('data-incoming_rate_sms')),
+            docs: event.target.getAttribute('data-docs') ?? ''
+        })
     }
     return (
         <Show when={!loading || options.length > 0}
@@ -41,10 +45,14 @@ export default function NumberOffersList({
                                 id={option.did}
                                 value={option.did}
                                 data-where_did={option.where_did}
-                                data-setuprate={option.setuprate}
-                                data-fixrate={option.fixrate}
+                                data-setup_rate={option.setup_rate}
+                                data-fix_rate={option.fix_rate}
+                                data-voice={option.voice.toString()}
+                                data-sms={option.sms.toString()}
+                                data-fax={option.fax.toString()}
+                                data-toll_free={option.toll_free.toString()}
                                 data-incoming_per_minute={option.incoming_per_minute}
-                                data-tollfree_rate_in_min={option.tollfree_rate_in_min}
+                                data-toll_free_rate_in_min={option.toll_free_rate_in_min}
                                 data-incoming_rate_sms={option.incoming_rate_sms}
                                 data-docs={option.docs}
                                 name="list-radio"
@@ -55,7 +63,7 @@ export default function NumberOffersList({
                             <Label htmlFor={option.did}
                                    className="w-full flex flex-row items-center cursor-pointer py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 text-opacity-100 dark:text-opacity-100">
                                 {option.name}&nbsp;{option.voice ? <Phone weight="thin"/> : ''}{option.sms ? <ChatCircleText weight="thin"/> : ''}{option.fax ?
-                                <Printer weight="thin"/> : ''}{option.tollfree ?
+                                <Printer weight="thin"/> : ''}{option.toll_free ?
                                 <Headset weight="thin"/> : ''}
                             </Label>
                         </div>

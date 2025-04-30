@@ -42,7 +42,7 @@ export default function Input({
 }) {
     const displayErr = error === '' ? 'invisible' : 'visible'
     const displayEye = type === 'password' ? 'visible' : 'invisible'
-    const [typeState, setTypeState] = useState(type)
+    const [typeState, setTypeState] = useState<string>(type)
 
     const switchPass = () => {
         setTypeState(typeState === 'password' ? 'text' : 'password')

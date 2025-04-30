@@ -62,9 +62,10 @@
     "invalid_url": "Invalid URL",
     "pay_for": "Pay for:",
     "month": "{count, plural, one {month} other {months}}",
-    "select_qnty": "Qnty",
-    "discount": "Discount: ",
-    "more_than": "more than"
+    "select_qty": "Qty",
+    "discount": "Discount:",
+    "more_than": "more than",
+    "total_price": "Total price:"
   },
   "docs": {
     "name_lastname": "First name, last name",

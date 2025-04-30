@@ -2,14 +2,14 @@ export type NumberInfo = {
     did: string
     name: string
     where_did: string
-    setuprate: string
-    fixrate: string
+    setup_rate: number
+    fix_rate: number
     voice: boolean
     sms: boolean
-    tollfree: boolean
+    toll_free: boolean
     fax: boolean
-    incoming_per_minute: string
-    tollfree_rate_in_min: string
-    incoming_rate_sms: string
-    docs: [] | string
+    incoming_per_minute?: number
+    toll_free_rate_in_min?: number
+    incoming_rate_sms?: number
+    docs: string
 }

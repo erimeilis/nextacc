@@ -27,7 +27,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
         }
     }
 
-    return <Show when={session.status === 'authenticated'}
+    return <Show when={(session.status === 'authenticated') && (session.data?.user?.provider !== 'anonymous')}
                  fallback={
                      <Show when={session.status === 'loading'}
                            fallback={<Login/>}>

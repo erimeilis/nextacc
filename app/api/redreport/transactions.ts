@@ -4,22 +4,27 @@ import {auth} from '@/auth'
 
 export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]> {
     const session = await auth()
-    if (!session) return []
+    if (!session || !session.user || session.user.provider === 'anonymous') return []
+    
+    // Create URL with query parameters instead of using body
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/transactions');
+    url.searchParams.append('site', process.env.SITE_ID || '');
+    // Uncomment and adjust if you need these parameters
+    // url.searchParams.append('from', moment().subtract(30, 'days').toISOString());
+    // url.searchParams.append('to', moment().toISOString());
+    
     const options: RequestInit = {
         cache: 'no-store',
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token
-        },
-        body: JSON.stringify({
-            'site': process.env.SITE_ID,
-            //'from': moment().subtract(30, 'days'),
-            //'to': moment(),
-        })
+        }
+        // Removed body as GET requests cannot have bodies
     }
-    return fetch(process.env.REDREPORT_URL + '/api/kc/transactions', options)
+    
+    return fetch(url.toString(), options)
         .then((res: Response) => {
             //console.log('redGetMoneyTransactionReport: ', res.status)
             if (!res.ok) return []

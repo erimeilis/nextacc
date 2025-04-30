@@ -1,4 +1,4 @@
-'use server'
+//'use server'
 import '@/app/[locale]/globals.css'
 import {AuthProvider} from '@/AuthProvider'
 import React from 'react'
@@ -8,6 +8,12 @@ import {getMessages} from 'next-intl/server'
 import {NextIntlClientProvider} from 'next-intl'
 import {CustomFlowbiteTheme, Flowbite, ThemeModeScript} from 'flowbite-react'
 import Nav from '@/components/service/Nav'
+import { Metadata } from 'next'
+import SWRProvider from '@/components/SWRProvider'
+
+export const metadata: Metadata = {
+  title: 'NextAcc',
+}
 
 export default async function RootLayout(
     props: {
@@ -265,6 +271,31 @@ export default async function RootLayout(
             root: {
                 base: 'text-opacity-40 dark:text-opacity-60'
             }
+        },
+        table: {
+            'root': {
+                'base': 'w-full text-left text-sm text-gray-500 dark:text-gray-200',
+                'shadow': 'absolute left-0 top-0 -z-10 h-full w-full rounded-lg bg-white drop-shadow-md dark:bg-indigo-950',
+                'wrapper': 'relative'
+            },
+            'body': {
+                'base': 'group/body',
+                'cell': {
+                    'base': 'px-3 py-2 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg' +
+                        ' group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg'
+                }
+            },
+            'head': {
+                'base': 'group/head text-xs text-gray-600 dark:text-gray-400',
+                'cell': {
+                    'base': 'bg-gray-50 px-3 py-2 group-first/head:first:rounded-tl-lg group-first/head:last:rounded-tr-lg dark:bg-indigo-900'
+                }
+            },
+            'row': {
+                'base': 'group/row',
+                'hovered': 'hover:bg-gray-50 dark:hover:bg-gray-600',
+                'striped': 'odd:bg-white even:bg-gray-50 odd:dark:bg-indigo-900/70 even:dark:bg-indigo-950/70'
+            }
         }
     }
 
@@ -273,21 +304,24 @@ export default async function RootLayout(
         <head>
             <ThemeModeScript/>
             <title>NextAcc</title>
+            <link rel="icon" href="/icon.png" type="image/png" />
         </head>
         <body className="bg-stone-200 dark:bg-slate-900">
-        <AuthProvider>
-            <NextIntlClientProvider messages={messages}>
-                <Flowbite theme={{theme: indigoOrangeTheme}}>
-                    <Nav/>
-                    <main className="flex items-center justify-center px-4 pt-4 pb-96 bg-stone-200 dark:bg-slate-900">
-                        <div className="flex flex-col sm:w-full md:w-3/4 lg:w-1/2 max-w-4xl gap-4">
-                            {offers}
-                            {dashboard}
-                        </div>
-                    </main>
-                </Flowbite>
-            </NextIntlClientProvider>
-        </AuthProvider>
+        <SWRProvider>
+            <AuthProvider>
+                <NextIntlClientProvider messages={messages}>
+                    <Flowbite theme={{theme: indigoOrangeTheme}}>
+                        <Nav/>
+                        <main className="flex items-center justify-center px-4 pt-4 pb-96 bg-stone-200 dark:bg-slate-900">
+                            <div className="flex flex-col sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-4">
+                                {offers}
+                                {dashboard}
+                            </div>
+                        </main>
+                    </Flowbite>
+                </NextIntlClientProvider>
+            </AuthProvider>
+        </SWRProvider>
         </body>
         </html>
     )

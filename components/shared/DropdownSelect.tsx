@@ -5,20 +5,20 @@ import {ChangeEvent} from 'react'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 
-export default function DropdownSelectNumber({
-                                                 selectId,
-                                                 selectTitle = '',
-                                                 data = [],
-                                                 onSelectAction,
-                                                 selectedOption,
-                                                 loading = false,
-                                                 customClass = ''
-                                             }: {
+export default function DropdownSelect({
+                                           selectId,
+                                           selectTitle = '',
+                                           data = [],
+                                           onSelectAction,
+                                           selectedOption,
+                                           loading = false,
+                                           customClass = ''
+                                       }: {
     selectId: string
     selectTitle: string
-    data: { id: number, name: string }[]
-    onSelectAction: (value: number) => void
-    selectedOption?: number | string | null
+    data: { id: string, name: string }[]
+    onSelectAction: (value: string) => void
+    selectedOption?: string | null
     loading?: boolean
     customClass?: string
 }) {
@@ -33,9 +33,8 @@ export default function DropdownSelectNumber({
         </option>
     ))
     const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onSelectAction(Number(event.target.value))
+        onSelectAction(event.target.value)
     }
-    const slugOption = data.find(e => getSlug(e.name) == selectedOption)
     return (
         <Show
             when={!loading || items.length > 0}
@@ -54,13 +53,7 @@ export default function DropdownSelectNumber({
                     appearance-none cursor-pointer text-sm h-full w-full border-none
                     bg-gray-100 text-gray-900 focus:ring-1 focus:ring-gray-300 disabled:text-gray-300 disabled:bg-gray-50
                     dark:bg-indigo-950 dark:text-slate-300 dark:focus:ring-indigo-500 dark:disabled:text-slate-500 dark:disabled:bg-slate-800"
-                    value={selectedOption ?
-                        (!isNaN(+selectedOption)) ?
-                            selectedOption :
-                            slugOption ?
-                                slugOption.id :
-                                '' :
-                        ''}
+                    value={selectedOption ?? 'none'}
                     onChange={handleOptionChange}
                     disabled={data.length === 0}
                 >

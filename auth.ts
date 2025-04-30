@@ -1,4 +1,4 @@
-import NextAuth, {Account, AuthError, Profile, User} from 'next-auth'
+import NextAuth, {Account, AuthError, Profile, Session, User} from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import {
@@ -18,9 +18,12 @@ import {getLocale} from 'next-intl/server'
 import {geoip} from '@/utils/geoip'
 import qs from 'querystring'
 import {headers} from 'next/headers'
-import {AdapterUser} from '@auth/core/adapters'
+import {AdapterSession, AdapterUser} from '@auth/core/adapters'
 import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
 import {refreshAccessToken} from '@/app/api/auth/[...nextauth]/refresh'
+import {v4 as uuidv4} from 'uuid'
+import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-names-generator'
+import {JWT} from 'next-auth/jwt'
 
 declare module 'next-auth' {
     interface User {
@@ -29,15 +32,19 @@ declare module 'next-auth' {
         access_token: string,
         refresh_token: string,
         expires_in: number,
-        maxAge?: number
-        error?: string
-    }
-
-    interface Session {
-        token: string,
-        error: string
+        maxAge?: number,
+        error?: string,
+        provider: string
     }
 }
+
+declare module 'next-auth' {
+    interface Session {
+        token: string,
+        error: string,
+    }
+}
+
 declare module 'next-auth/jwt' {
     /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
     interface JWT {
@@ -54,8 +61,19 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         error: '/'
     },
     secret: process.env.NEXTAUTH_SECRET,
+    session: {
+        strategy: 'jwt',
+    },
     trustHost: true,
     providers: [
+        CredentialsProvider({
+            id: 'anonymous',
+            name: 'Anonymous',
+            credentials: {},
+            async authorize() {
+                return await createAnonymousUser() as User
+            },
+        }),
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
@@ -88,6 +106,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                             const access_token = jwtDecode(kcApiToken.access_token) as KCApiAccessToken
                             const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60
                             return {
+                                provider: 'keycloak',
                                 id: access_token.jti,
                                 email: access_token.email,
                                 username: access_token.email,
@@ -131,6 +150,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                                 const access_token = jwtDecode(kcApiToken.access_token) as KCApiAccessToken
                                 const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60
                                 return {
+                                    provider: 'keycloak',
                                     id: access_token.jti,
                                     email: access_token.email,
                                     username: access_token.email,
@@ -165,13 +185,15 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 console.log('catch error on callback')
                 throw new AuthError(params.user.error)
             }
+            if (params.user.provider === 'anonymous') return true
             if (!params.account || params.account.provider !== 'google') return true
             if (!params.account.access_token) return false
+
+            const email = params.user.email!
 
             const adminToken = await kcGetAdminAccessToken() //Get Admin token on KC
             if (!adminToken) return false
 
-            const email = params.user.email!
             console.log('Try to add social to ' + email)
 
             const addsocial = await kcAddSocial({
@@ -236,16 +258,16 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             }
             return false
         },
-        async jwt({token, user}) {
+        async jwt({token, user}: { token: JWT, user: User | AdapterUser | null }): Promise<JWT> {
+            //console.log('jwt -> ', token, user)
             if (user) {
-                const newToken = {
+                return {
+                    ...token,
                     accessToken: user.access_token,
                     accessTokenExpires: Date.now() + user.expires_in * 1000,
                     refreshToken: user.refresh_token,
                     user,
                 }
-                //console.log(newToken)
-                return newToken
             }
             if (Date.now() < token.accessTokenExpires - 1000) {
                 // token has not expired yet, return it
@@ -255,8 +277,9 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             console.log('🐥')
             return refreshedToken
         },
-        async session({session, token}) {
-            // console.log({session, token})
+        async session({session, token}: { session: Session, token: JWT | null }) {
+            console.log('session -> ', session)
+            console.log('token -> ', token)
             // Send properties to the client
             if (token) {
                 session.token = token.accessToken
@@ -264,5 +287,35 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             }
             return session
         },
-    }
+    },
+    events: {
+        async signIn({user, account}: { user: User, account: Account | null, profile?: Profile }): Promise<void> {
+            console.log(`signIn of ${user.name} from ${user?.provider || account?.provider}`)
+        },
+        async signOut({session, token}: { session?: void | AdapterSession | null | undefined, token?: JWT & { user?: User } | null }): Promise<void> {
+            console.log('signOut', session, token)
+            if (token?.user) {
+                console.log(`signOut of ${token.user.name} from ${token.user.provider}`)
+            }
+        },
+    },
 })
+
+const createAnonymousUser = async () => {
+    const nameConfig: Config = {
+        dictionaries: [adjectives, colors, animals],
+        separator: '-',
+        length: 3,
+    }
+    const randomName = uniqueNamesGenerator(nameConfig)
+    return {
+        id: uuidv4(),
+        name: randomName,
+        email: `${randomName}@anonymous.user`,
+        image: null,
+        access_token: 'anonymous_token',
+        refresh_token: 'anonymous_refresh',
+        expires_in: 86400, // 24 hours
+        provider: 'anonymous',
+    }
+}

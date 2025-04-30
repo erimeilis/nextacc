@@ -8,7 +8,7 @@ import {auth} from '@/auth'
 
 export async function redGetUserProfile(): Promise<UserProfile | null> {
     const session = await auth()
-    if (!session) return null
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -38,7 +38,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
 
 export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<UserProfile | null> {
     const session = await auth()
-    if (!session) return null
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PATCH',

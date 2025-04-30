@@ -4,20 +4,24 @@ import {NumberInfo} from '@/types/NumberInfo'
 
 export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     const session = await auth()
-    if (!session) return []
+    if (!session || !session.user || session.user.provider === 'anonymous') return []
+    
+    // Create URL with query parameters instead of using body
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers');
+    url.searchParams.append('site', process.env.SITE_ID || '');
+    
     const options: RequestInit = {
         cache: 'no-store',
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token
-        },
-        body: JSON.stringify({
-            'site': process.env.SITE_ID,
-        })
+        }
+        // Removed body as GET requests cannot have bodies
     }
-    return fetch(process.env.REDREPORT_URL + '/api/kc/numbers', options)
+    
+    return fetch(url.toString(), options)
         .then((res: Response) => {
             //console.log('redGetMyNumbers: ', res.status)
             if (!res.ok) return []

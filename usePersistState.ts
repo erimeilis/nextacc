@@ -11,12 +11,29 @@ export default function usePersistState<T>(initial_value: T, id: string): [T, (n
         }
         // Otherwise use initial_value that was passed to the function
         return initial_value
-    }, [])
+    }, [id, initial_value])
 
     const [state, setState] = useState(_initial_value)
     useEffect(() => {
         const state_str = JSON.stringify(state) // Stringified state
         localStorage.setItem('state:' + id, state_str) // Set stringified state as item in localStorage
-    }, [state])
+    }, [id, state])
     return [state, setState]
+}
+
+export function getPersistState<T>(id: string, defaultValue: T): T {
+    // Check if we're in a browser environment
+    if (typeof localStorage !== 'undefined') {
+        try {
+            const storedValue = localStorage.getItem('state:' + id)
+            // If a value exists in localStorage, parse and return it
+            if (storedValue !== null) {
+                return JSON.parse(storedValue) as T
+            }
+        } catch (error) {
+            console.error('Error retrieving state from localStorage:', error)
+        }
+    }
+    // Return default value if no value in localStorage or if we're not in a browser
+    return defaultValue
 }

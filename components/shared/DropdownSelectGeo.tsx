@@ -5,19 +5,19 @@ import {ChangeEvent} from 'react'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 
-export default function DropdownSelectString({
-                                           selectId,
-                                           selectTitle = '',
-                                           data = [],
-                                           onSelectAction,
-                                           selectedOption,
-                                           loading = false,
-                                           customClass = ''
-                                       }: {
+export default function DropdownSelectGeo({
+                                              selectId,
+                                              selectTitle = '',
+                                              data = [],
+                                              onSelectAction,
+                                              selectedOption,
+                                              loading = false,
+                                              customClass = ''
+                                          }: {
     selectId: string
     selectTitle: string
-    data: { id: string, name: string }[]
-    onSelectAction: (value: string) => void
+    data: { id: number | string, name: string }[]
+    onSelectAction: (value: number | string) => void
     selectedOption?: number | string | null
     loading?: boolean
     customClass?: string
@@ -33,7 +33,7 @@ export default function DropdownSelectString({
         </option>
     ))
     const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onSelectAction(event.target.value)
+        onSelectAction(Number(event.target.value))
     }
     const slugOption = data.find(e => getSlug(e.name) == selectedOption)
     return (
@@ -58,7 +58,7 @@ export default function DropdownSelectString({
                         (!isNaN(+selectedOption)) ?
                             selectedOption :
                             slugOption ?
-                                slugOption.id.toString() :
+                                slugOption.id :
                                 'none' :
                         'none'}
                     onChange={handleOptionChange}
