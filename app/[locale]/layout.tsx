@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import SWRProvider from '@/providers/SWRProvider'
 
-// Dynamically import Nav component to reduce initial bundle size
+// Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/service/Nav'), {
   ssr: true,
   loading: () => <div className="h-16"></div> // Simple placeholder while loading

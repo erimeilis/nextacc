@@ -9,6 +9,17 @@ import {profileTabs} from '@/constants/profileTabs'
 import {useTranslations} from 'next-intl'
 import Tab from '@/components/shared/Tab'
 
+declare module "next-auth" {
+    interface User {
+        provider: string;
+        // Add any other custom properties you need
+    }
+
+    interface Session {
+        user?: User;
+    }
+}
+
 export default function Layout({children}: { children: React.ReactNode }) {
     const session = useSession()
     const router = useRouter()
