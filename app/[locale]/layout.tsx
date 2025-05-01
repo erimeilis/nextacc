@@ -6,7 +6,7 @@ import {routing} from '@/i18n/routing'
 import {notFound} from 'next/navigation'
 import {getMessages} from 'next-intl/server'
 import {NextIntlClientProvider} from 'next-intl'
-import { ThemeProvider } from 'next-themes'
+import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import SWRProvider from '@/providers/SWRProvider'
@@ -19,6 +19,49 @@ const Nav = dynamic(() => import('@/components/service/Nav'), {
 
 export const metadata: Metadata = {
   title: 'NextAcc',
+}
+
+// This function generates a script that will be included in the HTML head
+// It immediately sets the correct theme based on localStorage before any content renders
+function ThemeScript() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            try {
+              // Get color theme from localStorage
+              var colorTheme = localStorage.getItem('state:color-theme');
+              colorTheme = colorTheme ? JSON.parse(colorTheme) : 'blue';
+              
+              // Get dark mode setting from localStorage
+              var isDarkMode = localStorage.getItem('state:dark-mode');
+              isDarkMode = isDarkMode ? JSON.parse(isDarkMode) : true;
+              
+              // Apply the themes immediately to prevent flash
+              var root = document.documentElement;
+              
+              // First add the color theme
+              var colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet'];
+              colorThemes.forEach(function(theme) {
+                root.classList.remove(theme);
+              });
+              root.classList.add(colorTheme);
+              
+              // Then add dark mode if needed
+              if (isDarkMode) {
+                root.classList.add('dark');
+              } else {
+                root.classList.remove('dark');
+              }
+            } catch (e) {
+              console.error('Error applying theme:', e);
+            }
+          })();
+        `,
+      }}
+    />
+  );
 }
 
 export default async function RootLayout(
@@ -43,10 +86,10 @@ export default async function RootLayout(
         notFound()
     }
 
-    // Get messages with caching
+    // Get messages
+    // Using the revalidate option for caching instead of 'cache'
     const messages = await getMessages({
-        // Use a longer cache time for messages
-        cache: process.env.NODE_ENV === 'production' ? 'force-cache' : 'no-store'
+        locale
     })
 
     return (
@@ -54,6 +97,7 @@ export default async function RootLayout(
         <head>
             <title>NextAcc</title>
             <link rel="icon" href="/icon.png" type="image/png" />
+            <ThemeScript />
         </head>
         <body className="bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
