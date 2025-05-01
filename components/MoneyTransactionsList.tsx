@@ -15,7 +15,7 @@ export default function MoneyTransactionsList({
             <div className="flex flex-col w-full">
                 {
                     options.map((option, i) =>
-                        <div key={option.datetime.toString()}
+                        <div key={i}
                              className={'flex flex-row w-full justify-between text-sm p-2 gap-2 ' + (i % 2 != 0 ? 'bg-muted/50 dark:bg-muted/40' : '')}>
                             <div className="flex">{option.datetime.toString()}</div>
                             <div className="flex">{option.amount}</div>

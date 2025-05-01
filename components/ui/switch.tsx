@@ -1,7 +1,7 @@
-import * as React from "react"
-import * as SwitchPrimitives from "@radix-ui/react-switch"
+import * as React from 'react'
+import * as SwitchPrimitives from '@radix-ui/react-switch'
 
-import { cn } from "@/lib/utils"
+import {cn} from '@/lib/utils'
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
@@ -24,10 +24,12 @@ const Switch = React.forwardRef<
 ))
 Switch.displayName = SwitchPrimitives.Root.displayName
 
-// Add ToggleSwitch component for compatibility with flowbite-react
+// Add the ToggleSwitch component for compatibility with flowbite-react
 const ToggleSwitch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  }
 >(({ className, checked, onChange, ...props }, ref) => {
   // Ensure the component is interactive by handling the checked state and onChange event explicitly
   return (
@@ -43,7 +45,7 @@ const ToggleSwitch = React.forwardRef<
           // Create a synthetic event object that mimics the expected structure
           const event = {
             target: { checked: isChecked }
-          } as React.ChangeEvent<HTMLInputElement>;
+          } as unknown as React.ChangeEvent<HTMLInputElement>;
           onChange(event);
         }
       }}

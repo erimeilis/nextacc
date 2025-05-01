@@ -1,6 +1,7 @@
 'use server'
 import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {auth} from '@/auth'
+import moment from 'moment'
 
 export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]> {
     const session = await auth()
@@ -9,9 +10,8 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
     // Create URL with query parameters instead of using body
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/transactions');
     url.searchParams.append('site', process.env.SITE_ID || '');
-    // Uncomment and adjust if you need these parameters
-    // url.searchParams.append('from', moment().subtract(30, 'days').toISOString());
-    // url.searchParams.append('to', moment().toISOString());
+    url.searchParams.append('from', moment().subtract(360, 'days').toISOString());
+    url.searchParams.append('to', moment().toISOString());
     
     const options: RequestInit = {
         cache: 'no-store',

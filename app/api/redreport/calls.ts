@@ -1,14 +1,17 @@
 'use server'
+import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {auth} from '@/auth'
-import {NumberInfo} from '@/types/NumberInfo'
+import moment from 'moment'
 
-export async function redGetMyNumbers(): Promise<NumberInfo[]> {
+export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return []
     
     // Create URL with query parameters instead of using body
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers');
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/calls');
     url.searchParams.append('site', process.env.SITE_ID || '');
+    url.searchParams.append('from', moment().subtract(360, 'days').toISOString());
+    url.searchParams.append('to', moment().toISOString());
     
     const options: RequestInit = {
         cache: 'no-store',
@@ -23,15 +26,16 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            //console.log('redGetMyNumbers: ', res.status)
+            //console.log('redGetMoneyTransactionReport: ', res.status)
             if (!res.ok) return []
             return res.json()
         })
         .then(async (data) => {
-            return data.data.dids
+            //await slack(JSON.stringify(data.data.money_transactions))
+            return data.data
         })
         .catch((err) => {
-            console.log('redGetMyNumbers error: ', err.message)
+            console.log('redGetCallStatisticsReport error: ', err.message)
             return []
         })
 }

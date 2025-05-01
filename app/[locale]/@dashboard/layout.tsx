@@ -16,7 +16,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
     const t = useTranslations('dashboard')
     const pathName = usePathname()
     const searchParams = useSearchParams()
-    const search = searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const activePathName = () => {
         if (!pathName) {

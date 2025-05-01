@@ -6,27 +6,15 @@ import {DotsThreeVertical} from '@phosphor-icons/react'
 import {signOut, useSession} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import {createHash} from 'crypto'
 import Link from 'next/link'
 import {profileTabs} from '@/constants/profileTabs'
 import {useRouter, useSearchParams} from 'next/navigation'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { 
-  Avatar, 
-  AvatarFallback, 
-  AvatarImage 
-} from '@/components/ui/avatar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
+import {ThemeToggle} from '@/components/ui/theme-toggle'
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
+import {Button} from '@/components/ui/button'
 
 export default function Nav() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -36,7 +24,7 @@ export default function Nav() {
 
     const t = useTranslations('dashboard')
     const searchParams = useSearchParams()
-    const search = searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen)
@@ -101,7 +89,7 @@ export default function Nav() {
                                             key={tab.slug}
                                             onClick={() => router.push('/' + tab.slug + search)}
                                         >
-                                            {React.createElement(tab.icon, { className: "mr-2 h-4 w-4" })}
+                                            {tab.icon && React.createElement(tab.icon, { className: "mr-2 h-4 w-4" })}
                                             <span>{t(tab.name)}</span>
                                         </DropdownMenuItem>
                                     ))}

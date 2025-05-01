@@ -32,28 +32,32 @@ export async function addToCart(
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
-            'Authorization': (!anonymous ? 'Bearer ' + session?.token : ''),
+            'Authorization': (!anonymous ?
+                ('Bearer ' + session?.token) :
+                ('Bearer ' + process.env.REDREPORT_TOKEN)
+            ),
             'X-UID': uid,
         },
         credentials: 'include',
         body: JSON.stringify({
             'site': process.env.SITE_ID,
-            'number': number,
-            'countryId': countryId,
-            'areaCode': areaCode,
+            'did': number.did,
+            'where_did': number.where_did,
+            'country_id': countryId,
+            'area_code': areaCode,
             'qty': qty,
             'voice': voice,
             'sms': sms
         })
     }
-    return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/add-to-cart' : '/api/did/add-to-cart'), options)
+    return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/add-to-cart' : '/api/add-to-cart'), options)
         .then((res: Response) => {
             if (!res.ok) return []
             return res.json()
         })
         .then(async (data) => {
             console.log('buyNumber: ', data)
-            return data.uid
+            return data.data
         })
         .catch((err) => {
             console.log('buyNumber error: ', err.message)

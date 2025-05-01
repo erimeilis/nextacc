@@ -24,7 +24,7 @@ export default function Profile({
     const t = useTranslations('profile')
 
     const searchParams = useSearchParams()
-    const search = searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const [modeEditProfile, setModeEditProfile] = useState(false)
     const handleToggle = () => {

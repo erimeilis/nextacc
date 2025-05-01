@@ -25,7 +25,7 @@ export default function Toggle({
                     onChange={(e) => {
                         // With our updated ToggleSwitch component, we can now access e.target.checked
                         if (typeof e === 'object' && e !== null && 'target' in e && e.target && 'checked' in e.target) {
-                            onToggle(e.target.checked);
+                            onToggle(e.target.checked as boolean);
                         } else {
                             // Fallback to the previous behavior
                             onToggle(!checked);

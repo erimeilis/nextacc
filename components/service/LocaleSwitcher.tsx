@@ -1,7 +1,7 @@
 'use client'
 import {routing} from '@/i18n/routing'
 //import {CaretDown} from '@phosphor-icons/react'
-import { Dropdown } from '@/components/ui/dropdown'
+import {Dropdown} from '@/components/ui/dropdown'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
 
@@ -16,7 +16,7 @@ export default function LocaleSwitcher() {
     const t = useTranslations('common')
     const pathName = usePathname()
     const searchParams = useSearchParams()
-    const search = searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const redirectedPathName = (locale: string) => {
         if (!pathName) {
@@ -29,7 +29,7 @@ export default function LocaleSwitcher() {
     }
 
     return (
-        <Dropdown label={t('locale')} inline="true" /*arrowIcon={CaretDown}*/>
+        <Dropdown label={t('locale')} className="inline" /*arrowIcon={CaretDown}*/>
             {routing.locales.map((locale) => (
                 <Dropdown.Item
                     key={locale}

@@ -2,17 +2,16 @@
 import DropdownSelectGeo from '@/components/shared/DropdownSelectGeo'
 import NumberTypeSelector from '@/components/NumberTypeSelector'
 import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
-import { Card } from '@/components/ui/card'
+import {Card} from '@/components/ui/card'
 import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import useSWR from 'swr'
 import {NumberInfo} from '@/types/NumberInfo'
 import CQS from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 import dynamic from 'next/dynamic'
-import React from 'react'
 
 // Dynamically import components that are only needed conditionally
 const NumberOffersList = dynamic(() => import('@/components/NumberOffersList'), {
@@ -43,25 +42,25 @@ export default function OffersPage() {
 
     // Use SWR hooks outside of render functions to prevent unnecessary re-renders
     const { data: countriesData = [] } = useSWR(
-        searchParams.has('type') ? {
-            type: searchParams.get('type'),
+        searchParams?.has('type') ? {
+            type: searchParams?.get('type'),
         } : null, 
         getCountries
     )
 
     const countries = countriesData
-    const slugCountry = countries.find(e => getSlug(e.name) == searchParams.get('country'))
-    const getCountry: number | null = searchParams.has('country') ?
-        (!isNaN(+searchParams.get('country')!) ?
-            Number(searchParams.get('country')) :
+    const slugCountry = countries.find(e => getSlug(e.name) == searchParams?.get('country'))
+    const getCountry: number | null = searchParams?.has('country') ?
+        (!isNaN(+(searchParams?.get('country') || '')) ?
+            Number(searchParams?.get('country')) :
             (slugCountry ?
                 Number(slugCountry.id) :
                 null)) :
         null
 
     const { data: areasData = [] } = useSWR(
-        searchParams.has('type') && getCountry !== null ? {
-            type: searchParams.get('type'),
+        searchParams?.has('type') && getCountry !== null ? {
+            type: searchParams?.get('type'),
             country: getCountry
         } : null, 
         getAreas
@@ -72,26 +71,26 @@ export default function OffersPage() {
         if (
             areasData &&
             areasData.length === 1 &&
-            !searchParams.has('area')
+            !searchParams?.has('area')
         ) {
             router.push(pathName + '?' + CQS('area', areasData[0].id, searchParams))
         }
     }, [areasData, pathName, router, searchParams])
 
     const areas = areasData
-    const slugArea = areas.find(e => getSlug(e.name) == searchParams.get('area'))
-    const getArea: number | null = searchParams.has('area') ?
-        (!isNaN(+searchParams.get('area')!) ?
-            Number(searchParams.get('area')) :
+    const slugArea = areas.find(e => getSlug(e.name) == searchParams?.get('area'))
+    const getArea: number | null = searchParams?.has('area') ?
+        (!isNaN(+(searchParams?.get('area') || '')) ?
+            Number(searchParams?.get('area')) :
             (slugArea ?
                 Number(slugArea.id) :
                 null)) :
         null
 
     const { data: numbersData = [] } = useSWR(
-        searchParams.has('type') && getCountry !== null && getArea !== null ?
+        searchParams?.has('type') && getCountry !== null && getArea !== null ?
             {
-                type: searchParams.get('type'),
+                type: searchParams?.get('type'),
                 country: getCountry,
                 area: getArea,
             } :
@@ -100,8 +99,8 @@ export default function OffersPage() {
     )
 
     const numbers = numbersData
-    const getNumber: NumberInfo | null = searchParams.has('number') ?
-        (numbers.find(e => e.did == searchParams.get('number')) ?? null) :
+    const getNumber: NumberInfo | null = searchParams?.has('number') ?
+        (numbers.find(e => e.did == searchParams?.get('number')) ?? null) :
         null
 
     const handleType = async (t: string) => {
@@ -129,14 +128,14 @@ export default function OffersPage() {
     }
 
     // If no type is selected, use 'voice' as default
-    const selectedType = searchParams.get('type') || 'voice'
+    const selectedType = searchParams?.get('type') || 'voice'
 
-    // If no type is in URL and this is initial render, set voice as default
+    // If no type is in the URL and this is an initial render, set voice as default
     React.useEffect(() => {
-        if (!searchParams.has('type')) {
+        if (searchParams && !searchParams?.has('type')) {
             router.push(pathName + '?' + CQS('type', 'voice', searchParams))
         }
-    }, [])
+    }, [searchParams, router, pathName])
 
     return (
         <Card id="offers" className="bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background border border-border p-0 pb-8 overflow-hidden">
@@ -163,12 +162,12 @@ export default function OffersPage() {
             </div>
             <div
                 className="flex items-center transition duration-300 px-6 overflow-hidden"
-                style={{display: (searchParams.has('type') && searchParams.has('country') && searchParams.has('area')) ? 'block' : 'none'}}
+                style={{display: (searchParams?.has('type') && searchParams?.has('country') && searchParams?.has('area')) ? 'block' : 'none'}}
             >
                 <NumberOffersList
                     options={numbers}
                     onSelectAction={handleNumber}
-                    selectedOption={searchParams.get('number')}
+                    selectedOption={searchParams?.get('number') ?? null}
                     loading={loadingNumbers}
                 />
             </div>
@@ -176,11 +175,11 @@ export default function OffersPage() {
                 className="flex flex-col px-6 transition duration-300 text-foreground dark:text-foreground overflow-hidden"
             >
                 <Show when={typeof getNumber !== 'undefined' && getNumber !== null}>
-                    {BuyNumberForm({
-                        numberInfo: getNumber!,
-                        countryId: getCountry,
-                        areaCode: getArea,
-                    })}
+                    <BuyNumberForm
+                        numberInfo={getNumber!}
+                        countryId={getCountry}
+                        areaCode={getArea}
+                    />
                 </Show>
             </div>
         </Card>

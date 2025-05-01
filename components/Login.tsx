@@ -13,10 +13,10 @@ import {schemaVerify} from '@/schemas/verify.schema'
 import usePersistState from '@/usePersistState'
 import {validateFormData} from '@/utils/validation'
 import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
-import { Card } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Modal } from '@/components/ui/dialog'
+import {Card} from '@/components/ui/card'
+import {Checkbox} from '@/components/ui/checkbox'
+import {Label} from '@/components/ui/label'
+import {Modal} from '@/components/ui/dialog'
 import {signIn} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {ChangeEvent, SyntheticEvent, useState} from 'react'
@@ -38,7 +38,7 @@ export default function Login() {
     const c = useTranslations('common')
 
     const searchParams = useSearchParams()
-    const search = searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const [modeLogin, setModeLogin] = usePersistState(false, 'loginMode')
     const handleToggle = () => {

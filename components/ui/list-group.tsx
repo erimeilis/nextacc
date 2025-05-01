@@ -1,8 +1,16 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from 'react'
+import {cn} from '@/lib/utils'
 
 // Create a context to pass the horizontal prop to children
 const ListGroupContext = React.createContext(false)
+
+interface ListGroupType extends React.ForwardRefExoticComponent<
+  React.HTMLAttributes<HTMLDivElement> & {
+    horizontal?: boolean;
+  } & React.RefAttributes<HTMLDivElement>
+> {
+  Item: typeof ListGroupItem;
+}
 
 const ListGroup = React.forwardRef<
   HTMLDivElement,
@@ -23,7 +31,7 @@ const ListGroup = React.forwardRef<
       {children}
     </div>
   </ListGroupContext.Provider>
-))
+)) as ListGroupType
 ListGroup.displayName = "ListGroup"
 
 const ListGroupItem = React.forwardRef<
