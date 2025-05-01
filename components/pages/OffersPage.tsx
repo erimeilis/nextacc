@@ -128,9 +128,19 @@ export default function OffersPage() {
         //setNumberInfo(number)
     }
 
+    // If no type is selected, use 'voice' as default
+    const selectedType = searchParams.get('type') || 'voice'
+
+    // If no type is in URL and this is initial render, set voice as default
+    React.useEffect(() => {
+        if (!searchParams.has('type')) {
+            router.push(pathName + '?' + CQS('type', 'voice', searchParams))
+        }
+    }, [])
+
     return (
-        <Card id="offers" className="bg-muted dark:bg-muted border border-border p-0">
-            <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={searchParams.get('type')}/>
+        <Card id="offers" className="bg-muted dark:bg-muted border border-border p-0 pb-8">
+            <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={selectedType}/>
             <div className="flex flex-col md:flex-row items-center gap-4 justify-between my-4 px-6">
                 <DropdownSelectGeo
                     selectId="country"

@@ -252,17 +252,19 @@ export default function BuyNumberForm({
                 </div>
 
                 <div className="flex flex-col gap-6 w-full lg:w-fit">
-                    <div className="flex flex-row gap-3 justify-end items-center">
-                        <div className="text-sm font-medium">{t('pay_for')}</div>
-                        <DropdownSelect
-                            selectId="discount"
-                            selectTitle={t('select_qty')}
-                            data={discounts}
-                            onSelectAction={handleQtyChange}
-                            selectedOption={discountState}
-                            customClass="min-w-max w-fit"
-                        />
-                        <div className="text-sm font-medium">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
+                    <div className="flex flex-row gap-2 justify-end items-center bg-secondary/30 p-2 rounded-lg">
+                        <div className="flex items-center text-xs font-medium">{t('pay_for')}</div>
+                        <div className="flex items-center">
+                            <DropdownSelect
+                                selectId="discount"
+                                selectTitle={t('select_qty')}
+                                data={discounts}
+                                onSelectAction={handleQtyChange}
+                                selectedOption={discountState}
+                                customClass="min-w-max w-fit text-xs text-muted-foreground h-8 hide-label"
+                            />
+                        </div>
+                        <div className="flex items-center text-xs font-medium">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
                     </div>
 
                     <div className="bg-card rounded-lg overflow-hidden shadow-sm border border-border">
@@ -277,7 +279,7 @@ export default function BuyNumberForm({
                                     return (d.id !== '0') ? (
                                         <TableRow key={d.name} className="text-sm">
                                             <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
-                                            <TableCell className="text-destructive font-medium">-{d.id}%</TableCell>
+                                            <TableCell className="text-green-600 dark:text-green-400 font-medium">-{d.id}%</TableCell>
                                             <TableCell>=</TableCell>
                                             <TableCell className="whitespace-nowrap text-right font-medium">
                                                 {Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$

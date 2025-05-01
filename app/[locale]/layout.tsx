@@ -21,66 +21,6 @@ export const metadata: Metadata = {
   title: 'NextAcc',
 }
 
-// This function generates a script that will be included in the HTML head
-// It immediately sets the correct theme based on localStorage before any content renders
-function ThemeScript() {
-  return (
-    <>
-      {/* Add the meta tag for color-scheme to tell browsers about our color scheme */}
-      <meta name="color-scheme" content="dark light" />
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                // Block theme transitions until page is loaded
-                document.documentElement.style.setProperty('transition', 'none');
-                
-                // Get color theme from localStorage
-                var colorTheme = localStorage.getItem('state:color-theme');
-                colorTheme = colorTheme ? JSON.parse(colorTheme) : 'blue';
-                
-                // Get dark mode setting from localStorage
-                var isDarkMode = localStorage.getItem('state:dark-mode');
-                isDarkMode = isDarkMode ? JSON.parse(isDarkMode) : true;
-                
-                // Apply the themes immediately to prevent flash
-                var root = document.documentElement;
-                
-                // First add the color theme
-                var colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet'];
-                colorThemes.forEach(function(theme) {
-                  root.classList.remove(theme);
-                });
-                root.classList.add(colorTheme);
-                
-                // Then add dark mode if needed
-                if (isDarkMode) {
-                  root.classList.add('dark');
-                  document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'dark');
-                } else {
-                  root.classList.remove('dark');
-                  document.querySelector('meta[name="color-scheme"]').setAttribute('content', 'light');
-                }
-                
-                // Re-enable transitions after page load
-                window.addEventListener('load', function() {
-                  // Remove the transition blocking after a small delay to ensure everything is rendered
-                  setTimeout(function() {
-                    document.documentElement.style.removeProperty('transition');
-                  }, 100);
-                });
-              } catch (e) {
-                console.error('Error applying theme:', e);
-              }
-            })();
-          `,
-        }}
-      />
-    </>
-  );
-}
-
 export default async function RootLayout(
     props: {
         dashboard: React.ReactNode,
@@ -114,15 +54,39 @@ export default async function RootLayout(
         <head>
             <title>NextAcc</title>
             <link rel="icon" href="/icon.png" type="image/png" />
-            <ThemeScript />
+            <script dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  // Apply dark/light theme
+                  try {
+                    const theme = localStorage.getItem('theme');
+                    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
+
+                    // Apply color theme
+                    const colorThemeStr = localStorage.getItem('state:color-theme');
+                    if (colorThemeStr) {
+                      const colorTheme = JSON.parse(colorThemeStr);
+                      const colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet'];
+                      document.documentElement.classList.remove(...colorThemes);
+                      document.documentElement.classList.add(colorTheme);
+                    }
+                  } catch (e) {
+                    console.error('Error applying theme:', e);
+                  }
+                })();
+              `
+            }} />
         </head>
         <body className="bg-background text-foreground">
         <ThemeProvider 
-          attribute="class" 
-          defaultTheme="dark" 
-          enableSystem={true}
+          attribute="class"
           disableTransitionOnChange={true}
           storageKey="theme"
+          defaultTheme="system"
         >
             <SWRProvider>
                 <AuthProvider>

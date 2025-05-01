@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* Blue theme (default) */
+  :root, .blue {
     --background: 210 50% 98%;
     --foreground: 220 20% 20%;
     --card: 0 0% 100%;
@@ -26,6 +27,99 @@
     --radius: 0.75rem;
   }
 
+  /* Pink theme */
+  .pink {
+    --background: 350 50% 98%;
+    --foreground: 350 20% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 350 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 350 20% 20%;
+    --primary: 350 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 350 40% 96%;
+    --secondary-foreground: 350 20% 20%;
+    --muted: 350 40% 96%;
+    --muted-foreground: 350 10% 50%;
+    --accent: 350 40% 96%;
+    --accent-foreground: 350 20% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 350 20% 90%;
+    --input: 350 20% 90%;
+    --ring: 350 100% 50%;
+  }
+
+  /* Orange theme */
+  .orange {
+    --background: 30 50% 98%;
+    --foreground: 30 20% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 20% 20%;
+    --primary: 30 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 40% 96%;
+    --secondary-foreground: 30 20% 20%;
+    --muted: 30 40% 96%;
+    --muted-foreground: 30 10% 50%;
+    --accent: 30 40% 96%;
+    --accent-foreground: 30 20% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 20% 90%;
+    --input: 30 20% 90%;
+    --ring: 30 100% 50%;
+  }
+
+  /* Teal theme */
+  .teal {
+    --background: 180 50% 98%;
+    --foreground: 180 20% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 180 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 20% 20%;
+    --primary: 180 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 180 40% 96%;
+    --secondary-foreground: 180 20% 20%;
+    --muted: 180 40% 96%;
+    --muted-foreground: 180 10% 50%;
+    --accent: 180 40% 96%;
+    --accent-foreground: 180 20% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 180 20% 90%;
+    --input: 180 20% 90%;
+    --ring: 180 100% 40%;
+  }
+
+  /* Violet theme */
+  .violet {
+    --background: 270 50% 98%;
+    --foreground: 270 20% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 20% 20%;
+    --primary: 270 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 270 40% 96%;
+    --secondary-foreground: 270 20% 20%;
+    --muted: 270 40% 96%;
+    --muted-foreground: 270 10% 50%;
+    --accent: 270 40% 96%;
+    --accent-foreground: 270 20% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 270 100% 50%;
+  }
+
+  /* Dark mode overrides for all themes */
   .dark {
     --background: 220 30% 10%;
     --foreground: 210 40% 98%;
@@ -46,6 +140,27 @@
     --border: 220 20% 25%;
     --input: 220 20% 25%;
     --ring: 210 100% 60%;
+  }
+
+  /* Dark mode theme-specific primary colors */
+  .dark.pink {
+    --primary: 350 100% 60%;
+    --ring: 350 100% 60%;
+  }
+
+  .dark.orange {
+    --primary: 30 100% 60%;
+    --ring: 30 100% 60%;
+  }
+
+  .dark.teal {
+    --primary: 180 100% 50%;
+    --ring: 180 100% 50%;
+  }
+
+  .dark.violet {
+    --primary: 270 100% 60%;
+    --ring: 270 100% 60%;
   }
 }
 

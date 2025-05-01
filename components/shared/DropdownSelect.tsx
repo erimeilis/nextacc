@@ -41,19 +41,24 @@ export default function DropdownSelect({
             fallback={<Loader height={8}/>}
         >
             <div className={`min-w-[200px] ${customClass}`}>
-                <Label
-                    htmlFor={selectId}
-                    className="text-sm font-medium mb-2 block">
-                    {selectTitle}
-                </Label>
+                {!customClass.includes('hide-label') && (
+                    <Label
+                        htmlFor={selectId}
+                        className="text-sm font-medium mb-2 block">
+                        {selectTitle}
+                    </Label>
+                )}
                 <div className="relative">
                     <select
                         id={selectId}
                         name={selectId}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background 
+                        className={`flex w-full rounded-md border border-input bg-background ring-offset-background 
                         appearance-none cursor-pointer
                         focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 
-                        disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled:cursor-not-allowed disabled:opacity-50 
+                        ${customClass.includes('text-') ? customClass.split(' ').filter(cls => cls.startsWith('text-')).join(' ') : 'text-sm'}
+                        ${customClass.includes('h-') ? customClass.split(' ').filter(cls => cls.startsWith('h-')).join(' ') : 'h-10'}
+                        ${customClass.includes('h-8') ? 'px-3 py-1' : 'px-3 py-2'}`}
                         value={selectedOption ?? 'none'}
                         onChange={handleOptionChange}
                         disabled={data.length === 0}
@@ -67,7 +72,7 @@ export default function DropdownSelect({
                         </option>
                         {items}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+                    <div className={`pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground ${customClass.includes('h-8') ? 'scale-90' : ''}`}>
                         <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>

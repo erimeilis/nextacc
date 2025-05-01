@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import {Moon, Palette, Sun} from '@phosphor-icons/react'
+import { useTheme } from 'next-themes'
 import usePersistState from '@/usePersistState'
 
 import {Button} from '@/components/ui/button'
@@ -10,8 +11,8 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 const colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet']
 
 export function ThemeToggle() {
-  const [persistedTheme, setPersistedTheme] = usePersistState('blue', 'color-theme')
-  const [isDarkMode, setIsDarkMode] = usePersistState(true, 'dark-mode')
+  const { theme, setTheme } = useTheme()
+  const [colorTheme, setColorTheme] = usePersistState('blue', 'color-theme')
   const [isMounted, setIsMounted] = React.useState(false)
 
   // Only run once after component mounts to avoid hydration mismatch
@@ -19,37 +20,21 @@ export function ThemeToggle() {
     setIsMounted(true)
   }, [])
 
+  // Apply color theme when component mounts or colorTheme changes
   React.useEffect(() => {
     if (!isMounted) return;
 
-    // Block transitions during theme change
-    document.documentElement.style.setProperty('transition', 'none');
-
-    if (persistedTheme) {
-      document.documentElement.classList.remove(...colorThemes)
-      document.documentElement.classList.add(persistedTheme)
-    }
-    
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark')
-      document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark')
-      document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', 'light');
-    }
-
-    // Re-enable transitions after a small delay
-    setTimeout(() => {
-      document.documentElement.style.removeProperty('transition');
-    }, 100);
-  }, [persistedTheme, isDarkMode, isMounted])
+    // Apply color theme
+    document.documentElement.classList.remove(...colorThemes)
+    document.documentElement.classList.add(colorTheme)
+  }, [isMounted, colorTheme])
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   const handleThemeChange = (newTheme: string) => {
-    setPersistedTheme(newTheme)
+    setColorTheme(newTheme)
   }
 
   return (
@@ -77,19 +62,24 @@ export function ThemeToggle() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleThemeChange('blue')}>
+          <DropdownMenuItem onClick={() => handleThemeChange('blue')} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-blue-500"></div>
             Blue
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('pink')}>
+          <DropdownMenuItem onClick={() => handleThemeChange('pink')} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-pink-500"></div>
             Pink
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('orange')}>
+          <DropdownMenuItem onClick={() => handleThemeChange('orange')} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-orange-500"></div>
             Orange
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('teal')}>
+          <DropdownMenuItem onClick={() => handleThemeChange('teal')} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-teal-500"></div>
             Teal
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('violet')}>
+          <DropdownMenuItem onClick={() => handleThemeChange('violet')} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-violet-500"></div>
             Violet
           </DropdownMenuItem>
         </DropdownMenuContent>

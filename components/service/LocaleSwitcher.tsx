@@ -5,6 +5,13 @@ import { Dropdown } from '@/components/ui/dropdown'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
 
+// Map of locale codes to flag emojis
+const localeFlags: Record<string, string> = {
+    'en': '🇬🇧',
+    'pl': '🇵🇱',
+    'uk': '🇺🇦',
+}
+
 export default function LocaleSwitcher() {
     const t = useTranslations('common')
     const pathName = usePathname()
@@ -26,11 +33,11 @@ export default function LocaleSwitcher() {
             {routing.locales.map((locale) => (
                 <Dropdown.Item
                     key={locale}
-                    //icon={Flag.code = `${locale.toUpperCase()}`}
                     href={redirectedPathName(locale) + search}
-                    //onClick={() => router.push({pathname: redirectedPathName(locale)})}
+                    className="flex items-center gap-2"
                 >
-                    {locale}
+                    <span className="text-base">{localeFlags[locale]}</span>
+                    <span>{locale}</span>
                 </Dropdown.Item>
             ))}
         </Dropdown>
