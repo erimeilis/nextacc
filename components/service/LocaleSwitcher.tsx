@@ -29,7 +29,7 @@ export default function LocaleSwitcher() {
     }
 
     return (
-        <Dropdown label={t('locale')} inline /*arrowIcon={CaretDown}*/>
+        <Dropdown label={t('locale')} inline="true" /*arrowIcon={CaretDown}*/>
             {routing.locales.map((locale) => (
                 <Dropdown.Item
                     key={locale}

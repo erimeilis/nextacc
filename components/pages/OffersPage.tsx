@@ -139,7 +139,7 @@ export default function OffersPage() {
     }, [])
 
     return (
-        <Card id="offers" className="bg-background dark:bg-background border border-border p-0 pb-8 overflow-hidden">
+        <Card id="offers" className="bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background border border-border p-0 pb-8 overflow-hidden">
             <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={selectedType}/>
             <div className="flex flex-col md:flex-row items-center gap-4 justify-between my-4 px-6">
                 <DropdownSelectGeo

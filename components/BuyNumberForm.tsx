@@ -182,7 +182,7 @@ export default function BuyNumberForm({
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="w-full space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
-                        {t('setupfee')}: <span className="text-primary font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span className="text-primary font-semibold">{numberInfo.fix_rate} $</span>
+                        {t('setupfee')}: <span className="text-price font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span className="text-price font-semibold">{numberInfo.fix_rate} $</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
@@ -283,7 +283,7 @@ export default function BuyNumberForm({
                                     return (d.id !== '0') ? (
                                         <TableRow key={d.name} className="text-sm">
                                             <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
-                                            <TableCell className="text-green-600 dark:text-green-400 font-medium">-{d.id}%</TableCell>
+                                            <TableCell className="text-price font-medium">-{d.id}%</TableCell>
                                             <TableCell>=</TableCell>
                                             <TableCell className="whitespace-nowrap text-right font-medium">
                                                 {Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
@@ -296,7 +296,7 @@ export default function BuyNumberForm({
                     </div>
 
                     <div className="flex flex-row gap-3 justify-end items-center whitespace-nowrap text-sm font-medium">
-                        {t('total_price')} <span className="text-primary text-lg font-bold">
+                        {t('total_price')} <span className="text-price text-lg font-bold">
                             {Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
                         </span>
                     </div>

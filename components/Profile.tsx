@@ -94,8 +94,8 @@ export default function Profile({
         when={typeof userProfile !== 'undefined' && userProfile !== null}
         fallback={<Loader height={350}/>}>
         <div id="profile" className="transition duration-300 ease">
-            <div className="flex items-center justify-between pb-4 border-b border-border dark:border-border drop-shadow-sm">
-                <div className="text-sm px-2 pt-2">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
+            <div className="flex items-center justify-between gap-4 pb-4 border-b border-border dark:border-border drop-shadow-sm">
+                <div className="text-sm px-2">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
                 <Button
                     onClick={() => {
                     }}

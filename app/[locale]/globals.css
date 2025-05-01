@@ -3,165 +3,178 @@
 @tailwind utilities;
 
 @layer base {
-  /* Blue theme (default) */
-  :root, .blue {
-    --background: 210 50% 98%;
-    --foreground: 220 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 20%;
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 220 20% 20%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 220 10% 50%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 220 20% 20%;
+  /* Light Equinox theme (default) */
+  :root, .equinox {
+    --background: 212 20% 95%; /* Slate background for light blue theme */
+    --foreground: 217 20% 20%; /* Slate foreground */
+    --card: 212 25% 97%; /* Slate card */
+    --card-foreground: 217 20% 20%; /* Slate card foreground */
+    --popover: 212 25% 97%; /* Slate popover */
+    --popover-foreground: 217 20% 20%; /* Slate popover foreground */
+    --primary: 210 100% 50%; /* Blue primary color */
+    --primary-foreground: 212 20% 98%; /* Light slate instead of pure white */
+    --complementary: 22 100% 50%; /* Amber for Nav */
+    --button-from: 22 100% 50%; /* Orange gradient start for light blue theme */
+    --button-to: 22 100% 60%; /* Orange gradient end for light blue theme */
+    --button-text: 0 0% 100%; /* White text for better contrast on buttons */
+    --price: 210 100% 50%; /* Blue for price figures */
+    --secondary: 212 25% 90%; /* Slate secondary */
+    --secondary-foreground: 217 20% 20%; /* Slate secondary foreground */
+    --muted: 212 25% 90%; /* Slate muted */
+    --muted-foreground: 217 10% 50%; /* Slate muted foreground */
+    --accent: 212 25% 90%; /* Slate accent */
+    --accent-foreground: 217 20% 20%; /* Slate accent foreground */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 90%;
-    --input: 220 20% 90%;
-    --ring: 210 100% 50%;
+    --border: 217 20% 88%; /* Slate border */
+    --input: 217 20% 88%; /* Slate input */
+    --ring: 213 94% 68%; /* Tailwind blue-400 */
     --radius: 0.75rem;
   }
 
-  /* Pink theme */
-  .pink {
-    --background: 350 50% 98%;
-    --foreground: 350 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 350 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 350 20% 20%;
-    --primary: 350 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 350 40% 96%;
-    --secondary-foreground: 350 20% 20%;
-    --muted: 350 40% 96%;
-    --muted-foreground: 350 10% 50%;
-    --accent: 350 40% 96%;
-    --accent-foreground: 350 20% 20%;
+  /* Reef theme */
+  .reef {
+    --background: 240 5% 96%; /* Zinc-100 */
+    --foreground: 240 5% 10%; /* Zinc-950 */
+    --card: 240 5% 98%; /* Zinc-50 */
+    --card-foreground: 240 5% 10%; /* Zinc-950 */
+    --popover: 240 5% 98%; /* Zinc-50 */
+    --popover-foreground: 240 5% 10%; /* Zinc-950 */
+    --primary: 350 89% 60%; /* Rose-500 as main color */
+    --primary-foreground: 240 5% 10%; /* Zinc-950 */
+    --complementary: 350 73% 47%; /* Rose-600 for Nav */
+    --button-from: 350 89% 60%; /* Pink gradient start */
+    --button-to: 350 89% 70%; /* Pink gradient end */
+    --button-text: 240 5% 98%; /* Zinc-50 for better contrast on pink */
+    --price: 350 89% 60%; /* Pink for price figures */
+    --secondary: 240 5% 91%; /* Zinc-200 */
+    --secondary-foreground: 240 5% 10%; /* Zinc-950 */
+    --muted: 240 5% 91%; /* Zinc-200 */
+    --muted-foreground: 240 5% 45%; /* Zinc-500 */
+    --accent: 240 5% 91%; /* Zinc-200 */
+    --accent-foreground: 240 5% 10%; /* Zinc-950 */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 350 20% 90%;
-    --input: 350 20% 90%;
-    --ring: 350 100% 50%;
+    --destructive-foreground: 240 5% 98%; /* Zinc-50 */
+    --border: 240 5% 85%; /* Zinc-300 */
+    --input: 240 5% 85%; /* Zinc-300 */
+    --ring: 180 100% 40%; /* Teal ring */
   }
 
-  /* Orange theme */
-  .orange {
-    --background: 30 50% 98%;
-    --foreground: 30 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 30 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 20% 20%;
-    --primary: 30 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 40% 96%;
-    --secondary-foreground: 30 20% 20%;
-    --muted: 30 40% 96%;
-    --muted-foreground: 30 10% 50%;
-    --accent: 30 40% 96%;
-    --accent-foreground: 30 20% 20%;
+  /* Void theme - based on Tailwind stone colors */
+  .void {
+    --background: 60 5% 96%; /* stone-100 */
+    --foreground: 24 10% 10%; /* stone-900 */
+    --card: 60 9% 98%; /* stone-50 */
+    --card-foreground: 24 10% 10%; /* stone-900 */
+    --popover: 60 9% 98%; /* stone-50 */
+    --popover-foreground: 24 10% 10%; /* stone-900 */
+    --primary: 25 5% 45%; /* stone-500 as main color */
+    --primary-foreground: 60 9% 98%; /* stone-50 */
+    --complementary: 33 5% 32%; /* stone-600 for Nav */
+    --button-from: 25 5% 45%; /* stone-500 gradient start */
+    --button-to: 24 6% 83%; /* stone-300 gradient end */
+    --button-text: 60 9% 98%; /* stone-50 for better contrast */
+    --price: 25 5% 45%; /* stone-500 for price figures */
+    --secondary: 20 6% 90%; /* stone-200 */
+    --secondary-foreground: 24 10% 10%; /* stone-900 */
+    --muted: 20 6% 90%; /* stone-200 */
+    --muted-foreground: 24 5% 64%; /* stone-400 */
+    --accent: 20 6% 90%; /* stone-200 */
+    --accent-foreground: 24 10% 10%; /* stone-900 */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 30 20% 90%;
-    --input: 30 20% 90%;
-    --ring: 30 100% 50%;
+    --destructive-foreground: 60 9% 98%; /* stone-50 */
+    --border: 24 6% 83%; /* stone-300 */
+    --input: 24 6% 83%; /* stone-300 */
+    --ring: 25 5% 45%; /* stone-500 ring */
   }
 
-  /* Teal theme */
-  .teal {
-    --background: 180 50% 98%;
-    --foreground: 180 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 180 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 180 20% 20%;
-    --primary: 180 100% 40%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 180 40% 96%;
-    --secondary-foreground: 180 20% 20%;
-    --muted: 180 40% 96%;
-    --muted-foreground: 180 10% 50%;
-    --accent: 180 40% 96%;
-    --accent-foreground: 180 20% 20%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 180 20% 90%;
-    --input: 180 20% 90%;
-    --ring: 180 100% 40%;
-  }
-
-  /* Violet theme */
-  .violet {
-    --background: 270 50% 98%;
-    --foreground: 270 20% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 270 20% 20%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 270 20% 20%;
-    --primary: 270 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 270 40% 96%;
-    --secondary-foreground: 270 20% 20%;
-    --muted: 270 40% 96%;
-    --muted-foreground: 270 10% 50%;
-    --accent: 270 40% 96%;
-    --accent-foreground: 270 20% 20%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 270 20% 90%;
-    --input: 270 20% 90%;
-    --ring: 270 100% 50%;
-  }
 
   /* Dark mode overrides for all themes */
   .dark {
-    --background: 220 30% 10%;
+    --background: 220 30% 12%; /* Slightly lighter */
     --foreground: 210 40% 98%;
-    --card: 220 25% 15%;
+    --card: 220 25% 16%; /* Slightly lighter */
     --card-foreground: 210 40% 98%;
-    --popover: 220 25% 15%;
+    --popover: 220 25% 16%; /* Slightly lighter */
     --popover-foreground: 210 40% 98%;
-    --primary: 210 100% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 20%;
+    --primary: 210 100% 60%; /* Blue buttons */
+    --primary-foreground: 0 0% 100%; /* White text is fine on dark backgrounds */
+    --complementary: 240 70% 50%; /* Indigo Nav */
+    --secondary: 220 20% 22%; /* Slightly lighter */
     --secondary-foreground: 210 40% 98%;
-    --muted: 220 20% 20%;
-    --muted-foreground: 210 40% 70%;
-    --accent: 220 20% 20%;
+    --muted: 220 20% 22%; /* Slightly lighter */
+    --muted-foreground: 210 40% 75%; /* Slightly lighter */
+    --accent: 220 20% 22%; /* Slightly lighter */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 25%;
-    --input: 220 20% 25%;
+    --border: 220 20% 26%; /* Slightly lighter */
+    --input: 220 20% 26%; /* Slightly lighter */
     --ring: 210 100% 60%;
+    --price: 210 100% 60%; /* Blue for price figures in dark mode */
   }
 
   /* Dark mode theme-specific primary colors */
-  .dark.pink {
-    --primary: 350 100% 60%;
-    --ring: 350 100% 60%;
+  .dark.equinox {
+    --primary: 210 100% 60%; /* Blue buttons */
+    --ring: 210 100% 60%;
+    --complementary: 240 70% 50%; /* Indigo Nav */
+    --background: 220 30% 12%; /* Slightly lighter */
+    --card: 220 25% 16%; /* Slightly lighter */
+    --popover: 220 25% 16%; /* Slightly lighter */
+    --secondary: 220 20% 22%; /* Slightly lighter */
+    --muted: 220 20% 22%; /* Slightly lighter */
+    --accent: 220 20% 22%; /* Slightly lighter */
+    --border: 220 20% 26%; /* Slightly lighter */
+    --input: 220 20% 26%; /* Slightly lighter */
+    --button-from: 210 100% 50%; /* Blue gradient start */
+    --button-to: 210 100% 70%; /* Blue gradient end */
+    --button-text: 0 0% 100%; /* White text for better contrast on buttons */
+    --price: 210 100% 60%; /* Blue for price figures */
   }
 
-  .dark.orange {
-    --primary: 30 100% 60%;
-    --ring: 30 100% 60%;
+  .dark.reef {
+    --primary: 350 89% 60%; /* Pink buttons */
+    --ring: 350 89% 60%;
+    --complementary: 180 100% 40%; /* Teal for Nav */
+    --background: 240 3% 11%; /* Zinc-900 */
+    --card: 240 5% 15%; /* Zinc-800 */
+    --popover: 240 5% 15%; /* Zinc-800 */
+    --secondary: 240 3% 22%; /* Zinc-700 */
+    --muted: 240 3% 22%; /* Zinc-700 */
+    --muted-foreground: 240 5% 65%; /* Zinc-400 */
+    --accent: 240 3% 22%; /* Zinc-700 */
+    --accent-foreground: 240 5% 96%; /* Zinc-100 */
+    --border: 240 4% 26%; /* Zinc-600 */
+    --input: 240 4% 26%; /* Zinc-600 */
+    --button-from: 180 89% 30%; /* Teal gradient start */
+    --button-to: 180 89% 40%; /* Teal gradient end */
+    --button-text: 240 5% 98%; /* Zinc-50 for better contrast */
+    --price: 350 89% 60%; /* Pink for price figures */
+    --foreground: 240 5% 96%; /* Zinc-100 */
   }
 
-  .dark.teal {
-    --primary: 180 100% 50%;
-    --ring: 180 100% 50%;
+  .dark.void {
+    --primary: 25 5% 45%; /* Stone-500 buttons */
+    --ring: 25 5% 45%;
+    --complementary: 33 5% 32%; /* Stone-600 for Nav */
+    --background: 24 10% 10%; /* Stone-900 */
+    --card: 24 9% 15%; /* Stone-800 */
+    --popover: 24 9% 15%; /* Stone-800 */
+    --secondary: 23 7% 20%; /* Stone-700 */
+    --muted: 23 7% 20%; /* Stone-700 */
+    --muted-foreground: 24 5% 64%; /* Stone-400 */
+    --accent: 23 7% 20%; /* Stone-700 */
+    --accent-foreground: 20 6% 90%; /* Stone-200 */
+    --border: 22 6% 32%; /* Stone-600 */
+    --input: 22 6% 32%; /* Stone-600 */
+    --button-from: 25 5% 35%; /* Stone-600 gradient start */
+    --button-to: 25 5% 45%; /* Stone-500 gradient end */
+    --button-text: 60 9% 98%; /* Stone-50 for better contrast */
+    --price: 25 5% 45%; /* Stone-500 for price figures */
+    --foreground: 20 6% 90%; /* Stone-200 */
   }
 
-  .dark.violet {
-    --primary: 270 100% 60%;
-    --ring: 270 100% 60%;
-  }
 }
 
 body {
@@ -169,18 +182,32 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Price text styling */
+.text-price {
+  color: hsl(var(--price));
+}
+
 .backdrop {
-  background-color: rgb(0 0 0 / 0.1);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  background-color: hsl(var(--complementary) / 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .backdrop:where(.dark, .dark *) {
-  background-color: rgb(0 0 0 / 0.3);
+  background-color: hsl(var(--complementary) / 0.3);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Gradient button styles */
+.gradient-button {
+  background: linear-gradient(to right, hsl(var(--button-from)), hsl(var(--button-to)));
+  color: hsl(var(--button-text));
+  transition: filter 0.3s ease;
+}
+
+.gradient-button:hover {
+  filter: brightness(1.1);
 }

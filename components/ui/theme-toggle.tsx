@@ -8,11 +8,11 @@ import usePersistState from '@/usePersistState'
 import {Button} from '@/components/ui/button'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 
-const colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet']
+const colorThemes = ['equinox', 'reef', 'void']
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-  const [colorTheme, setColorTheme] = usePersistState('blue', 'color-theme')
+  const [colorTheme, setColorTheme] = usePersistState('equinox', 'color-theme')
   const [isMounted, setIsMounted] = React.useState(false)
 
   // Only run once after component mounts to avoid hydration mismatch
@@ -40,9 +40,9 @@ export function ThemeToggle() {
   return (
     <div className="flex items-center gap-2">
       <Button 
-        variant="ghost" 
+        variant="link" 
         size="icon" 
-        className="rounded-lg p-2.5 text-sm text-muted-foreground hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-foreground"
+        className="rounded-lg p-2.5 text-sm text-white hover:text-white focus:outline-none focus:bg-transparent"
         onClick={toggleDarkMode}
       >
         <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0" />
@@ -53,34 +53,35 @@ export function ThemeToggle() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
-            variant="ghost" 
+            variant="link" 
             size="icon" 
-            className="rounded-lg p-2.5 text-sm text-muted-foreground hover:text-foreground focus:outline-none dark:text-muted-foreground dark:hover:text-foreground"
+            className="rounded-lg p-2.5 text-sm text-white hover:text-white focus:outline-none focus:bg-transparent"
           >
             <Palette className="h-5 w-5" />
             <span className="sr-only">Toggle color theme</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleThemeChange('blue')} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-            Blue
+          <DropdownMenuItem onClick={() => handleThemeChange('equinox')} className="flex items-center gap-2">
+            <div className="relative w-5 h-5">
+              <div className="absolute inset-0 rounded-full bg-orange-500"></div>
+              <div className="absolute inset-[5px] rounded-full bg-blue-300"></div>
+            </div>
+            Equinox
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('pink')} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-pink-500"></div>
-            Pink
+          <DropdownMenuItem onClick={() => handleThemeChange('reef')} className="flex items-center gap-2">
+            <div className="relative w-5 h-5">
+              <div className="absolute inset-0 rounded-full bg-teal-500"></div>
+              <div className="absolute inset-[5px] rounded-full bg-pink-300"></div>
+            </div>
+            Reef
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('orange')} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-            Orange
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('teal')} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-teal-500"></div>
-            Teal
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleThemeChange('violet')} className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-violet-500"></div>
-            Violet
+          <DropdownMenuItem onClick={() => handleThemeChange('void')} className="flex items-center gap-2">
+            <div className="relative w-5 h-5">
+              <div className="absolute inset-0 rounded-full bg-black"></div>
+              <div className="absolute inset-[5px] rounded-full bg-white"></div>
+            </div>
+            Void
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

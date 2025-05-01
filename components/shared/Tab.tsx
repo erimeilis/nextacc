@@ -7,8 +7,8 @@ const commonClass = 'shadow-inner shadow-sm border-b border-r last:border-r-0 bo
     'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground ' +
     'dark:bg-muted dark:text-muted-foreground dark:border-border dark:hover:bg-accent dark:hover:text-foreground '
 const activeTabClass = 'shadow-none border-b-0 ' +
-    'bg-background hover:bg-background text-foreground ' +
-    'dark:bg-background dark:text-foreground dark:hover:bg-background dark:hover:text-foreground'
+    'bg-gradient-to-br from-secondary to-background hover:bg-gradient-to-br hover:from-secondary hover:to-background text-foreground ' +
+    'dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground dark:hover:bg-gradient-to-br dark:hover:from-secondary dark:hover:to-background'
 
 export default function Tab({
                                 type = 'button',

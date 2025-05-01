@@ -19,7 +19,7 @@ const disabledLineButtonClass = `
 
 const fixedButtonClass = `
     flex w-fit h-fit cursor-pointer rounded-md px-4 py-2 text-sm font-medium transition-colors
-    text-primary-foreground bg-primary hover:bg-primary/90 active:bg-primary/80
+    gradient-button
 `
 const disabledButtonClass = `
     opacity-50 cursor-not-allowed
@@ -27,7 +27,7 @@ const disabledButtonClass = `
 
 const pillowButtonClass = `
     flex w-fit h-fit cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors
-    text-primary-foreground bg-primary hover:bg-primary/90 active:bg-primary/80
+    gradient-button
     shadow-sm hover:shadow
 `
 

@@ -10,13 +10,11 @@ import { cn } from "@/lib/utils"
 
 const Dropdown = ({
   label,
-  inline,
   children,
   className,
   ...props
 }: {
   label: React.ReactNode;
-  inline?: boolean;
   children: React.ReactNode;
   className?: string;
 }) => {
@@ -24,8 +22,8 @@ const Dropdown = ({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant={inline ? "ghost" : "default"} 
-          className={cn("", className)}
+          variant="link" 
+          className={cn("text-white hover:text-white focus:outline-none focus:bg-transparent", className)}
           {...props}
         >
           {label}

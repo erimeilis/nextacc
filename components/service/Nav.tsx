@@ -43,7 +43,7 @@ export default function Nav() {
     }
 
     return (
-        <nav className="w-full px-4 py-2 mx-auto bg-primary dark:bg-primary bg-opacity-90 sticky top-0 shadow lg:px-8 lg:py-3 backdrop-blur-lg backdrop-saturate-150 z-[9999]">
+        <nav className="w-full px-3 py-1 mx-auto backdrop sticky top-0 shadow lg:px-6 lg:py-2 z-[9999]">
             <div className="flex flex-wrap items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Image
@@ -87,7 +87,7 @@ export default function Nav() {
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end" forceMount>
+                            <DropdownMenuContent className="w-56 z-[10000]" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium">{session.data.user.name}</p>
@@ -124,19 +124,19 @@ export default function Nav() {
                 </div>
                 <div className={`${isMenuOpen ? 'block' : 'hidden'} w-full md:block md:w-auto md:order-1`}>
                     <div className="flex flex-col p-4 mt-4 font-medium border rounded-lg md:p-0 md:flex-row md:space-x-8 md:mt-0 md:border-0">
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-white bg-primary rounded md:bg-transparent md:p-0 md:text-primary-foreground">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-white md:p-0">
                             Home
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-white hover:text-white/80 md:p-0">
                             About
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-white hover:text-white/80 md:p-0">
                             Services
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-white hover:text-white/80 md:p-0">
                             Pricing
                         </Link>
-                        <Link href="#" className="block py-2 pl-3 pr-4 text-muted-foreground hover:text-foreground hover:bg-primary-foreground dark:hover:bg-primary md:p-0">
+                        <Link href="#" className="block py-2 pl-3 pr-4 text-white hover:text-white/80 md:p-0">
                             Contact
                         </Link>
                     </div>

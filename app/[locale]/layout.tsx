@@ -70,7 +70,7 @@ export default async function RootLayout(
                     const colorThemeStr = localStorage.getItem('state:color-theme');
                     if (colorThemeStr) {
                       const colorTheme = JSON.parse(colorThemeStr);
-                      const colorThemes = ['blue', 'pink', 'orange', 'teal', 'violet'];
+                      const colorThemes = ['equinox', 'reef'];
                       document.documentElement.classList.remove(...colorThemes);
                       document.documentElement.classList.add(colorTheme);
                     }
