@@ -38,7 +38,16 @@ export default function Login() {
     const c = useTranslations('common')
 
     const searchParams = useSearchParams()
-    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    // Filter out callbackUrl parameter to prevent infinite redirections
+    const filteredParams = new URLSearchParams()
+    if (searchParams) {
+        searchParams.forEach((value, key) => {
+            if (key !== 'callbackUrl') {
+                filteredParams.append(key, value)
+            }
+        })
+    }
+    const search = filteredParams.size > 0 ? `?${filteredParams.toString()}` : ''
 
     const [modeLogin, setModeLogin] = usePersistState(false, 'loginMode')
     const handleToggle = () => {

@@ -14,8 +14,8 @@ export default function AnonymousSessionProvider({
     useEffect(() => {
         console.log(status)
         if (status === 'unauthenticated') {
-            // login as anonymous
-            signIn('anonymous')
+            // login as anonymous without redirect to prevent callbackUrl parameter accumulation
+            signIn('anonymous', { redirect: false })
                 .then(() => {
                     if (persistentId === '') setPersistentId(uuidv4())
                 })
