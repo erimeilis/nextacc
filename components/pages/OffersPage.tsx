@@ -139,7 +139,7 @@ export default function OffersPage() {
     }, [])
 
     return (
-        <Card id="offers" className="bg-muted dark:bg-muted border border-border p-0 pb-8">
+        <Card id="offers" className="bg-background dark:bg-background border border-border p-0 pb-8 overflow-hidden">
             <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={selectedType}/>
             <div className="flex flex-col md:flex-row items-center gap-4 justify-between my-4 px-6">
                 <DropdownSelectGeo
@@ -162,7 +162,7 @@ export default function OffersPage() {
                 />
             </div>
             <div
-                className="flex items-center transition duration-300 px-6"
+                className="flex items-center transition duration-300 px-6 overflow-hidden"
                 style={{display: (searchParams.has('type') && searchParams.has('country') && searchParams.has('area')) ? 'block' : 'none'}}
             >
                 <NumberOffersList
@@ -173,7 +173,7 @@ export default function OffersPage() {
                 />
             </div>
             <div
-                className="flex flex-col px-6 transition duration-300 text-foreground dark:text-foreground"
+                className="flex flex-col px-6 transition duration-300 text-foreground dark:text-foreground overflow-hidden"
             >
                 <Show when={typeof getNumber !== 'undefined' && getNumber !== null}>
                     {BuyNumberForm({

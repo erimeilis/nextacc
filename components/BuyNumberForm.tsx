@@ -181,13 +181,15 @@ export default function BuyNumberForm({
         >
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="w-full space-y-6">
-                    <div className="p-4 bg-secondary/50 rounded-lg text-sm font-medium">
+                    <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
                         {t('setupfee')}: <span className="text-primary font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span className="text-primary font-semibold">{numberInfo.fix_rate} $</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <PhoneTransfer size={20} className="text-primary" />
+                                <div className="flex flex-row items-center gap-3 mt-8">
+                                    <PhoneTransfer size={24} className="text-primary" />
+                                </div>
                                 <DropdownSelect
                                     selectId="voiceType"
                                     selectTitle={t('select_voice_destination')}
@@ -217,7 +219,9 @@ export default function BuyNumberForm({
                     {numberInfo.sms ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <ChatText size={20} className="text-primary" />
+                                <div className="flex flex-row items-center gap-3 mt-8">
+                                    <ChatText size={24} className="text-primary" />
+                                </div>
                                 <DropdownSelect
                                     selectId="smsType"
                                     selectTitle={t('select_sms_destination')}
@@ -252,7 +256,7 @@ export default function BuyNumberForm({
                 </div>
 
                 <div className="flex flex-col gap-6 w-full lg:w-fit">
-                    <div className="flex flex-row gap-2 justify-end items-center bg-secondary/30 p-2 rounded-lg">
+                    <div className="flex flex-row gap-2 justify-end items-center bg-gradient-to-r from-secondary/40 to-secondary/20 p-2 h-8 rounded-lg shadow-sm overflow-hidden">
                         <div className="flex items-center text-xs font-medium">{t('pay_for')}</div>
                         <div className="flex items-center">
                             <DropdownSelect
@@ -267,11 +271,11 @@ export default function BuyNumberForm({
                         <div className="flex items-center text-xs font-medium">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
                     </div>
 
-                    <div className="bg-card rounded-lg overflow-hidden shadow-sm border border-border">
+                    <div className="bg-gradient-to-br from-card to-muted/30 dark:from-card dark:to-muted/30 rounded-lg overflow-hidden shadow-md border border-border">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead colSpan={4} className="bg-muted/50 text-center font-medium">{t('discount')}</TableHead>
+                                    <TableHead colSpan={4} className="bg-gradient-to-r from-muted/60 to-muted/40 text-center font-medium">{t('discount')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>

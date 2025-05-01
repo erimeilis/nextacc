@@ -35,7 +35,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
                      </Show>
                  }>
         <div className="flex flex-col rounded-md w-full border border-border bg-muted drop-shadow text-foreground
-        dark:border-border dark:bg-background dark:text-foreground">
+        dark:border-border dark:bg-background dark:text-foreground overflow-hidden">
             <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
                 {profileTabs.map(tab =>
                     <Tab

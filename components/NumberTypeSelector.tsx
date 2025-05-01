@@ -17,7 +17,7 @@ export default function NumberTypeSelector({
     }
     const t = useTranslations('offers')
     return (
-        <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
+        <nav className="flex flex-row w-full justify-evenly bg-background dark:bg-background">
             {options.map((option) =>
                 <Tab
                     key={option}

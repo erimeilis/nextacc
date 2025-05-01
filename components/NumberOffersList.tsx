@@ -51,7 +51,7 @@ export default function NumberOffersList({
                         options.map((option) => {
                             const isSelected = selectedOption === option.did;
                             return (
-                                <div key={option.did} className="flex flex-row items-center gap-3 p-2 rounded-md border border-border hover:bg-muted/50 transition-colors">
+                                <div key={option.did} className="flex flex-row items-center gap-3 p-2 rounded-md border border-border hover:bg-muted/50 transition-colors overflow-hidden">
                                     <Radio
                                         id={option.did}
                                         value={option.did}

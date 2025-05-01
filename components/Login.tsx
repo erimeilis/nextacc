@@ -154,7 +154,7 @@ export default function Login() {
 
     return (
         <>
-            <Card id="login" className="p-6">
+            <Card id="login" className="p-6 bg-gradient-to-br from-background to-muted dark:from-background dark:to-muted overflow-hidden">
                 <div className="flex items-center justify-between">
                     <div>{t('not_signed_in')}<br/></div>
                     <Toggle
