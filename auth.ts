@@ -16,7 +16,20 @@ import {jwtDecode} from 'jwt-decode'
 import {KCApiAccessToken} from '@/types/KCApiAccessToken'
 import {getLocale} from 'next-intl/server'
 import {geoip} from '@/utils/geoip'
-import qs from 'querystring'
+// Custom cookie parser function instead of using 'querystring' which is not supported in Edge Runtime
+const parseCookies = (cookieString: string, separator: string = '; '): Record<string, string> => {
+    const cookies: Record<string, string> = {};
+    if (!cookieString) return cookies;
+
+    cookieString.split(separator).forEach(cookie => {
+        const [name, value] = cookie.split('=');
+        if (name && value) {
+            cookies[name.trim()] = decodeURIComponent(value.trim());
+        }
+    });
+
+    return cookies;
+}
 import {headers} from 'next/headers'
 import {AdapterSession, AdapterUser} from '@auth/core/adapters'
 import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
@@ -139,7 +152,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                             //throw new AuthError('bad_credentials')
                         }
 
-                        //User exists and creds are ok as we've got ID
+                        //User exists, and creds are ok as we've got ID
                         //const adminToken = await kcGetAdminToken() //Get Admin token on KC
                         //if (!adminToken) return null
 
@@ -220,7 +233,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                     const country = await geoip()
                     const headersList = await headers()
                     const cookies = headersList.get('cookie')
-                    const cookiesObj = qs.decode(cookies!, '; ')
+                    const cookiesObj = parseCookies(cookies!, '; ')
                     const lang = cookiesObj.NEXT_LOCALE
                     const adminToken = await kcGetAdminAccessToken() //Get Admin token on KC
                     if (!adminToken) return false
@@ -270,7 +283,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 }
             }
             if (Date.now() < token.accessTokenExpires - 1000) {
-                // token has not expired yet, return it
+                // the token has not expired yet, return it
                 return token
             }
             const refreshedToken = await refreshAccessToken(token)
@@ -286,6 +299,10 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 session.user = token.user as AdapterUser
             }
             return session
+        },
+        async redirect({ url, baseUrl }) {
+            // Ensure the redirect URL is working correctly
+            return url ? url : baseUrl;
         },
     },
     events: {
