@@ -27,7 +27,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
     const t = useTranslations('dashboard')
     const pathName = usePathname()
     const searchParams = useSearchParams()
-    // Filter out callbackUrl parameter to prevent infinite redirections
+    // Filter out the callbackUrl parameter to prevent infinite redirections
     const filteredParams = new URLSearchParams()
     if (searchParams) {
         searchParams.forEach((value, key) => {
