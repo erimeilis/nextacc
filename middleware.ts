@@ -9,13 +9,16 @@ const intlMiddleware = createMiddleware(routing);
 export async function middleware(request: NextRequest) {
   // First, check authentication with next-auth if needed,
   // We're not using the response directly as next-auth v5 handles auth via middleware
-  await auth();
+  await auth()
 
   // Then, handle internationalization with next-intl
-  return intlMiddleware(request);
+  return intlMiddleware(request)
 }
 
 export const config = {
-  // Skip all paths that should not be internationalized
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|icon.png).*)'],
+  // Exclude auth-related paths to prevent infinite redirects as per NextAuth.js documentation
+  matcher: [
+    // Apply middleware to all routes except the ones specified
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|icon.png).*)'
+  ],
 }
