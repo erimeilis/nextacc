@@ -1,9 +1,9 @@
 'use client'
 import {routing} from '@/i18n/routing'
-//import {CaretDown} from '@phosphor-icons/react'
-import {Dropdown} from '@/components/ui/dropdown'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
+import {Button} from '@/components/ui/button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
 
 // Map of locale codes to flag emojis
 const localeFlags: Record<string, string> = {
@@ -29,17 +29,27 @@ export default function LocaleSwitcher() {
     }
 
     return (
-        <Dropdown label={t('locale')} className="inline" /*arrowIcon={CaretDown}*/>
-            {routing.locales.map((locale) => (
-                <Dropdown.Item
-                    key={locale}
-                    href={redirectedPathName(locale) + search}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button 
+                    variant="nav"
                     className="flex items-center gap-2"
                 >
-                    <span className="text-base">{localeFlags[locale]}</span>
-                    <span>{locale}</span>
-                </Dropdown.Item>
-            ))}
-        </Dropdown>
+                    {t('locale')}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-fit z-[10000]" align="end" forceMount>
+                {routing.locales.map((locale) => (
+                    <DropdownMenuItem
+                        key={locale}
+                        className="flex items-center gap-2"
+                        onClick={() => window.location.href = redirectedPathName(locale) + search}
+                    >
+                        <span className="text-base">{localeFlags[locale]}</span>
+                        <span>{locale}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
