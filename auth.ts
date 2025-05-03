@@ -16,6 +16,13 @@ import {jwtDecode} from 'jwt-decode'
 import {KCApiAccessToken} from '@/types/KCApiAccessToken'
 import {getLocale} from 'next-intl/server'
 import {geoip} from '@/utils/geoip'
+import {headers} from 'next/headers'
+import {AdapterSession, AdapterUser} from '@auth/core/adapters'
+import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
+import {refreshAccessToken} from '@/app/api/auth/[...nextauth]/refresh'
+import {v4 as uuidv4} from 'uuid'
+import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-names-generator'
+import {JWT} from 'next-auth/jwt'
 // Custom cookie parser function instead of using 'querystring' which is not supported in Edge Runtime
 const parseCookies = (cookieString: string, separator: string = '; '): Record<string, string> => {
     const cookies: Record<string, string> = {};
@@ -30,13 +37,6 @@ const parseCookies = (cookieString: string, separator: string = '; '): Record<st
 
     return cookies;
 }
-import {headers} from 'next/headers'
-import {AdapterSession, AdapterUser} from '@auth/core/adapters'
-import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
-import {refreshAccessToken} from '@/app/api/auth/[...nextauth]/refresh'
-import {v4 as uuidv4} from 'uuid'
-import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-names-generator'
-import {JWT} from 'next-auth/jwt'
 
 declare module 'next-auth' {
     interface User {
@@ -70,8 +70,12 @@ declare module 'next-auth/jwt' {
 
 export const {handlers, signIn, signOut, auth} = NextAuth({
     pages: {
-        signIn: '/',
-        error: '/'
+        signIn: '',
+        error: '',
+        signOut: '',
+        verifyRequest: '',
+        newUser: ''
+
     },
     secret: process.env.NEXTAUTH_SECRET,
     session: {
