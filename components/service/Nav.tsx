@@ -29,6 +29,7 @@ export default function Nav() {
     //    setIsMenuOpen(!isMenuOpen)
     //}
 
+    //todo reset persistentID on logout?
     return (
         <nav className="w-full px-3 py-1 mx-auto backdrop sticky top-0 shadow lg:px-6 lg:py-2 z-[9999]">
             <div className="flex flex-wrap items-center justify-between">

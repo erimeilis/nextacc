@@ -1,9 +1,9 @@
 import {ReactNode, useEffect} from 'react'
-import {signIn, useSession} from 'next-auth/react'
+import {useSession} from 'next-auth/react'
 import usePersistState from '@/usePersistState'
 import {v4 as uuidv4} from 'uuid'
 
-export default function AnonymousSessionProvider({
+export default function AnonymousSessionProvider({ //todo rename or remove it cos we only set persistentId here
                                                      children
                                                  }: {
     children: ReactNode
@@ -13,13 +13,13 @@ export default function AnonymousSessionProvider({
 
     useEffect(() => {
         console.log(status)
-        if (status === 'unauthenticated') {
+        if (persistentId === '') setPersistentId(uuidv4())
+        //if (status === 'unauthenticated') {
             // login as anonymous without redirect to prevent callbackUrl parameter accumulation
-            signIn('anonymous', { redirect: false })
-                .then(() => {
-                    if (persistentId === '') setPersistentId(uuidv4())
-                })
-        }
+        //    (async () => {
+        //        await signIn('anonymous', { redirect: false })
+        //    })()
+        //}
     }, [persistentId, session, setPersistentId, status])
 
     return (

@@ -90,6 +90,7 @@ export default function Profile({
 
     const userProfile = Userinfo()
 
+    //todo reset persistentID on logout?
     return <Show
         when={typeof userProfile !== 'undefined' && userProfile !== null}
         fallback={<Loader height={350}/>}>
