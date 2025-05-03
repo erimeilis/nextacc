@@ -2,6 +2,7 @@
 import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
 import {KCUserRepresentation} from '@/types/KCUserRepresentation'
 import {geoip} from '@/utils/geoip'
+import {getClientIp} from '@/utils/getClientIp'
 import axios, {AxiosError, AxiosResponse} from 'axios'
 import {KCFederatedIdentityRepresentation} from '@/types/KCFederatedIdentityRepresentation'
 
@@ -363,6 +364,7 @@ export async function kcSendServiceEmail({
 
 
 export async function redLoginOrSignupWithToken(token: string): Promise<number | null> {
+    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -370,6 +372,7 @@ export async function redLoginOrSignupWithToken(token: string): Promise<number |
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + token,
+            'X-Client-IP': clientIp || '',
         },
         body: JSON.stringify({
             'site': process.env.SITE_ID
@@ -398,6 +401,7 @@ export async function redGetUserByCreds(username: string, password = ''): Promis
     if (password !== '') body = Object.assign(body, {
         'password': password
     })
+    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -405,6 +409,7 @@ export async function redGetUserByCreds(username: string, password = ''): Promis
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
+            'X-Client-IP': clientIp || '',
         },
         body: JSON.stringify({
             body

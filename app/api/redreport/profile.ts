@@ -1,6 +1,7 @@
 'use server'
 import {UserProfile} from '@/types/UserProfile'
 import {auth} from '@/auth'
+import {getClientIp} from '@/utils/getClientIp'
 
 //const urlKcToken: string = process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token'
 //const urlKcUsers: string = process.env.KEYCLOAK_ADMIN_REALM + '/users/'
@@ -9,6 +10,7 @@ import {auth} from '@/auth'
 export async function redGetUserProfile(): Promise<UserProfile | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
+    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -16,6 +18,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token,
+            'X-Client-IP': clientIp || '',
         },
         body: JSON.stringify({
             'site': process.env.SITE_ID
@@ -39,6 +42,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
 export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<UserProfile | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
+    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PATCH',
@@ -46,6 +50,7 @@ export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<U
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token,
+            'X-Client-IP': clientIp || '',
         },
         body: JSON.stringify({
             'site': process.env.SITE_ID,

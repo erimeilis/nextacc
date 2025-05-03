@@ -4,9 +4,19 @@ import {setupCache} from 'axios-cache-interceptor'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
+import {getClientIp} from '@/utils/getClientIp'
 
 const instance = Axios.create()
 const axios = setupCache(instance)
+
+// Set up request interceptor to add client IP to all requests
+axios.interceptors.request.use(async (config) => {
+    const clientIp = await getClientIp();
+    if (clientIp) {
+        config.headers['X-Client-IP'] = clientIp;
+    }
+    return config;
+});
 
 // Set up error interceptor once
 axios.interceptors.response.use(

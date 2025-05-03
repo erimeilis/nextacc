@@ -1,6 +1,7 @@
 'use server'
 import {NumberInfo} from '@/types/NumberInfo'
 import {auth} from '@/auth'
+import {getClientIp} from '@/utils/getClientIp'
 
 export async function addToCart(
     {
@@ -26,6 +27,7 @@ export async function addToCart(
     }
     const session = await auth()
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
+    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -37,6 +39,7 @@ export async function addToCart(
                 ('Bearer ' + process.env.REDREPORT_TOKEN)
             ),
             'X-UID': uid,
+            'X-Client-IP': clientIp || '',
         },
         credentials: 'include',
         body: JSON.stringify({
