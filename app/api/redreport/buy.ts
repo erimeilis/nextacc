@@ -1,10 +1,11 @@
 'use server'
 import {NumberInfo} from '@/types/NumberInfo'
 import {auth} from '@/auth'
-import {getClientIp} from '@/utils/getClientIp'
+import {getAppIp} from '@/utils/getAppIp'
 
 export async function addToCart(
     {
+        clientInfo,
         uid,
         number,
         countryId,
@@ -13,6 +14,7 @@ export async function addToCart(
         voice,
         sms
     }: {
+        clientInfo: { ip?: string, country?: string },
         uid: string,
         number: NumberInfo | null,
         countryId: number | null,
@@ -27,7 +29,7 @@ export async function addToCart(
     }
     const session = await auth()
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
-    const clientIp = await getClientIp()
+    const appIp = await getAppIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -39,7 +41,9 @@ export async function addToCart(
                 ('Bearer ' + process.env.REDREPORT_TOKEN)
             ),
             'X-UID': uid,
-            'X-Client-IP': clientIp || '',
+            'X-App-IP': appIp || '',
+            'X-Client-IP': clientInfo.ip || '',
+            'X-Client-Country': clientInfo.country || '',
         },
         credentials: 'include',
         body: JSON.stringify({

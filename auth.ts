@@ -25,17 +25,17 @@ import {adjectives, animals, colors, Config, uniqueNamesGenerator} from 'unique-
 import {JWT} from 'next-auth/jwt'
 // Custom cookie parser function instead of using 'querystring' which is not supported in Edge Runtime
 const parseCookies = (cookieString: string, separator: string = '; '): Record<string, string> => {
-    const cookies: Record<string, string> = {};
-    if (!cookieString) return cookies;
+    const cookies: Record<string, string> = {}
+    if (!cookieString) return cookies
 
     cookieString.split(separator).forEach(cookie => {
-        const [name, value] = cookie.split('=');
+        const [name, value] = cookie.split('=')
         if (name && value) {
-            cookies[name.trim()] = decodeURIComponent(value.trim());
+            cookies[name.trim()] = decodeURIComponent(value.trim())
         }
-    });
+    })
 
-    return cookies;
+    return cookies
 }
 
 declare module 'next-auth' {
@@ -303,33 +303,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 session.user = token.user as AdapterUser
             }
             return session
-        },
-        async redirect({ url, baseUrl }) {
-            // Ensure the redirect URL is working correctly
-            if (!url) {
-                console.log("NextAuth redirect: No URL provided, returning baseUrl:", baseUrl);
-                return baseUrl;
-            }
-
-            console.log("NextAuth redirect: Original URL:", url, "baseUrl:", baseUrl);
-
-            // Prevent infinite loop by checking if the URL already contains the baseUrl in callbackUrl parameter
-            const callbackUrlParam = "callbackUrl=";
-            if (url.includes(callbackUrlParam)) {
-                const callbackUrlValue = url.split(callbackUrlParam)[1];
-                console.log("NextAuth redirect: Found callbackUrl parameter with value:", callbackUrlValue);
-
-                // If the callbackUrl value contains the baseUrl, it might cause an infinite loop
-                if (callbackUrlValue && callbackUrlValue.includes(baseUrl)) {
-                    console.log("NextAuth redirect: Detected potential infinite loop, returning baseUrl to break it");
-                    // Return just the baseUrl to break the loop
-                    return baseUrl;
-                }
-            }
-
-            console.log("NextAuth redirect: Returning URL:", url);
-            return url;
-        },
+        }
     },
     events: {
         async signIn({user, account}: { user: User, account: Account | null, profile?: Profile }): Promise<void> {

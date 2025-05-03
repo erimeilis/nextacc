@@ -1,5 +1,5 @@
 'use client'
-import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
+import React, {ChangeEvent, SyntheticEvent, useEffect, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
@@ -16,16 +16,9 @@ import {schemaHttps} from '@/schemas/https.schema'
 import useSWR from 'swr'
 import {getDiscounts} from '@/app/api/redreport/offers'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
-import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableHead,
-    TableRow,
-    TableCell
-} from '@/components/ui/table'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/buy'
-import {getPersistState} from '@/usePersistState'
+import usePersistState, {getPersistState} from '@/usePersistState'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -39,6 +32,25 @@ export default function BuyNumberForm({
     const t = useTranslations('offers')
     const d = useTranslations('docs')
     const persistentId = getPersistState<string>('persistentId', 'no-id')
+    const [persistentClientInfo, setPersistentClientInfo] = usePersistState<object>({
+        'ip': '',
+        'hostname': '',
+        'city': '',
+        'region': '',
+        'country': '',
+        'loc': '',
+        'org': '',
+        'postal': '',
+        'timezone': ''
+    }, 'persistentClientInfo')
+    useEffect(() => {
+        const getClientInfo = async () => {
+            const res = await fetch('https://ipinfo.io/json')
+            const info = await res.json()
+            setPersistentClientInfo(info)
+        }
+        getClientInfo()
+    }, [setPersistentClientInfo])
 
     const voice: { id: string, name: string }[] = voiceDestinationsFields.map((i) => {
         return {id: i.id, name: t(i.labelText)}
@@ -51,6 +63,7 @@ export default function BuyNumberForm({
         //TODO add validation here
         if (numberInfo) {
             const data = await addToCart({
+                clientInfo: persistentClientInfo,
                 uid: persistentId,
                 number: numberInfo,
                 countryId: countryId,
@@ -182,13 +195,14 @@ export default function BuyNumberForm({
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="w-full space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
-                        {t('setupfee')}: <span className="text-price font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span className="text-price font-semibold">{numberInfo.fix_rate} $</span>
+                        {t('setupfee')}: <span className="text-price font-semibold">{numberInfo.setup_rate} $</span> / {t('monthlyfee')}: <span
+                        className="text-price font-semibold">{numberInfo.fix_rate} $</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
                             <div className="flex w-full flex-row items-center gap-3">
                                 <div className="flex flex-row items-center gap-3 mt-8">
-                                    <PhoneTransfer size={24} className="text-primary" />
+                                    <PhoneTransfer size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
                                     selectId="voiceType"
@@ -220,7 +234,7 @@ export default function BuyNumberForm({
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
                             <div className="flex w-full flex-row items-center gap-3">
                                 <div className="flex flex-row items-center gap-3 mt-8">
-                                    <ChatText size={24} className="text-primary" />
+                                    <ChatText size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
                                     selectId="smsType"

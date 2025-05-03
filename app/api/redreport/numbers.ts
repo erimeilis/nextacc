@@ -1,7 +1,6 @@
 'use server'
 import {auth} from '@/auth'
 import {NumberInfo} from '@/types/NumberInfo'
-import {getClientIp} from '@/utils/getClientIp'
 
 export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     const session = await auth()
@@ -11,7 +10,6 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers');
     url.searchParams.append('site', process.env.SITE_ID || '');
 
-    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -19,7 +17,6 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token,
-            'X-Client-IP': clientIp || ''
         }
         // Removed body as GET requests cannot have bodies
     }

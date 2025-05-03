@@ -2,7 +2,6 @@
 import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {auth} from '@/auth'
 import moment from 'moment'
-import {getClientIp} from '@/utils/getClientIp'
 
 export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> {
     const session = await auth()
@@ -14,7 +13,6 @@ export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> 
     url.searchParams.append('from', moment().subtract(360, 'days').toISOString());
     url.searchParams.append('to', moment().toISOString());
 
-    const clientIp = await getClientIp()
     const options: RequestInit = {
         cache: 'no-store',
         method: 'GET',
@@ -22,7 +20,6 @@ export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> 
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token,
-            'X-Client-IP': clientIp || ''
         }
         // Removed body as GET requests cannot have bodies
     }
