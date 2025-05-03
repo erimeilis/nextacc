@@ -129,8 +129,13 @@ export default function Profile({
                                 <Show
                                     when={modeEditProfile}
                                     fallback={
-                                        <div className="flex flex-row">
-                                            <p className="p-2 text-sm">{t(field.labelText)}:&nbsp;&nbsp;{profileState[field.id]}</p>
+                                        <div className="flex flex-row w-full">
+                                            <div className="flex text-sm p-2 items-center font-normal min-w-32 w-32">
+                                                {t(field.labelText)}:
+                                            </div>
+                                            <div className="flex-grow p-2 text-sm">
+                                                {profileState[field.id]}
+                                            </div>
                                         </div>}
                                 >
                                     <LineInput
@@ -144,7 +149,7 @@ export default function Profile({
                                         isRequired={field.isRequired}
                                         placeholder={t(field.placeholder)}
                                         size="sm"
-                                        customClass="rounded-none border-b-none"
+                                        customClass=""
                                     />
                                 </Show>
                             </div>

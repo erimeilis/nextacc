@@ -48,21 +48,21 @@ export default function LineInput({
     }
 
     return (
-        <div className="flex flex-row">
+        <div className="flex flex-row w-full">
             <Label
                 htmlFor={labelFor}
-                className="flex text-sm p-2 items-center font-normal"
+                className="flex text-sm p-2 items-center font-normal min-w-32 w-32"
             >
                 {labelText}:
             </Label>
-            <div className="relative">
+            <div className="relative flex-grow flex items-end">
                 <Input
                     onChange={handleAction}
                     value={value}
                     id={id}
                     name={name}
                     type={typeState}
-                    className={`${customClass} ${size === 'sm' ? 'h-8 text-sm' : size === 'lg' ? 'h-12 text-lg' : 'h-10'}`}
+                    className={`bg-transparent border-0 border-b border-input rounded-none py-0 mb-0 ${customClass} ${size === 'sm' ? 'h-8 text-sm' : size === 'lg' ? 'h-12 text-lg' : 'h-10'}`}
                     placeholder={placeholder}
                     required={isRequired}
                     disabled={disabled}

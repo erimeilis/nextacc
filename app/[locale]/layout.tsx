@@ -10,15 +10,23 @@ import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import SWRProvider from '@/providers/SWRProvider'
+import {Ubuntu} from 'next/font/google'
+
+// Initialize Ubuntu font
+const ubuntu = Ubuntu({
+    weight: ['300', '400', '500', '700'],
+    subsets: ['latin', 'cyrillic'],
+    display: 'swap',
+})
 
 // Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/service/Nav'), {
-  ssr: true,
-  loading: () => <div className="h-16"></div> // Simple placeholder while loading
+    ssr: true,
+    loading: () => <div className="h-16"></div> // Simple placeholder while loading
 })
 
 export const metadata: Metadata = {
-  title: 'NextAcc',
+    title: 'NextAcc',
 }
 
 export default async function RootLayout(
@@ -50,12 +58,12 @@ export default async function RootLayout(
     })
 
     return (
-        <html lang={locale} suppressHydrationWarning>
+        <html lang={locale} suppressHydrationWarning className={ubuntu.className}>
         <head>
             <title>NextAcc</title>
-            <link rel="icon" href="/icon.png" type="image/png" />
+            <link rel="icon" href="/icon.png" type="image/png"/>
             <script dangerouslySetInnerHTML={{
-              __html: `
+                __html: `
                 (function() {
                   // Apply dark/light theme
                   try {
@@ -79,14 +87,14 @@ export default async function RootLayout(
                   }
                 })();
               `
-            }} />
+            }}/>
         </head>
         <body className="bg-background text-foreground">
-        <ThemeProvider 
-          attribute="class"
-          disableTransitionOnChange={true}
-          storageKey="theme"
-          defaultTheme="system"
+        <ThemeProvider
+            attribute="class"
+            disableTransitionOnChange={true}
+            storageKey="theme"
+            defaultTheme="system"
         >
             <SWRProvider>
                 <AuthProvider>

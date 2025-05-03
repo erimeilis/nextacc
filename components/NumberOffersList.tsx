@@ -63,10 +63,10 @@ export default function NumberOffersList({
                                         onClick={isSelected ? undefined : () => handleLabelClick(option.did)}
                                     >
                                         {option.name}
-                                        {option.voice ? <Phone weight="regular" className="text-muted-foreground" size={16}/> : ''}
-                                        {option.sms ? <ChatCircleText weight="regular" className="text-muted-foreground" size={16}/> : ''}
-                                        {option.fax ? <Printer weight="regular" className="text-muted-foreground" size={16}/> : ''}
-                                        {option.toll_free ? <Headset weight="regular" className="text-muted-foreground" size={16}/> : ''}
+                                        {option.voice ? <Phone weight="fill" className={isSelected ? "text-primary" : "text-muted-foreground"} size={16}/> : ''}
+                                        {option.sms ? <ChatCircleText weight="fill" className={isSelected ? "text-primary" : "text-muted-foreground"} size={16}/> : ''}
+                                        {option.fax ? <Printer weight="fill" className={isSelected ? "text-primary" : "text-muted-foreground"} size={16}/> : ''}
+                                        {option.toll_free ? <Headset weight="fill" className={isSelected ? "text-primary" : "text-muted-foreground"} size={16}/> : ''}
                                     </Label>
                                 </div>
                             );
