@@ -53,8 +53,8 @@ export default function CartButton() {
                     </span>
                 </Button>
             </DrawerTrigger>
-            <DrawerContent className="max-w-md rounded-l-lg border-l fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
-                {/* Hide the default drawer handle for right-side drawer */}
+            <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-l-lg border-l fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
+                {/* Hide the default drawer handle for the right-side drawer */}
                 <style jsx global>{`
                     .max-w-md > div:first-child {
                         display: none;
@@ -62,11 +62,11 @@ export default function CartButton() {
                 `}</style>
                 <div className="flex flex-col h-full w-full">
                     <DrawerHeader className="flex flex-row items-center justify-between">
-                        <DrawerTitle>Your Cart</DrawerTitle>
+                        <DrawerTitle></DrawerTitle>
                         <DrawerClose onClick={() => setSidebarOpen(false)}/>
                     </DrawerHeader>
 
-                    <div 
+                    <div
                         className="flex-1 overflow-y-auto px-4 pt-6"
                         style={{
                             scrollbarWidth: 'thin',
