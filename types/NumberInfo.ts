@@ -7,7 +7,6 @@ export type NumberInfo = {
     voice: boolean
     sms: boolean
     toll_free: boolean
-    fax: boolean
     incoming_per_minute?: number
     toll_free_rate_in_min?: number
     incoming_rate_sms?: number

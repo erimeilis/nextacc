@@ -19,6 +19,7 @@ import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/buy'
 import usePersistState, {getPersistState} from '@/usePersistState'
+import {ClientInfo} from '@/types/ClientInfo'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -32,16 +33,9 @@ export default function BuyNumberForm({
     const t = useTranslations('offers')
     const d = useTranslations('docs')
     const persistentId = getPersistState<string>('persistentId', 'no-id')
-    const [persistentClientInfo, setPersistentClientInfo] = usePersistState<object>({
+    const [persistentClientInfo, setPersistentClientInfo] = usePersistState<ClientInfo>({
         'ip': '',
-        'hostname': '',
-        'city': '',
-        'region': '',
         'country': '',
-        'loc': '',
-        'org': '',
-        'postal': '',
-        'timezone': ''
     }, 'persistentClientInfo')
     useEffect(() => {
         const getClientInfo = async () => {
@@ -195,8 +189,10 @@ export default function BuyNumberForm({
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="w-full space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
-                        <span className="flex items-center">{t('setupfee')}:</span> <span className="text-price font-semibold mx-2 flex items-center">{numberInfo.setup_rate} $</span> / <span className="flex items-center">{t('monthlyfee')}:</span> <span
-                        className="text-price font-semibold mx-2 flex items-center">{numberInfo.fix_rate} $</span>
+                        <span className="flex items-center">{t('setupfee')}:</span> <span
+                        className="text-price font-semibold mx-2 flex items-center">{numberInfo.setup_rate} $</span> / <span className="flex items-center">{t('monthlyfee')}:</span>
+                        <span
+                            className="text-price font-semibold mx-2 flex items-center">{numberInfo.fix_rate} $</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">

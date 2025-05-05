@@ -6,12 +6,11 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return []
 
-    // Create URL with query parameters instead of using body
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers');
-    url.searchParams.append('site', process.env.SITE_ID || '');
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers')
+    url.searchParams.append('site', process.env.SITE_ID || '')
 
     const options: RequestInit = {
-        cache: 'no-store',
+        cache: 'reload',
         method: 'GET',
         headers: {
             'Accept': 'application/json',

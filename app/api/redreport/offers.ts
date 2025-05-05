@@ -71,7 +71,7 @@ export async function getNumbers({type, country, area}: { type: string, country:
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
             cache: {
-                ttl: 30 * 60 * 1000,
+                ttl: 10 * 60 * 1000,
             }
         }
     )
@@ -87,7 +87,6 @@ export async function getNumbers({type, country, area}: { type: string, country:
             voice: number.voice ?? false,
             sms: number.sms ?? false,
             toll_free: number.toll_free ?? false,
-            fax: number.fax ?? false,
             incoming_per_minute: number.incoming_per_minute ? Number(number.incoming_per_minute) : null,
             toll_free_rate_in_min: number.toll_free_rate_in_min ? Number(number.toll_free_rate_in_min) : null,
             incoming_rate_sms: number.incoming_rate_sms ? Number(number.incoming_rate_sms) : null,
