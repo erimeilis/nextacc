@@ -14,6 +14,7 @@ import {ThemeToggle} from '@/components/ui/theme-toggle'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 import {Button} from '@/components/ui/button'
+import CartButton from '@/components/service/CartButton'
 
 export default function Nav() {
     //const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -49,9 +50,11 @@ export default function Nav() {
                         className="dark:hidden"
                     />
                 </Link>
+
                 <div className="flex md:order-2 gap-2 items-center">
+                    <CartButton />
                     <LocaleSwitcher/>
-                    <ThemeToggle />
+                    <ThemeToggle/>
                     {(session &&
                         session.status === 'authenticated' &&
                         session.data &&
@@ -62,12 +65,12 @@ export default function Nav() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                                     <Avatar>
-                                        <AvatarImage 
+                                        <AvatarImage
                                             src={
                                                 session.data.user.image ??
                                                 'https://gravatar.com/avatar/' + createHash('sha256').update(session.data.user.email!.toLowerCase()).digest('hex')
-                                            } 
-                                            alt="User settings" 
+                                            }
+                                            alt="User settings"
                                         />
                                         <AvatarFallback>
                                             {session.data.user.name?.charAt(0) || 'U'}
@@ -82,19 +85,19 @@ export default function Nav() {
                                         <p className="text-xs text-muted-foreground">{session.data.user.email}</p>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator/>
                                 <DropdownMenuGroup>
                                     {profileTabs.map(tab => (
-                                        <DropdownMenuItem 
+                                        <DropdownMenuItem
                                             key={tab.slug}
                                             onClick={() => router.push('/' + tab.slug + search)}
                                         >
-                                            {tab.icon && React.createElement(tab.icon, { className: "mr-2 h-4 w-4" })}
+                                            {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-4 w-4'})}
                                             <span>{t(tab.name)}</span>
                                         </DropdownMenuItem>
                                     ))}
                                 </DropdownMenuGroup>
-                                <DropdownMenuSeparator />
+                                <DropdownMenuSeparator/>
                                 <DropdownMenuItem onClick={() => signOut({redirectTo: '/' + search})}>
                                     {l('signout')}
                                 </DropdownMenuItem>

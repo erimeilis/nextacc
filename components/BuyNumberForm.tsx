@@ -55,22 +55,33 @@ export default function BuyNumberForm({
     const handleAddToCart = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
         //TODO add validation here
-        if (numberInfo) {
-            const data = await addToCart({
-                clientInfo: persistentClientInfo,
-                uid: persistentId,
-                number: numberInfo,
-                countryId: countryId,
-                areaCode: areaCode,
-                qty: Number(qty?.name ?? 1),
-                voice: numberInfo.voice || numberInfo.toll_free ?
-                    {type: voiceTypeState, destination: voiceDestinationState} :
-                    undefined,
-                sms: numberInfo.sms ?
-                    {type: smsTypeState, destination: smsDestinationState} :
-                    undefined
-            })
-            alert(JSON.stringify(data))
+
+        // Get the button that was clicked
+        const buttonId = (e.nativeEvent as SubmitEvent).submitter?.id || null;
+        setLoadingButton(buttonId);
+
+        try {
+            if (numberInfo) {
+                const data = await addToCart({
+                    clientInfo: persistentClientInfo,
+                    uid: persistentId,
+                    number: numberInfo,
+                    countryId: countryId,
+                    areaCode: areaCode,
+                    qty: Number(qty?.name ?? 1),
+                    voice: numberInfo.voice || numberInfo.toll_free ?
+                        {type: voiceTypeState, destination: voiceDestinationState} :
+                        undefined,
+                    sms: numberInfo.sms ?
+                        {type: smsTypeState, destination: smsDestinationState} :
+                        undefined
+                })
+                alert(JSON.stringify(data))
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error)
+        } finally {
+            setLoadingButton(null);
         }
     }
 
@@ -100,6 +111,7 @@ export default function BuyNumberForm({
     const [voiceDestinationErrorState, setVoiceDestinationErrorState] = useState<string>('')
     const [smsDestinationErrorState, setSmsDestinationErrorState] = useState<string>('')
     const [discountState, setDiscountState] = useState<string>('0')
+    const [loadingButton, setLoadingButton] = useState<string | null>(null)
 
     const handleVoiceTypeChange = (value: string) => {
         setVoiceTypeState(value)
@@ -316,6 +328,7 @@ export default function BuyNumberForm({
                             type="submit"
                             style="pillow"
                             id="cart"
+                            loading={loadingButton === 'cart'}
                         >
                             {t('add_to_cart')}
                         </Button>
@@ -323,6 +336,7 @@ export default function BuyNumberForm({
                             type="submit"
                             style="pillow"
                             id="buy"
+                            loading={loadingButton === 'buy'}
                         >
                             {t('buy')}
                         </Button>

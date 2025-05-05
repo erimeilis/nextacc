@@ -1,5 +1,6 @@
 'use client'
 import React, {FC, SVGProps} from 'react'
+import Loader from '@/components/service/Loader'
 
 const fixedLineButtonClass = `
     flex relative w-fit h-fit cursor-pointer transition-all ease-in-out
@@ -40,6 +41,7 @@ export default function Button({
                                    disabled = false,
                                    style = 'line',
                                    icon,
+                                   loading = false,
                                    children
                                }: {
     id?: string
@@ -60,21 +62,36 @@ export default function Button({
             type={type}
             className={
                 style === 'line' 
-                    ? `${fixedLineButtonClass} ${className} ${disabled ? disabledLineButtonClass : ''}`
+                    ? `${fixedLineButtonClass} ${className} ${disabled || loading ? disabledLineButtonClass : ''}`
                     : style === 'pillow'
-                        ? `${pillowButtonClass} ${className} ${disabled ? disabledButtonClass : ''}`
-                        : `${fixedButtonClass} ${className} ${disabled ? disabledButtonClass : ''}`
+                        ? `${pillowButtonClass} ${className} ${disabled || loading ? disabledButtonClass : ''}`
+                        : `${fixedButtonClass} ${className} ${disabled || loading ? disabledButtonClass : ''}`
             }
             onClick={onClick}
-            disabled={disabled}
+            disabled={disabled || loading}
         >
-            <span className="flex flex-row group-active:[transform:translate3d(0,1px,0)] whitespace-nowrap">
-                {icon ? //TODO make it rotating on positive loading
-                    <div className="mt-0.5 mr-1">
-                        {React.createElement(icon)}
-                    </div> :
-                    ''}
-                <div>{children}</div>
+            <span className="relative flex items-center justify-center">
+                {/* Always render the content to maintain button size */}
+                <span 
+                    className="flex flex-row group-active:[transform:translate3d(0,1px,0)] whitespace-nowrap" 
+                    style={{
+                        opacity: loading ? 0 : 1,
+                    }}
+                >
+                    {icon ? 
+                        <div className="mt-0.5 mr-1">
+                            {React.createElement(icon)}
+                        </div> :
+                        ''}
+                    <div>{children}</div>
+                </span>
+
+                {/* Loader positioned absolutely over the content when loading */}
+                {loading && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                        <Loader height={24} width={36} radius={3} color="hsl(var(--button-text))" wrapperClass="flex items-center justify-center" />
+                    </span>
+                )}
             </span>
         </button>
     )

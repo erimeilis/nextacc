@@ -14,7 +14,7 @@ export default function Loader({
                                    height = 80,
                                    width = 48,
                                    radius = 4,
-                                   color = '#64748b',
+                                   color,
                                    ariaLabel = 'three-dots-loading',
                                    wrapperClass = 'flex w-full justify-center transition duration-300 ease',
                                    visible = true,
@@ -40,7 +40,7 @@ export default function Loader({
                 height={height}
                 viewBox="0 0 120 30"
                 xmlns="http://www.w3.org/2000/svg"
-                fill={color}
+                fill={color || "hsl(var(--primary))"}
                 data-testid="three-dots-svg"
             >
                 <circle cx="15" cy="15" r={Number(radius) + 6}>

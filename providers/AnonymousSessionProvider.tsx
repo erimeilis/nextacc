@@ -9,11 +9,11 @@ export default function AnonymousSessionProvider({ //todo rename or remove it co
     children: ReactNode
 }) {
     const {data: session, status} = useSession()
-    const [persistentId, setPersistentId] = usePersistState<string>('', 'persistentId')
+    const [persistentId, setPersistentId] = usePersistState<string>('no-id', 'persistentId')
 
     useEffect(() => {
         console.log(status)
-        if (persistentId === '') setPersistentId(uuidv4())
+        if (persistentId === 'no-id') setPersistentId(uuidv4())
         //if (status === 'unauthenticated') {
             // login as anonymous without redirect to prevent callbackUrl parameter accumulation
         //    (async () => {
