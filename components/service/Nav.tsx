@@ -14,7 +14,7 @@ import {ThemeToggle} from '@/components/ui/theme-toggle'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 import {Button} from '@/components/ui/button'
-import CartButton from '@/components/service/CartButton'
+import CartButton from '@/components/CartButton'
 
 export default function Nav() {
     //const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -52,9 +52,9 @@ export default function Nav() {
                 </Link>
 
                 <div className="flex md:order-2 gap-2 items-center">
-                    <CartButton />
                     <LocaleSwitcher/>
                     <ThemeToggle/>
+                    <CartButton/>
                     {(session &&
                         session.status === 'authenticated' &&
                         session.data &&

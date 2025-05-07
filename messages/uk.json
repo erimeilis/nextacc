@@ -108,5 +108,14 @@
     "edit_profile": "Редагувати профіль",
     "dont_edit_profile": "Скасувати",
     "balance": "Баланс"
+  },
+  "cart": {
+    "number": "Номер",
+    "where": "Постачальник",
+    "month": "{count, plural, one {місяць} few {місяці} many {місяців} other {місяця}}",
+    "voice": "Голосовий номер",
+    "sms": "SMS-номер",
+    "empty": "Ваш кошик порожній",
+    "buy_now": "Купити зараз"
   }
 }

@@ -17,7 +17,7 @@ import useSWR from 'swr'
 import {getDiscounts} from '@/app/api/redreport/offers'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
-import {addToCart} from '@/app/api/redreport/buy'
+import {addToCart} from '@/app/api/redreport/cart'
 import usePersistState, {getPersistState} from '@/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
 
@@ -57,8 +57,8 @@ export default function BuyNumberForm({
         //TODO add validation here
 
         // Get the button that was clicked
-        const buttonId = (e.nativeEvent as SubmitEvent).submitter?.id || null;
-        setLoadingButton(buttonId);
+        const buttonId = (e.nativeEvent as SubmitEvent).submitter?.id || null
+        setLoadingButton(buttonId)
 
         try {
             if (numberInfo) {
@@ -81,7 +81,7 @@ export default function BuyNumberForm({
         } catch (error) {
             console.error('Error adding to cart:', error)
         } finally {
-            setLoadingButton(null);
+            setLoadingButton(null)
         }
     }
 

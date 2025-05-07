@@ -1,11 +1,8 @@
 'use server'
 import {auth} from '@/auth'
 import {NumberInfo} from '@/types/NumberInfo'
-import {getCart} from '@/app/api/redreport/buy'
-import {getPersistState} from '@/usePersistState'
 
 export async function redGetMyNumbers(): Promise<NumberInfo[]> {
-    const persistentId = getPersistState<string>('persistentId', 'no-id')
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return []
 
@@ -30,28 +27,7 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
             return res.json()
         })
         .then(async (data) => {
-            // Get all numbers
-            const allNumbers = data.data.dids || []
-
-            // Find cart numbers to exclude todo check if it really works
-            let cartItems = []
-            try {
-                cartItems = await getCart({uid: persistentId})
-            } catch (error) {
-                console.log('Error fetching cart items:', error)
-            }
-
-            // Get cart DIDs to exclude
-            const cartDids = cartItems.map((item: { did: never }) => item.did || '')
-
-            // Filter for digit-only numbers that are not in the cart
-            return allNumbers.filter((number: { did: string }) => {
-                // Check if it's digit-only (contains only 0-9)
-                const isDigitsOnly = /^\d+$/.test(number.did)
-                // Check if it's not in the cart
-                const isNotInCart = !cartDids.includes(number.did)
-                return isDigitsOnly && isNotInCart
-            })
+            return data.data.dids || []
         })
         .catch((err) => {
             console.log('redGetMyNumbers error: ', err.message)

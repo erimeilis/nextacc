@@ -109,5 +109,14 @@
     "edit_profile": "Edytuj profil",
     "dont_edit_profile": "Anuluj",
     "balance": "Saldo"
+  },
+  "cart": {
+    "number": "Numer",
+    "where": "Dostawca",
+    "month": "{count, plural, one {miesiąc} few {miesiące} many {miesięcy} other {miesiąca}}",
+    "voice": "Połączenia",
+    "sms": "SMS",
+    "empty": "Twój koszyk jest pusty",
+    "buy_now": "Kup teraz"
   }
 }

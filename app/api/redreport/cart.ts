@@ -59,7 +59,7 @@ export async function addToCart(
             'sms': sms
         })
     }
-    return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/add-to-cart' : '/api/add-to-cart'), options)
+    return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/add' : '/api/cart/add'), options)
         .then((res: Response) => {
             if (!res.ok) return []
             return res.json()
@@ -87,7 +87,7 @@ export async function getCart(
     const session = await auth()
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
 
-    const url = new URL(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart' : '/api/cart'))
+    const url = new URL(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/get' : '/api/cart/get'))
     url.searchParams.append('site', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -110,7 +110,6 @@ export async function getCart(
             return res.json()
         })
         .then(async (data) => {
-            console.log('getCart: ', data)
             return data.data
         })
         .catch((err) => {

@@ -109,5 +109,14 @@
     "edit_profile": "Edit profile",
     "dont_edit_profile": "Cancel",
     "balance": "Balance"
+  },
+  "cart": {
+    "number": "Number",
+    "where": "Provider",
+    "month": "{count, plural, one {month} other {months}}",
+    "voice": "Voice",
+    "sms": "SMS",
+    "empty": "Your cart is empty",
+    "buy_now": "Buy now"
   }
 }

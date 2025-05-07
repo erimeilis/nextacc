@@ -15,7 +15,7 @@ export default function usePersistState<T>(initial_value: T, id: string): [T, (n
                 console.error('Error parsing state from localStorage:', error)
             }
         }
-        // Otherwise use initial_value that was passed to the function
+        // Otherwise, use initial_value that was passed to the function
         return initial_value
     }, [id, initial_value])
 
@@ -40,6 +40,6 @@ export function getPersistState<T>(id: string, defaultValue: T): T {
             console.error('Error retrieving state from localStorage:', error)
         }
     }
-    // Return default value if no value in localStorage or if we're not in a browser
+    // Return the default value if no value in localStorage or if we're not in a browser
     return defaultValue
 }
