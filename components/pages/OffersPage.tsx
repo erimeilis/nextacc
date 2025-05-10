@@ -12,6 +12,7 @@ import CQS from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 import dynamic from 'next/dynamic'
+import {useCartStore} from '@/stores/useCartStore'
 
 // Dynamically import components that are only needed conditionally
 const NumberOffersList = dynamic(() => import('@/components/NumberOffersList'), {
@@ -41,10 +42,10 @@ export default function OffersPage() {
     const [loadingNumbers, setLoadingNumbers] = useState(false)
 
     // Use SWR hooks outside of render functions to prevent unnecessary re-renders
-    const { data: countriesData = [] } = useSWR(
+    const {data: countriesData = []} = useSWR(
         searchParams?.has('type') ? {
             type: searchParams?.get('type'),
-        } : null, 
+        } : null,
         getCountries
     )
 
@@ -58,11 +59,11 @@ export default function OffersPage() {
                 null)) :
         null
 
-    const { data: areasData = [] } = useSWR(
+    const {data: areasData = []} = useSWR(
         searchParams?.has('type') && getCountry !== null ? {
             type: searchParams?.get('type'),
             country: getCountry
-        } : null, 
+        } : null,
         getAreas
     )
 
@@ -87,18 +88,31 @@ export default function OffersPage() {
                 null)) :
         null
 
-    const { data: numbersData = [] } = useSWR(
+    const {data: numbersData = []} = useSWR(
         searchParams?.has('type') && getCountry !== null && getArea !== null ?
             {
                 type: searchParams?.get('type'),
                 country: getCountry,
                 area: getArea,
             } :
-            null, 
+            null,
         getNumbers
     )
 
-    const numbers = numbersData
+    const {cart} = useCartStore()
+    const numbers = numbersData.filter(number => {
+        // Check if this number exists in the cart and has a numeric did
+        const existsInCart = cart.some(cartItem => {
+            // Check if cartItem.did is numeric
+            const isNumeric = /^\d+$/.test(cartItem.did)
+            // If it's numeric and matches the current number's did, return true (this item is in the cart)
+            return isNumeric && cartItem.did === number.did
+        })
+
+        // Return true only for numbers NOT in the cart (filter those out)
+        return !existsInCart
+    })
+
     const getNumber: NumberInfo | null = searchParams?.has('number') ?
         (numbers.find(e => e.did == searchParams?.get('number')) ?? null) :
         null
@@ -138,7 +152,8 @@ export default function OffersPage() {
     }, [searchParams, router, pathName])
 
     return (
-        <Card id="offers" className="bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background border border-border p-0 pb-8 overflow-hidden">
+        <Card id="offers"
+              className="bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background border border-border p-0 pb-8 overflow-hidden">
             <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={selectedType}/>
             <div className="flex flex-col md:flex-row items-center gap-4 justify-between my-4 px-6">
                 <DropdownSelectGeo

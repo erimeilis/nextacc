@@ -8,8 +8,8 @@ import {Checkbox} from '@/components/ui/checkbox'
 
 interface MiniCartProps {
     cartItems: CartItem[]
-    selectedItems: { [key: string]: boolean }
-    setSelectedItemsAction: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
+    selectedItems: number[]
+    setSelectedItemsAction: (id: number, select?: boolean) => void
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
 }
 
@@ -54,12 +54,9 @@ export default function MiniCart({
                                                 <div className="flex items-center gap-2">
                                                     <Checkbox
                                                         id={`checkbox-${item.id}`}
-                                                        checked={selectedItems[item.id] || false}
+                                                        checked={selectedItems.includes(item.id)}
                                                         onCheckedChange={(checked) => {
-                                                            setSelectedItemsAction({
-                                                                ...selectedItems,
-                                                                [item.id]: checked
-                                                            })
+                                                            setSelectedItemsAction(item.id, checked)
                                                         }}
                                                     />
                                                     <div>
@@ -100,7 +97,7 @@ export default function MiniCart({
 
                                             {/* Display date - optional */}
                                             <div className="col-span-4 text-xs text-muted-foreground mt-1">
-                                                {new Date(item.date).toLocaleDateString()}
+                                                {item.date.split('T')[0]}
                                             </div>
                                         </div>
                                     </div>

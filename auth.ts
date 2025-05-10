@@ -290,13 +290,10 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
                 // the token has not expired yet, return it
                 return token
             }
-            const refreshedToken = await refreshAccessToken(token)
-            console.log('🐥')
-            return refreshedToken
+            //console.log('🐥')
+            return await refreshAccessToken(token)
         },
         async session({session, token}: { session: Session, token: JWT | null }) {
-            console.log('session -> ', session)
-            console.log('token -> ', token)
             // Send properties to the client
             if (token) {
                 session.token = token.accessToken
@@ -309,8 +306,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         async signIn({user, account}: { user: User, account: Account | null, profile?: Profile }): Promise<void> {
             console.log(`signIn of ${user.name} from ${user?.provider || account?.provider}`)
         },
-        async signOut({session, token}: { session?: void | AdapterSession | null | undefined, token?: JWT & { user?: User } | null }): Promise<void> {
-            console.log('signOut', session, token)
+        async signOut({token}: { session?: void | AdapterSession | null | undefined, token?: JWT & { user?: User } | null }): Promise<void> {
             if (token?.user) {
                 console.log(`signOut of ${token.user.name} from ${token.user.provider}`)
             }

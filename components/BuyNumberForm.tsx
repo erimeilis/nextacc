@@ -1,5 +1,5 @@
 'use client'
-import React, {ChangeEvent, SyntheticEvent, useEffect, useState} from 'react'
+import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
@@ -18,8 +18,10 @@ import {getDiscounts} from '@/app/api/redreport/offers'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/cart'
-import usePersistState, {getPersistState} from '@/usePersistState'
+import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
+import {slack} from '@/utils/slack'
+import {useCartStore} from '@/stores/useCartStore'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -37,14 +39,13 @@ export default function BuyNumberForm({
         'ip': '',
         'country': '',
     }, 'persistentClientInfo')
-    useEffect(() => {
-        const getClientInfo = async () => {
-            const res = await fetch('https://ipinfo.io/json')
-            const info = await res.json()
-            setPersistentClientInfo(info)
-        }
-        getClientInfo()
-    }, [setPersistentClientInfo])
+    const {updateData} = useCartStore()
+    const getClientInfo = async () => {
+        const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
+        const info = await res.json()
+        await slack(info.ip)
+        setPersistentClientInfo(info)
+    }
 
     const voice: { id: string, name: string }[] = voiceDestinationsFields.map((i) => {
         return {id: i.id, name: t(i.labelText)}
@@ -59,9 +60,9 @@ export default function BuyNumberForm({
         // Get the button that was clicked
         const buttonId = (e.nativeEvent as SubmitEvent).submitter?.id || null
         setLoadingButton(buttonId)
-
         try {
             if (numberInfo) {
+                await getClientInfo()
                 const data = await addToCart({
                     clientInfo: persistentClientInfo,
                     uid: persistentId,
@@ -76,7 +77,7 @@ export default function BuyNumberForm({
                         {type: smsTypeState, destination: smsDestinationState} :
                         undefined
                 })
-                alert(JSON.stringify(data))
+                updateData(data?.cart ?? [])
             }
         } catch (error) {
             console.error('Error adding to cart:', error)
@@ -201,10 +202,11 @@ export default function BuyNumberForm({
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
                 <div className="w-full space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
-                        <span className="flex items-center">{t('setupfee')}:</span> <span
-                        className="text-price font-semibold mx-2 flex items-center">{numberInfo.setup_rate} $</span> / <span className="flex items-center">{t('monthlyfee')}:</span>
-                        <span
-                            className="text-price font-semibold mx-2 flex items-center">{numberInfo.fix_rate} $</span>
+                        <span className="flex items-center">{t('setupfee')}:</span>
+                        <span className="text-price font-semibold mx-2 flex items-center">${numberInfo.setup_rate}</span>
+                        /
+                        <span className="ml-2 flex items-center">{t('monthlyfee')}:</span>
+                        <span className="text-price font-semibold mx-2 flex items-center">${numberInfo.fix_rate}</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start gap-4">
@@ -308,7 +310,7 @@ export default function BuyNumberForm({
                                             <TableCell className="text-price font-medium">-{d.id}%</TableCell>
                                             <TableCell>=</TableCell>
                                             <TableCell className="whitespace-nowrap text-right font-medium">
-                                                {Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
+                                                ${Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}
                                             </TableCell>
                                         </TableRow>
                                     ) : null
@@ -319,7 +321,7 @@ export default function BuyNumberForm({
 
                     <div className="flex flex-row gap-3 justify-end items-center whitespace-nowrap text-sm font-medium">
                         {t('total_price')} <span className="text-price text-lg font-bold">
-                            {Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}&thinsp;$
+                            ${Number((100 - (qty !== undefined ? Number(qty.id) : 0)) / 100 * (numberInfo.fix_rate * (qty !== undefined ? Number(qty.name) : 1) + numberInfo.setup_rate)).toFixed(2)}
                         </span>
                     </div>
 

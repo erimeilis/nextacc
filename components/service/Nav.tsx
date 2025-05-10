@@ -5,6 +5,7 @@ import logo from '@/app/[locale]/icon.png'
 import {signOut, useSession} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
+import {resetPersistentId} from '@/utils/resetPersistentId'
 import React from 'react'
 import {createHash} from 'crypto'
 import Link from 'next/link'
@@ -98,7 +99,10 @@ export default function Nav() {
                                     ))}
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator/>
-                                <DropdownMenuItem onClick={() => signOut({redirectTo: '/' + search})}>
+                                <DropdownMenuItem onClick={() => {
+                                    resetPersistentId();
+                                    signOut({redirectTo: '/' + search});
+                                }}>
                                     {l('signout')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

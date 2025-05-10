@@ -4,6 +4,7 @@ import {redSetUserProfile} from '@/app/api/redreport/profile'
 import {signOut} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import {UserProfile} from '@/types/UserProfile'
+import {resetPersistentId} from '@/utils/resetPersistentId'
 import LineInput from '@/components/shared/LineInput'
 import {CheckCircle, Pencil, X} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
@@ -103,10 +104,15 @@ export default function Profile({
                     type="button"
                     className="text-sm"
                 >
-                    {t('balance')}: {userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
+                    {t('balance')}: {userProfile?.currency == 'USD' ?
+                    '$' + userProfile?.balance.toFixed(2) :
+                    userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
                 </Button>
                 <Button
-                    onClick={() => signOut({redirectTo: '/' + search})}
+                    onClick={() => {
+                        resetPersistentId();
+                        signOut({redirectTo: '/' + search});
+                    }}
                     type="button"
                     className="text-sm"
                 >
