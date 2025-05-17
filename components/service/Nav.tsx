@@ -6,7 +6,7 @@ import {signOut, useSession} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
 import {resetPersistentId} from '@/utils/resetPersistentId'
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import {createHash} from 'crypto'
 import Link from 'next/link'
 import {profileTabs} from '@/constants/profileTabs'
@@ -16,11 +16,14 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 import {Button} from '@/components/ui/button'
 import CartButton from '@/components/CartButton'
+import {useClientStore} from '@/stores/useClientStore'
+import {PlusCircle} from 'lucide-react'
 
 export default function Nav() {
     //const [isMenuOpen, setIsMenuOpen] = useState(false)
     const session = useSession()
     const l = useTranslations('login')
+    const p = useTranslations('profile')
     const router = useRouter()
 
     const t = useTranslations('dashboard')
@@ -31,7 +34,19 @@ export default function Nav() {
     //    setIsMenuOpen(!isMenuOpen)
     //}
 
-    //todo reset persistentID on logout?
+    const [balanceState, setBalanceState] = useState<number | null>(0)
+    const {balance, updateProfile} = useClientStore()
+
+    useEffect(() => {
+        if (!balance) {
+            updateProfile()
+        }
+    }, [balance, updateProfile])
+
+    useEffect(() => {
+        setBalanceState(balance)
+    }, [balance])
+
     return (
         <nav className="w-full px-3 py-1 mx-auto backdrop sticky top-0 shadow lg:px-6 lg:py-2 z-[9999]">
             <div className="flex flex-wrap items-center justify-between">
@@ -52,7 +67,22 @@ export default function Nav() {
                     />
                 </Link>
 
-                <div className="flex md:order-2 gap-2 items-center">
+                <div className="flex items-center gap-2 ml-4">
+                    {(session &&
+                        session.status === 'authenticated' &&
+                        session.data &&
+                        session.data.user &&
+                        (session.data.user.provider !== 'anonymous')
+                    ) ? (
+                        <>
+                            <span className="text-sm font-medium text-white">{p('balance')}:</span><span className="text-sm font-bold text-white">${balanceState}</span><Button
+                            variant="navIcon" size="icon" className="h-8 w-8" onClick={() => router.push('/profile' + search)}>
+                            <PlusCircle className="h-5 w-5"/>
+                        </Button>
+                        </>) : null}
+                </div>
+
+                <div className="flex md:order-2 gap-2 items-center ml-auto">
                     <LocaleSwitcher/>
                     <ThemeToggle/>
                     <CartButton/>
@@ -100,8 +130,8 @@ export default function Nav() {
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuItem onClick={() => {
-                                    resetPersistentId();
-                                    signOut({redirectTo: '/' + search});
+                                    resetPersistentId()
+                                    signOut({redirectTo: '/' + search}).then()
                                 }}>
                                     {l('signout')}
                                 </DropdownMenuItem>

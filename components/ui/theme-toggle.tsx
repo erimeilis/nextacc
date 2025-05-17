@@ -40,9 +40,9 @@ export function ThemeToggle() {
     return (
         <div className="flex items-center gap-2">
             <Button
-                variant="link"
+                variant="navIcon"
                 size="icon"
-                className="rounded-lg p-2.5 text-sm text-white hover:text-white focus:outline-none focus:bg-transparent"
+                className="rounded-lg p-2.5 text-sm"
                 onClick={toggleDarkMode}
             >
                 <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0"/>
@@ -53,9 +53,9 @@ export function ThemeToggle() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        variant="link"
+                        variant="navIcon"
                         size="icon"
-                        className="rounded-lg p-2.5 text-sm text-white hover:text-white focus:outline-none focus:bg-transparent"
+                        className="rounded-lg p-2.5 text-sm"
                     >
                         <Palette className="h-5 w-5"/>
                         <span className="sr-only">Toggle color theme</span>

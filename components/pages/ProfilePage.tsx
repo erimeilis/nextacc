@@ -1,11 +1,23 @@
-'use server'
+'use client'
 import Profile from '@/components/Profile'
-import {redGetUserProfile} from '@/app/api/redreport/profile'
+import {useClientStore} from '@/stores/useClientStore'
+import {useEffect, useState} from 'react'
+import {UserProfile} from '@/types/UserProfile'
 
-export default async function ProfilePage() {
-    const profile = await redGetUserProfile()
+export default function ProfilePage() {
+    const [profileState, setProfileState] = useState<UserProfile | null>(null)
+    const {profile, updateProfile} = useClientStore()
+    useEffect(() => {
+        if (!profile) {
+            updateProfile()
+        }
+    }, [profile, updateProfile])
+
+    useEffect(() => {
+        setProfileState(profile)
+    }, [profile])
 
     return <Profile
-        profile={profile}
+        profile={profileState}
     />
 }

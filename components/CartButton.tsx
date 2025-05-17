@@ -22,9 +22,6 @@ export default function CartButton() {
         setTotalItemsState(totalItems)
         setTotalPriceState(totalPrice)
     }, [cart, totalItems, totalPrice])
-    
-    //const persistentId = getPersistState<string>('persistentId', 'no-id')
-    // todo use for delete from Cart
 
     // State for controlling the sidebar
     const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -41,12 +38,13 @@ export default function CartButton() {
                         <Loader height={20}/>
                     </div>
                     : <Button
-                        variant="ghost"
-                        className="relative p-2 text-white hover:bg-transparent"
+                        variant="navIcon"
+                        className="relative p-2"
                     >
-                        <span className="text-opacity-80 text-xs text-white mr-1">${totalPriceState}</span>
-                        <ShoppingBag size={24} className="text-white"/>
-                        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                        <span className="text-opacity-80 text-xs mr-1">${totalPriceState}</span>
+                        <ShoppingBag size={24}/>
+                        <span
+                            className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                         {totalItemsState}
                     </span>
                     </Button>}

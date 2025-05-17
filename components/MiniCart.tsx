@@ -1,10 +1,15 @@
 'use client'
-import React from 'react'
-import {Button} from '@/components/ui/button'
+import React, {SyntheticEvent, useState} from 'react'
+import Button from '@/components/shared/Button'
 import {CartItem} from '@/types/CartItem'
 import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
 import {useTranslations} from 'next-intl'
 import {Checkbox} from '@/components/ui/checkbox'
+import Show from '@/components/service/Show'
+import {useCartStore} from '@/stores/useCartStore'
+import {getPersistState} from '@/utils/usePersistState'
+import {removeFromCart} from '@/app/api/redreport/cart'
+import {ChatCircleText, Headset, Phone, X} from '@phosphor-icons/react'
 
 interface MiniCartProps {
     cartItems: CartItem[]
@@ -20,6 +25,40 @@ export default function MiniCart({
                                      setSidebarOpenAction
                                  }: MiniCartProps) {
     const t = useTranslations('cart')
+    const [loadingButton, setLoadingButton] = useState<string | null>(null)
+    const persistentId = getPersistState<string>('persistentId', 'no-id')
+    const {updateData} = useCartStore()
+
+    const handleRemoveFromCart = async (e?: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+        if (e) e.preventDefault()
+        // Set the button ID for loading state
+        setLoadingButton('remove')
+        try {
+            if (selectedItems && selectedItems.length > 0) {
+                const data = await removeFromCart({
+                    uid: persistentId,
+                    id: selectedItems
+                })
+                if (data) updateData(data)
+            }
+        } catch (error) {
+            console.error('Error removing from cart:', error)
+        } finally {
+            setLoadingButton(null)
+        }
+    }
+
+    const handleRemoveSingleItem = async (itemId: number) => {
+        try {
+            const data = await removeFromCart({
+                uid: persistentId,
+                id: [itemId]
+            })
+            if (data) updateData(data)
+        } catch (error) {
+            console.error('Error removing item from cart:', error)
+        }
+    }
 
     return (
         <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-l-lg border-l fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
@@ -47,57 +86,74 @@ export default function MiniCart({
                     {cartItems.length > 0 ? (
                         <ul className="space-y-1">
                             {cartItems.map((item) => (
-                                <li key={item.id} className="border-b border-border pb-2 mb-2 last:border-b-0 last:pb-0 last:mb-0">
+                                <li key={item.id}
+                                    className={`pb-2 mb-2 last:border-b-0 last:pb-0 last:mb-0 ${!selectedItems.includes(item.id) ? 'opacity-70' : ''}`}>
                                     <div className="bg-muted rounded-md p-2">
-                                        <div className="grid grid-cols-4 gap-1 text-sm">
-                                            <div className="col-span-4 flex justify-between items-center">
-                                                <div className="flex items-center gap-2">
-                                                    <Checkbox
-                                                        id={`checkbox-${item.id}`}
-                                                        checked={selectedItems.includes(item.id)}
-                                                        onCheckedChange={(checked) => {
-                                                            setSelectedItemsAction(item.id, checked)
-                                                        }}
-                                                    />
+                                        <div className="grid grid-cols-[auto_1fr_auto] gap-3 text-sm">
+                                            {/* Checkbox in its own column, vertically centered */}
+                                            <div className="flex items-center justify-center p-2">
+                                                <Checkbox
+                                                    id={`checkbox-${item.id}`}
+                                                    checked={selectedItems.includes(item.id)}
+                                                    onCheckedChange={(checked) => {
+                                                        setSelectedItemsAction(item.id, checked)
+                                                    }}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col pb-2">
+                                                {/* Number and price as dominant information */}
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-md font-bold">{item.did}</span>
+                                                        {item.did_info?.voice && <Phone weight="fill" className="text-muted-foreground" size={16}/>}
+                                                        {item.did_info?.sms && <ChatCircleText weight="fill" className="text-muted-foreground" size={16}/>}
+                                                        {item.did_info?.toll_free && <Headset weight="fill" className="text-muted-foreground" size={16}/>}
+                                                    </div>
+                                                    <span className="text-md font-bold text-primary">${item.sum}</span>
+                                                </div>
+
+                                                {/* Secondary information with smaller text */}
+                                                <div className="flex justify-between items-center text-xs">
                                                     <div>
-                                                        <span className="text-xs text-muted-foreground mr-1">{t('number')}</span>
-                                                        <span className="font-medium">{item.did}</span>
+                                                        <span className="text-muted-foreground mr-1">{t('where')}</span>
+                                                        <span className="font-medium">{item.where_did}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span
+                                                            className="text-muted-foreground mr-1">{t('month', {count: item.count_month !== undefined ? item.count_month : 1})}</span>
+                                                        <span className="font-medium">{item.count_month}</span>
                                                     </div>
                                                 </div>
-                                                <div className="font-medium text-primary">${item.sum}</div>
+
+                                                {/* Display voice destination if available */}
+                                                {item.voice && (
+                                                    <div className="text-xs mt-1">
+                                                        <span className="text-muted-foreground mr-1">{t('voice')}:</span>
+                                                        <span className="font-medium">{item.voice.destination}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Display SMS destination if available */}
+                                                {item.sms && (
+                                                    <div className="text-xs mt-1">
+                                                        <span className="text-muted-foreground mr-1">{t('sms')}:</span>
+                                                        <span className="font-medium">{item.sms.destination}</span>
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            <div className="col-span-4 flex justify-between items-center">
-                                                <div>
-                                                    <span className="text-xs text-muted-foreground mr-1">{t('where')}</span>
-                                                    <span className="font-medium">{item.where_did}</span>
-                                                </div>
-                                                <div>
-                                                    <span
-                                                        className="text-xs text-muted-foreground mr-1">{t('month', {count: item.count_month !== undefined ? item.count_month : 1})}</span>
-                                                    <span className="font-medium">{item.count_month}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Display voice destination if available */}
-                                            {item.voice && (
-                                                <div className="col-span-4 text-xs mt-1">
-                                                    <span className="text-muted-foreground mr-1">{t('voice')}:</span>
-                                                    <span className="font-medium">{item.voice.destination}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Display SMS destination if available */}
-                                            {item.sms && (
-                                                <div className="col-span-4 text-xs mt-1">
-                                                    <span className="text-muted-foreground mr-1">{t('sms')}:</span>
-                                                    <span className="font-medium">{item.sms.destination}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Display date - optional */}
-                                            <div className="col-span-4 text-xs text-muted-foreground mt-1">
-                                                {item.date.split('T')[0]}
+                                            {/* Delete button */}
+                                            <div className="flex items-center justify-center p-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveSingleItem(item.id)}
+                                                    className="flex items-center justify-center w-4 h-4 rounded-full bg-transparent text-red-700 hover:text-red-600 transition-all duration-300"
+                                                    aria-label="Remove item"
+                                                >
+                                                    <X size={14} weight="bold"/>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -109,25 +165,36 @@ export default function MiniCart({
                     )}
                 </div>
 
-                <DrawerFooter>
-                    <Button
-                        className="w-full font-medium shadow-sm transition-all hover:shadow-md"
-                        onClick={() => {
-                            // Get selected numbers
-                            const selectedNumbers = cartItems
-                                .filter((item) => selectedItems[item.id])
-                                .map(item => item.did)
-
-                            // Show alert with selected numbers
-                            if (selectedNumbers.length > 0) {
-                                alert(`Selected numbers:\n${selectedNumbers.join('\n')}`)
-                            } else {
-                                alert('No numbers selected')
-                            }
-                        }}
-                    >
-                        {t('buy_now')}
-                    </Button>
+                <DrawerFooter className="flex-column flex-wrap justify-between items-end px-4 py-8">
+                    <Show when={(selectedItems.length > 0)}
+                          fallback={<div className="w-full text-center">{t('select_to_proceed')}</div>}>
+                        <Button
+                            type="button"
+                            style="pillow"
+                            className="font-medium text-lg shadow-sm transition-all hover:shadow-md"
+                            id="buy-from-cart"
+                            onClick={() => {
+                                // Show alert with selected numbers
+                                if (selectedItems.length > 0) {
+                                    alert(`Selected numbers:\n${selectedItems.join('\n')}`)
+                                } else {
+                                    alert('No numbers selected')
+                                }
+                            }}
+                        >
+                            {t('buy_now')}
+                        </Button>
+                        <Button
+                            type="button"
+                            style="line"
+                            className="text-xs transition-all"
+                            id="remove"
+                            loading={loadingButton === 'remove'}
+                            onClick={handleRemoveFromCart}
+                        >
+                            {t('remove_selected')}
+                        </Button>
+                    </Show>
                 </DrawerFooter>
             </div>
         </DrawerContent>

@@ -9,7 +9,7 @@ import {profileTabs} from '@/constants/profileTabs'
 import {useTranslations} from 'next-intl'
 import Tab from '@/components/shared/Tab'
 
-declare module "next-auth" {
+declare module 'next-auth' {
     interface User {
         provider: string;
         // Add any other custom properties you need
@@ -27,16 +27,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
     const t = useTranslations('dashboard')
     const pathName = usePathname()
     const searchParams = useSearchParams()
-    // Filter out the callbackUrl parameter to prevent infinite redirections
-    const filteredParams = new URLSearchParams()
-    if (searchParams) {
-        searchParams.forEach((value, key) => {
-            if (key !== 'callbackUrl') {
-                filteredParams.append(key, value)
-            }
-        })
-    }
-    const search = filteredParams.size > 0 ? `?${filteredParams.toString()}` : ''
+    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const activePathName = () => {
         if (!pathName) {

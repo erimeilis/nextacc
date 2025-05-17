@@ -31,8 +31,8 @@ export default function LocaleSwitcher() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button 
-                    variant="nav"
+                <Button
+                    variant="navIcon"
                     className="flex items-center gap-2"
                 >
                     {t('locale')}

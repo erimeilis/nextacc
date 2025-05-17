@@ -1,14 +1,25 @@
-'use server'
-import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
+'use client'
 import MoneyTransactionsList from '@/components/MoneyTransactionsList'
 import {MoneyTransaction} from '@/types/MoneyTransaction'
+import {useEffect, useState} from 'react'
+import {useClientStore} from '@/stores/useClientStore'
 
-export default async function TransactionsPage() {
-    const report: MoneyTransaction[] = await redGetMoneyTransactionReport()
+export default function TransactionsPage() {
+    const [transactionsState, setTransactionsState] = useState<MoneyTransaction[] | null>(null)
+    const {transactions, updateTransactions} = useClientStore()
+    useEffect(() => {
+        if (!transactions) {
+            updateTransactions()
+        }
+    }, [transactions, updateTransactions])
+
+    useEffect(() => {
+        setTransactionsState(transactions)
+    }, [transactions])
 
     return (
         <MoneyTransactionsList
-            options={report}
+            options={transactionsState}
         />
     )
 }

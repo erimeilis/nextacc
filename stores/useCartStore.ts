@@ -5,9 +5,10 @@ import {getPersistState} from '@/utils/usePersistState'
 import {getCart} from '@/app/api/redreport/cart'
 import {persist} from 'zustand/middleware'
 
+// todo maybe better use Signals, think of it later
+
 const persistentId = getPersistState<string>('persistentId', 'no-id')
 
-// Define the interface of the Cart state
 interface State {
     cart: CartItem[]
     totalItems: number
@@ -17,14 +18,12 @@ interface State {
     error: unknown
 }
 
-// Define the interface of the actions that can be performed in the Cart
 interface Actions {
     fetchData: () => Promise<void>
     updateData: (items: CartItem[]) => void
     selectItem: (id: number, select?: boolean) => void
 }
 
-// Initialize a default state
 const INITIAL_STATE: State = {
     cart: [],
     totalItems: 0,
@@ -34,21 +33,16 @@ const INITIAL_STATE: State = {
     error: null
 }
 
-// Create the store with Zustand, combining the status interface and actions
 export const useCartStore = create(
     persist<State & Actions>(
         set => ({
-            cart: INITIAL_STATE.cart,
-            totalItems: INITIAL_STATE.totalItems,
-            totalPrice: INITIAL_STATE.totalPrice,
-            selectedItems: INITIAL_STATE.selectedItems,
-            isLoading: INITIAL_STATE.isLoading,
-            error: INITIAL_STATE.error,
+            ...INITIAL_STATE,
+            
             fetchData: async () => {
                 try {
                     if (persistentId !== 'no-id') {
                         set({isLoading: true})
-                        const items: CartItem[] = await getCart({uid: persistentId})
+                        const items: CartItem[] | null = await getCart({uid: persistentId})
                         if (!items || items.length == 0) {
                             set({
                                 cart: INITIAL_STATE.cart,
@@ -129,7 +123,7 @@ export const useCartStore = create(
                 })
             }
         }), {
-            name: 'cart-storage', // unic name
+            name: 'cart-storage', // unique name
             // getStorage: () => sessionStorage, (optional) by default, the 'localStorage' is used
         }
     )

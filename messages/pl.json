@@ -117,6 +117,8 @@
     "voice": "Połączenia",
     "sms": "SMS",
     "empty": "Twój koszyk jest pusty",
-    "buy_now": "Kup teraz"
+    "buy_now": "Kup zaznaczone teraz",
+    "remove_selected": "Usuń zaznaczone",
+    "select_to_proceed": "Proszę wybrać nomery"
   }
 }

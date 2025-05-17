@@ -117,6 +117,8 @@
     "voice": "Voice",
     "sms": "SMS",
     "empty": "Your cart is empty",
-    "buy_now": "Buy now"
+    "buy_now": "Buy selected now",
+    "remove_selected": "Remove selected",
+    "select_to_proceed": "Please, select numbers"
   }
 }

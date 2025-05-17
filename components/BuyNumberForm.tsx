@@ -77,7 +77,7 @@ export default function BuyNumberForm({
                         {type: smsTypeState, destination: smsDestinationState} :
                         undefined
                 })
-                updateData(data?.cart ?? [])
+                if (data) updateData(data)
             }
         } catch (error) {
             console.error('Error adding to cart:', error)

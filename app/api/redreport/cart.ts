@@ -4,6 +4,7 @@ import {NumberDestination} from '@/types/NumberDestination'
 import {auth} from '@/auth'
 import {getAppIp} from '@/utils/getAppIp'
 import {ClientInfo} from '@/types/ClientInfo'
+import {CartItem} from '@/types/CartItem'
 
 export async function addToCart(
     {
@@ -24,7 +25,7 @@ export async function addToCart(
         qty: number,
         voice?: NumberDestination,
         sms?: NumberDestination
-    }) {
+    }): Promise<CartItem[] | null> {
     if (!uid || !number) {
         console.log('addToCart: no uid or number')
         return []
@@ -61,16 +62,16 @@ export async function addToCart(
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/add' : '/api/cart/add'), options)
         .then((res: Response) => {
-            if (!res.ok) return []
+            if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
             console.log('addToCart: ', data)
-            return data.data
+            return data.data.cart
         })
         .catch((err) => {
             console.log('addToCart error: ', err.message)
-            return []
+            return null
         })
 }
 
@@ -79,7 +80,7 @@ export async function getCart(
         uid,
     }: {
         uid: string,
-    }) {
+    }): Promise<CartItem[] | null> {
     if (!uid) {
         console.log('getCart: no uid')
         return []
@@ -106,7 +107,7 @@ export async function getCart(
     }
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            if (!res.ok) return []
+            if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
@@ -114,6 +115,55 @@ export async function getCart(
         })
         .catch((err) => {
             console.log('getCart error: ', err.message)
-            return []
+            return null
+        })
+}
+
+export async function removeFromCart(
+    {
+        uid,
+        id
+    }: {
+        uid: string,
+        id: number[]
+    }): Promise<CartItem[] | null> {
+    if (!uid) {
+        console.log('getCart: no uid')
+        return []
+    }
+    const session = await auth()
+    const anonymous = !session || !session.user || session.user.provider === 'anonymous'
+
+    const url = new URL(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/remove' : '/api/cart/remove'))
+    url.searchParams.append('site', process.env.SITE_ID || '')
+    id.forEach(itemId => {
+        url.searchParams.append('id[]', itemId.toString())
+    })
+
+    const options: RequestInit = {
+        cache: 'no-store',
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': (!anonymous ?
+                    ('Bearer ' + session?.token) :
+                    ('Bearer ' + process.env.REDREPORT_TOKEN)
+            ),
+            'X-UID': uid,
+        },
+        credentials: 'include'
+    }
+    return fetch(url.toString(), options)
+        .then((res: Response) => {
+            if (!res.ok) return null
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data
+        })
+        .catch((err) => {
+            console.log('removeFromCart error: ', err.message)
+            return null
         })
 }

@@ -3,9 +3,9 @@ import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {auth} from '@/auth'
 import moment from 'moment'
 
-export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]> {
+export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return []
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/transactions')
     url.searchParams.append('site', process.env.SITE_ID || '')
@@ -24,7 +24,7 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
     return fetch(url.toString(), options)
         .then((res: Response) => {
             //console.log('redGetMoneyTransactionReport: ', res.status)
-            if (!res.ok) return []
+            if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
@@ -33,6 +33,6 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
         })
         .catch((err) => {
             console.log('redGetMoneyTransactionReport error: ', err.message)
-            return []
+            return null
         })
 }

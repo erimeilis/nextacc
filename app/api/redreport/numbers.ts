@@ -2,9 +2,9 @@
 import {auth} from '@/auth'
 import {NumberInfo} from '@/types/NumberInfo'
 
-export async function redGetMyNumbers(): Promise<NumberInfo[]> {
+export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return []
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers')
     url.searchParams.append('site', process.env.SITE_ID || '')
@@ -23,14 +23,14 @@ export async function redGetMyNumbers(): Promise<NumberInfo[]> {
     return fetch(url.toString(), options)
         .then((res: Response) => {
             //console.log('redGetMyNumbers: ', res.status)
-            if (!res.ok) return []
+            if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
-            return data.data.dids || []
+            return data.data.dids
         })
         .catch((err) => {
             console.log('redGetMyNumbers error: ', err.message)
-            return []
+            return null
         })
 }

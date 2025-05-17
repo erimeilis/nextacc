@@ -8,7 +8,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 const instance = Axios.create()
 const axios = setupCache(instance)
 
-export async function getCountries({type}: { type: string }) {
+export async function getCountries({type}: { type: string }): Promise<CountryInfo[]> {
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/countries',
         'type=' + type,
@@ -24,17 +24,12 @@ export async function getCountries({type}: { type: string }) {
         }
     )
     if (response.data && response.data.data && response.data.data.length > 0) {
-        const countries: CountryInfo[] = response.data.data
-        //console.log('getCountries: ', countries)
-        return countries.map(country => ({
-            id: country.id,
-            name: country.countryname + ' +' + country.countryprefix.toString(),
-        }))
+        return response.data.data
     }
     return []
 }
 
-export async function getAreas({type, country}: { type: string, country: number }) {
+export async function getAreas({type, country}: { type: string, country: number }): Promise<AreaInfo[]> {
     const response = await axios.post(
         process.env.REDREPORT_URL + '/api/did/areas',
         'type=' + type + '&country_id=' + country,
@@ -50,12 +45,7 @@ export async function getAreas({type, country}: { type: string, country: number 
         }
     )
     if (response.data && response.data.data && response.data.data.length > 0) {
-        const areas: AreaInfo[] = response.data.data
-        //console.log('getAreas: ', areas)
-        return areas.map(area => ({
-            id: area.areaprefix,
-            name: '(' + area.areaprefix.toString() + ') ' + area.areaname,
-        }))
+        return response.data.data
     }
     return []
 }

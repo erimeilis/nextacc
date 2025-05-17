@@ -1,7 +1,8 @@
 import {ReadonlyURLSearchParams} from 'next/navigation'
 
-export default function CQS(
-    name: string, value: string | number,
+export default function CreateQueryString(
+    name: string,
+    value: string | number,
     searchParams: ReadonlyURLSearchParams | null,
     drop?: string[]
 ) {
