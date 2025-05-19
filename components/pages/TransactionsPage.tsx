@@ -8,11 +8,14 @@ export default function TransactionsPage() {
     const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>(null)
     const {transactions, updateTransactions} = useClientStore()
     useEffect(() => {
-        if (!transactions) {
-            updateTransactions()
-                .then(() => setLocalTransactions(transactions))
-        } else
+        if (transactions) {
             setLocalTransactions(transactions)
+        } else {
+            updateTransactions()
+                .then((fetchedTransactions) => {
+                    setLocalTransactions(fetchedTransactions)
+                })
+        }
     }, [transactions, updateTransactions])
 
     return (

@@ -17,6 +17,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, 
 import {Button} from '@/components/ui/button'
 import CartButton from '@/components/CartButton'
 import {useClientStore} from '@/stores/useClientStore'
+import {useCartStore} from '@/stores/useCartStore'
 import {PlusCircle} from 'lucide-react'
 
 export default function Nav() {
@@ -35,7 +36,8 @@ export default function Nav() {
     //}
 
     const [localBalance, setLocalBalance] = useState<number | null>(0)
-    const {balance, updateProfile} = useClientStore()
+    const {balance, updateProfile, reset: resetClientStore} = useClientStore()
+    const {reset: resetCartStore} = useCartStore()
 
     useEffect(() => {
         if (!localBalance) {
@@ -128,8 +130,12 @@ export default function Nav() {
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuItem onClick={() => {
-                                    resetPersistentId()
-                                    signOut({redirectTo: '/' + search}).then()
+                                    resetClientStore()
+                                    resetCartStore()
+                                    signOut({redirectTo: '/' + search})
+                                        .then(() => {
+                                            resetPersistentId()
+                                        })
                                 }}>
                                     {l('signout')}
                                 </DropdownMenuItem>

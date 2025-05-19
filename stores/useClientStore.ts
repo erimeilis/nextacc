@@ -17,10 +17,11 @@ interface ClientStore {
     transactions: MoneyTransaction[] | null
     numbers: NumberInfo[] | null
     fetchData: () => Promise<void>
-    updateProfile: () => Promise<void>
-    updateInfo: (info: ClientInfo) => void
-    updateTransactions: () => Promise<void>
-    updateNumbers: () => Promise<void>
+    updateProfile: () => Promise<UserProfile | null>
+    updateInfo: (info: ClientInfo) => ClientInfo | null
+    updateTransactions: () => Promise<MoneyTransaction[] | null>
+    updateNumbers: () => Promise<NumberInfo[] | null>
+    reset: () => void
 }
 
 export const useClientStore = create<ClientStore>()(
@@ -31,6 +32,16 @@ export const useClientStore = create<ClientStore>()(
             info: null,
             transactions: null,
             numbers: null,
+
+            reset: () => {
+                set({
+                    balance: null,
+                    profile: null,
+                    info: null,
+                    transactions: null,
+                    numbers: null,
+                })
+            },
 
             fetchData: async () => {
                 const profilePromise = redGetUserProfile()
@@ -51,29 +62,65 @@ export const useClientStore = create<ClientStore>()(
                     numbers: numbers,
                 })
             },
-            updateProfile: async () => {
+            updateProfile: async (): Promise<UserProfile | null> => {
                 const profile = await redGetUserProfile()
-                set({
-                    balance: profile?.balance ?? 0,
-                    profile: profile
+                set(state => {
+                    if (
+                        state.profile === undefined ||
+                        state.profile !== profile
+                    ) {
+                        return {
+                            balance: profile?.balance ?? 0,
+                            profile: profile
+                        }
+                    }
+                    return state
                 })
+                return profile
             },
-            updateInfo: (info: ClientInfo) => {
-                set({
-                    info: info
+            updateInfo: (info: ClientInfo): ClientInfo | null => {
+                set(state => {
+                    if (
+                        state.info === undefined ||
+                        state.info !== info
+                    ) {
+                        return {
+                            info: info
+                        }
+                    }
+                    return state
                 })
+                return info
             },
-            updateTransactions: async () => {
+            updateTransactions: async (): Promise<MoneyTransaction[] | null> => {
                 const transactions = await redGetMoneyTransactionReport()
-                set({
-                    transactions: transactions
+                set(state => {
+                    if (
+                        state.transactions === undefined ||
+                        state.transactions !== transactions
+                    ) {
+                        return {
+                            transactions: transactions
+                        }
+                    }
+                    return state
                 })
+                return transactions
             },
-            updateNumbers: async () => {
+            updateNumbers: async (): Promise<NumberInfo[] | null> => {
                 const numbers = await redGetMyNumbers()
-                set({
-                    numbers: numbers
+                set(state => {
+                    if (
+                        state.numbers === undefined ||
+                        state.numbers !== numbers
+                    ) {
+                        return {
+                            numbers: numbers
+                        }
+                    }
+                    return state
                 })
+                return numbers
             },
         }),
         {

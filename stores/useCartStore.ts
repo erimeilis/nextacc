@@ -19,6 +19,7 @@ interface CartStore {
     fetchData: () => Promise<void>
     updateData: (items: CartItem[]) => void
     selectItem: (id: number, select?: boolean) => void
+    reset: () => void
 }
 
 export const useCartStore = create<CartStore>()(
@@ -28,6 +29,15 @@ export const useCartStore = create<CartStore>()(
             totalItems: 0,
             totalPrice: 0,
             selectedItems: [],
+
+            reset: () => {
+                set({
+                    cart: [],
+                    totalItems: 0,
+                    totalPrice: 0,
+                    selectedItems: [],
+                })
+            },
 
             fetchData: async () => {
                 try {

@@ -6,6 +6,8 @@ import {useTranslations} from 'next-intl'
 import {UserProfile} from '@/types/UserProfile'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import LineInput from '@/components/shared/LineInput'
+import {useClientStore} from '@/stores/useClientStore'
+import {useCartStore} from '@/stores/useCartStore'
 import {CheckCircle, Pencil, X} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
 import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
@@ -26,6 +28,9 @@ export default function Profile({
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+
+    const {reset: resetClientStore} = useClientStore()
+    const {reset: resetCartStore} = useCartStore()
 
     const [modeEditProfile, setModeEditProfile] = useState(false)
     const handleToggle = () => {
@@ -110,8 +115,12 @@ export default function Profile({
                 </Button>
                 <Button
                     onClick={() => {
-                        resetPersistentId();
-                        signOut({redirectTo: '/' + search});
+                        resetClientStore()
+                        resetCartStore()
+                        signOut({redirectTo: '/' + search})
+                            .then(() => {
+                                resetPersistentId()
+                            })
                     }}
                     type="button"
                     className="text-sm"

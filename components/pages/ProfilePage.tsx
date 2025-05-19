@@ -8,11 +8,14 @@ export default function ProfilePage() {
     const [localProfile, setLocalProfile] = useState<UserProfile | null>(null)
     const {profile, updateProfile} = useClientStore()
     useEffect(() => {
-        if (!profile) {
-            updateProfile()
-                .then(() => setLocalProfile(profile))
-        } else
+        if (profile) {
             setLocalProfile(profile)
+        } else {
+            updateProfile()
+                .then((fetchedProfile) => {
+                    setLocalProfile(fetchedProfile)
+                })
+        }
     }, [profile, updateProfile])
 
     return <Profile

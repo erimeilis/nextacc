@@ -8,11 +8,14 @@ export default function NumbersPage() {
     const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>(null)
     const {numbers, updateNumbers} = useClientStore()
     useEffect(() => {
-        if (!numbers) {
-            updateNumbers()
-                .then(() => setLocalNumbers(numbers))
-        } else
+        if (numbers) {
             setLocalNumbers(numbers)
+        } else {
+            updateNumbers()
+                .then((fetchedNumbers) => {
+                    setLocalNumbers(fetchedNumbers)
+                })
+        }
     }, [numbers, updateNumbers])
 
     return (

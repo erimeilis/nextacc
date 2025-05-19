@@ -173,17 +173,24 @@ export default function OffersPage() {
         const slug = countries?.find(e => e.id == value)
         router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
 
+        console.log('handleCountry', value, slug)
         // If type and country are valid, fetch updated areas in the background
         if (type && value) {
-            const countryId = typeof value === 'string' ? parseInt(value) : value
-            if (!isNaN(countryId)) {
+            const newCountryBySlug = localCountriesMap?.find(e =>
+                getSlug(e.countryname) == value)
+            const newCountry = !isNaN(+(value || '')) ?
+                Number(value) :
+                (newCountryBySlug ?
+                    Number(newCountryBySlug?.id) :
+                    null)
+            if (newCountry) {
                 // If areas already exist, set them immediately
-                const cKey: string = `${type}_${countryId}`
+                const cKey: string = `${type}_${newCountry}`
                 if (areasMap[cKey]) {
-                    setLocalAreasMap(areasMap[cKey])
+                    setLocalAreasMap(areasMap[cKey]) //todo check but guess we don't need that
                 }
                 // Then fetch updated areas in the background
-                updateAreas(type, countryId).then((fetchedAreas) => {
+                updateAreas(type, newCountry).then((fetchedAreas) => {
                     setLocalAreasMap(fetchedAreas)
                 })
             }
@@ -195,15 +202,21 @@ export default function OffersPage() {
 
         // If type, country, and area are valid, fetch updated numbers in the background
         if (type && country && value) {
-            const areaPrefix = typeof value === 'string' ? parseInt(value) : value
-            if (!isNaN(areaPrefix)) {
+            const newAreaBySlug = localAreasMap?.find(e =>
+                getSlug(e.areaname) == value)
+            const newArea = !isNaN(+(value || '')) ?
+                Number(value) :
+                (areaBySlug ?
+                    Number(newAreaBySlug?.areaprefix) :
+                    null)
+            if (newArea) {
                 // If numbers already exist, set them immediately
-                const aKey: string = `${type}_${country}_${areaPrefix}`
+                const aKey: string = `${type}_${country}_${newArea}`
                 if (numbersMap[aKey]) {
-                    setLocalNumbersMap(numbersMap[aKey])
+                    setLocalNumbersMap(numbersMap[aKey]) //todo check but guess we don't need that
                 }
                 // Then fetch updated numbers in the background
-                updateNumbers(type, country, areaPrefix).then((fetchedNumbers) => {
+                updateNumbers(type, country, newArea).then((fetchedNumbers) => {
                     setLocalNumbersMap(fetchedNumbers)
                 })
             }
