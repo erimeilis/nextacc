@@ -75,47 +75,55 @@ export default function OffersPage() {
 
     useEffect(() => {
         if (type) {
-            if (!countriesMap[type!]) {
+            // Initial load of countries - set from store if available
+            if (countriesMap[type!]) {
+                setLocalCountriesMap(countriesMap[type!])
+            } else {
+                // Only fetch if not available
                 updateCountries(type!)
                     .then((fetchedCountries) => {
                         setLocalCountriesMap(fetchedCountries)
                     })
-            } else {
-                setLocalCountriesMap(countriesMap[type!])
             }
+
             if (country) {
                 // Handle non-existable country selected
                 if (!countriesMap[type!]?.some(c => c.id === country)) {
                     router.push(pathName + '?' + CreateQueryString('type', type!, searchParams, ['country', 'area', 'number']))
+                    return
                 }
 
                 const cKey: string = `${type}_${country}`
-                if (!areasMap[cKey]) {
+                // Initial load of areas - set from store if available
+                if (areasMap[cKey]) {
+                    setLocalAreasMap(areasMap[cKey])
+                    // Handle auto-selection of area when there's only one option
+                    if (areasMap[cKey]?.length === 1 && !searchParams?.has('area')) {
+                        router.push(pathName + '?' + CreateQueryString('area', areasMap[cKey][0]?.areaprefix, searchParams))
+                    }
+                } else {
+                    // Only fetch if not available
                     updateAreas(type!, country)
                         .then((fetchedAreas) => {
                             setLocalAreasMap(fetchedAreas)
                             // Handle auto-selection of area when there's only one option
-                            if (fetchedAreas.length === 1) {
+                            if (fetchedAreas.length === 1 && !searchParams?.has('area')) {
                                 router.push(pathName + '?' + CreateQueryString('area', fetchedAreas[0]?.areaprefix, searchParams))
                             }
                         })
-                } else {
-                    setLocalAreasMap(areasMap[cKey])
-                    // Handle auto-selection of area when there's only one option
-                    if (areasMap[cKey]?.length === 1) {
-                        router.push(pathName + '?' + CreateQueryString('area', areasMap[cKey][0]?.areaprefix, searchParams))
-                    }
                 }
 
                 if (area) {
                     const aKey: string = `${type}_${country}_${area}`
-                    if (!numbersMap[aKey]) {
+                    // Initial load of numbers - set from store if available
+                    if (numbersMap[aKey]) {
+                        setLocalNumbersMap(numbersMap[aKey])
+                    } else {
+                        // Only fetch if not available
                         updateNumbers(type!, country, area)
                             .then((fetchedNumbers) => {
                                 setLocalNumbersMap(fetchedNumbers)
                             })
-                    } else {
-                        setLocalNumbersMap(numbersMap[aKey])
                     }
                 }
             }
@@ -155,15 +163,51 @@ export default function OffersPage() {
         setLocalAreasMap(null)
         setLocalNumbersMap(null)
         router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
+        // Fetch updated countries in the background
+        updateCountries(t).then((fetchedCountries) => {
+            setLocalCountriesMap(fetchedCountries)
+        })
     }
     const handleCountry = (value: number | string) => {
         setLocalAreasMap(null)
         const slug = countries?.find(e => e.id == value)
         router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
+
+        // If type and country are valid, fetch updated areas in the background
+        if (type && value) {
+            const countryId = typeof value === 'string' ? parseInt(value) : value
+            if (!isNaN(countryId)) {
+                // If areas already exist, set them immediately
+                const cKey: string = `${type}_${countryId}`
+                if (areasMap[cKey]) {
+                    setLocalAreasMap(areasMap[cKey])
+                }
+                // Then fetch updated areas in the background
+                updateAreas(type, countryId).then((fetchedAreas) => {
+                    setLocalAreasMap(fetchedAreas)
+                })
+            }
+        }
     }
     const handleArea = (value: number | string) => {
         setLocalNumbersMap(null)
         router.push(pathName + '?' + CreateQueryString('area', value, searchParams, ['number']))
+
+        // If type, country, and area are valid, fetch updated numbers in the background
+        if (type && country && value) {
+            const areaPrefix = typeof value === 'string' ? parseInt(value) : value
+            if (!isNaN(areaPrefix)) {
+                // If numbers already exist, set them immediately
+                const aKey: string = `${type}_${country}_${areaPrefix}`
+                if (numbersMap[aKey]) {
+                    setLocalNumbersMap(numbersMap[aKey])
+                }
+                // Then fetch updated numbers in the background
+                updateNumbers(type, country, areaPrefix).then((fetchedNumbers) => {
+                    setLocalNumbersMap(fetchedNumbers)
+                })
+            }
+        }
     }
     const handleNumber = (number: NumberInfo) => {
         router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
