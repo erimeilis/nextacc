@@ -5,19 +5,17 @@ import {useEffect, useState} from 'react'
 import {UserProfile} from '@/types/UserProfile'
 
 export default function ProfilePage() {
-    const [profileState, setProfileState] = useState<UserProfile | null>(null)
+    const [localProfile, setLocalProfile] = useState<UserProfile | null>(null)
     const {profile, updateProfile} = useClientStore()
     useEffect(() => {
         if (!profile) {
             updateProfile()
-        }
+                .then(() => setLocalProfile(profile))
+        } else
+            setLocalProfile(profile)
     }, [profile, updateProfile])
 
-    useEffect(() => {
-        setProfileState(profile)
-    }, [profile])
-
     return <Profile
-        profile={profileState}
+        profile={localProfile}
     />
 }

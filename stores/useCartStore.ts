@@ -4,52 +4,41 @@ import {CartItem} from '@/types/CartItem'
 import {getPersistState} from '@/utils/usePersistState'
 import {getCart} from '@/app/api/redreport/cart'
 import {persist} from 'zustand/middleware'
+import {idbStorage} from '@/stores/idbStorage'
 
 // todo maybe better use Signals, think of it later
 
 const persistentId = getPersistState<string>('persistentId', 'no-id')
 
-interface State {
+interface CartStore {
     cart: CartItem[]
     totalItems: number
     totalPrice: number
     selectedItems: number[]
-    isLoading: boolean
-    error: unknown
-}
 
-interface Actions {
     fetchData: () => Promise<void>
     updateData: (items: CartItem[]) => void
     selectItem: (id: number, select?: boolean) => void
 }
 
-const INITIAL_STATE: State = {
-    cart: [],
-    totalItems: 0,
-    totalPrice: 0,
-    selectedItems: [],
-    isLoading: false,
-    error: null
-}
+export const useCartStore = create<CartStore>()(
+    persist(
+        (set) => ({
+            cart: [],
+            totalItems: 0,
+            totalPrice: 0,
+            selectedItems: [],
 
-export const useCartStore = create(
-    persist<State & Actions>(
-        set => ({
-            ...INITIAL_STATE,
-            
             fetchData: async () => {
                 try {
                     if (persistentId !== 'no-id') {
-                        set({isLoading: true})
                         const items: CartItem[] | null = await getCart({uid: persistentId})
                         if (!items || items.length == 0) {
                             set({
-                                cart: INITIAL_STATE.cart,
-                                totalItems: INITIAL_STATE.totalItems,
-                                totalPrice: INITIAL_STATE.totalPrice,
-                                selectedItems: INITIAL_STATE.selectedItems,
-                                isLoading: false
+                                cart: [],
+                                totalItems: 0,
+                                totalPrice: 0,
+                                selectedItems: [],
                             })
                             return
                         }
@@ -64,12 +53,10 @@ export const useCartStore = create(
                             totalItems: sortedItems.length,
                             totalPrice: sortedItems.reduce((sum, item) => sum + item.sum, 0),
                             selectedItems: sortedItems.map(item => item.id),
-                            isLoading: false
                         })
                     }
                 } catch (error) {
                     console.error('Failed to fetch cart data: ', error)
-                    set({error, isLoading: false})
                 }
             },
             updateData: (items: CartItem[]) => {
@@ -124,7 +111,32 @@ export const useCartStore = create(
             }
         }), {
             name: 'cart-storage', // unique name
-            // getStorage: () => sessionStorage, (optional) by default, the 'localStorage' is used
+            storage: idbStorage,
+            version: 1,
+            partialize: (state: CartStore) => ({
+                cart: state.cart,
+                selectedItems: state.selectedItems,
+                totalItems: state.totalItems,
+                totalPrice: state.totalPrice,
+            }),
+            merge: (persistedState, currentState) => {
+                const persisted = persistedState as Partial<CartStore> || {}
+                return {
+                    ...currentState,
+                    cart:
+                        persisted.cart && Object.keys(persisted.cart).length > 0
+                            ? persisted.cart
+                            : currentState.cart,
+                    selectedItems:
+                        persisted.selectedItems && Object.keys(persisted.selectedItems).length > 0
+                            ? persisted.selectedItems
+                            : currentState.selectedItems,
+                    totalItems:
+                        persisted.totalItems ? persisted.totalItems : currentState.totalItems,
+                    totalPrice:
+                        persisted.totalPrice ? persisted.totalPrice : currentState.totalPrice,
+                }
+            },
         }
     )
 )

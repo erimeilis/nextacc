@@ -1,6 +1,6 @@
 'use client'
 import Loader from '@/components/service/Loader'
-import { Label } from '@/components/ui/label'
+import {Label} from '@/components/ui/label'
 import {ChangeEvent} from 'react'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
@@ -8,21 +8,21 @@ import Show from '@/components/service/Show'
 export default function DropdownSelectGeo({
                                               selectId,
                                               selectTitle = '',
-                                              data = [],
+                                              data,
                                               onSelectAction,
                                               selectedOption,
-                                              loading = false,
+                                              //loading = false,
                                               customClass = ''
                                           }: {
     selectId: string
     selectTitle: string
-    data: { id: number | string, name: string }[]
+    data: { id: number | string, name: string }[] | null | undefined
     onSelectAction: (value: number | string) => void
     selectedOption?: number | string | null
-    loading?: boolean
+    //loading?: boolean
     customClass?: string
 }) {
-    const items = data.map(item => (
+    const items = data?.map(item => (
         <option
             value={item.id}
             key={item.id}
@@ -35,10 +35,10 @@ export default function DropdownSelectGeo({
     const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
         onSelectAction(Number(event.target.value))
     }
-    const slugOption = data.find(e => getSlug(e.name) == selectedOption)
+    const slugOption = data?.find(e => getSlug(e.name) == selectedOption)
     return (
         <Show
-            when={!loading || items.length > 0}
+            when={items != null}
             fallback={<Loader height={8}/>}
         >
             <div className={'min-w-[200px] ' + customClass}>
@@ -62,7 +62,7 @@ export default function DropdownSelectGeo({
                                 'none' :
                         'none'}
                     onChange={handleOptionChange}
-                    disabled={data.length === 0}
+                    disabled={data?.length === 0}
                 >
                     <option
                         value="none"

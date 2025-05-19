@@ -5,21 +5,19 @@ import {useEffect, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 
 export default function TransactionsPage() {
-    const [transactionsState, setTransactionsState] = useState<MoneyTransaction[] | null>(null)
+    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>(null)
     const {transactions, updateTransactions} = useClientStore()
     useEffect(() => {
         if (!transactions) {
             updateTransactions()
-        }
+                .then(() => setLocalTransactions(transactions))
+        } else
+            setLocalTransactions(transactions)
     }, [transactions, updateTransactions])
-
-    useEffect(() => {
-        setTransactionsState(transactions)
-    }, [transactions])
 
     return (
         <MoneyTransactionsList
-            options={transactionsState}
+            options={localTransactions}
         />
     )
 }

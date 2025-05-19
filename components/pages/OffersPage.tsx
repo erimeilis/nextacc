@@ -31,108 +31,109 @@ export default function OffersPage() {
     const router = useRouter()
     const pathName = usePathname()
     const searchParams = useSearchParams()
+    if (searchParams && !searchParams.has('type')) {
+        // If no type is in the URL and this is an initial render, set voice as default
+        router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
+    }
 
     const t = useTranslations('offers')
 
     //const [numberInfo, setNumberInfo] = usePersistState<NumberInfo | null>(null, 'numberInfo')
-    const [loadingCountries, setLoadingCountries] = useState(false)
-    const [loadingAreas, setLoadingAreas] = useState(false)
-    const [loadingNumbers, setLoadingNumbers] = useState(false)
 
-    const [type, setType] = useState<string | null>(null)
-    const [country, setCountry] = useState<number | null>(null)
-    const [area, setArea] = useState<number | null>(null)
-    const [number, setNumber] = useState<string | null>(null)
-
-    const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[]>([])
-    const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[]>([])
-    const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[]>([])
+    const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[] | null>(null)
+    const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>(null)
+    const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>(null)
     const {countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers} = useOffersStore()
+    const {cart} = useCartStore()
+
+    const type = searchParams ? searchParams.get('type') : null
+    const countryBySlug = (searchParams && searchParams.has('country')) ?
+        (localCountriesMap?.find(e =>
+            getSlug(e.countryname) == searchParams.get('country'))) :
+        null
+    const country = (searchParams && searchParams.has('country')) ?
+        (!isNaN(+(searchParams.get('country') || '')) ?
+            Number(searchParams.get('country')) :
+            (countryBySlug ?
+                Number(countryBySlug.id) :
+                null)) :
+        null
+    const areaBySlug = (searchParams && searchParams.has('area')) ?
+        (localAreasMap?.find(e =>
+            getSlug(e.areaname) == searchParams.get('area'))) :
+        null
+    const area = (searchParams && searchParams.has('area')) ?
+        (!isNaN(+(searchParams.get('area') || '')) ?
+            Number(searchParams.get('area')) :
+            (areaBySlug ?
+                Number(areaBySlug.areaprefix) :
+                null)) :
+        null
+    const number = (searchParams && searchParams.has('number')) ?
+        searchParams.get('number') :
+        null
 
     useEffect(() => {
-        if (searchParams) {
-            // If no type is in the URL and this is an initial render, set voice as default
-            if (searchParams.has('type')) {
-                setType(searchParams.get('type'))
+        if (type) {
+            if (!countriesMap[type!]) {
+                updateCountries(type!)
+                    .then((fetchedCountries) => {
+                        setLocalCountriesMap(fetchedCountries)
+                    })
             } else {
-                router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams))
+                setLocalCountriesMap(countriesMap[type!])
             }
-            if (searchParams.has('country')) {
-                const countryBySlug = localCountriesMap?.find(e =>
-                    getSlug(e.countryname) == searchParams.get('country'))
-                setCountry(!isNaN(+(searchParams.get('country') || '')) ?
-                    Number(searchParams.get('country')) :
-                    (countryBySlug ?
-                        Number(countryBySlug.id) :
-                        null))
-            } else {
-                setCountry(null)
-            }
-            if (searchParams.has('area')) {
-                const areaBySlug = localAreasMap?.find(e =>
-                    getSlug(e.areaname) == searchParams.get('area'))
-                setArea(!isNaN(+(searchParams.get('area') || '')) ?
-                    Number(searchParams.get('area')) :
-                    (areaBySlug ?
-                        Number(areaBySlug.areaprefix) :
-                        null))
-            } else {
-                setArea(null)
-            }
-            if (searchParams.has('number')) {
-                setNumber(searchParams.get('number'))
-            } else {
-                setNumber(null)
-            }
-        }
-    }, [localAreasMap, localCountriesMap, pathName, router, searchParams])
-
-    // Get data from the Offers store
-    useEffect(() => {
-        if (searchParams && searchParams.has('type')) {
-            if (!countriesMap[searchParams.get('type')!]) {
-                updateCountries(searchParams.get('type')!)
-            }
-            setLocalCountriesMap(countriesMap[searchParams.get('type')!])
             if (country) {
                 // Handle non-existable country selected
-                if (!countriesMap[searchParams.get('type')!]?.some(c => c.id === country)) {
-                    router.push(pathName + '?' + CreateQueryString('type', searchParams.get('type')!, searchParams, ['country', 'area', 'number']))
+                if (!countriesMap[type!]?.some(c => c.id === country)) {
+                    router.push(pathName + '?' + CreateQueryString('type', type!, searchParams, ['country', 'area', 'number']))
                 }
-                const cKey: string = `${searchParams.get('type')}_${country}`
+
+                const cKey: string = `${type}_${country}`
                 if (!areasMap[cKey]) {
-                    updateAreas(searchParams.get('type')!, country)
-                }
-                setLocalAreasMap(areasMap[cKey])
-                // Handle auto-selection of area when there's only one option
-                if (areasMap[cKey]?.length === 1) {
-                    router.push(pathName + '?' + CreateQueryString('area', areasMap[cKey][0]?.areaprefix, searchParams))
-                }
-                if (area) {
-                    const aKey: string = `${searchParams.get('type')}_${country}_${area}`
-                    if (!numbersMap[aKey]) {
-                        updateNumbers(searchParams.get('type')!, country, area)
+                    updateAreas(type!, country)
+                        .then((fetchedAreas) => {
+                            setLocalAreasMap(fetchedAreas)
+                            // Handle auto-selection of area when there's only one option
+                            if (fetchedAreas.length === 1) {
+                                router.push(pathName + '?' + CreateQueryString('area', fetchedAreas[0]?.areaprefix, searchParams))
+                            }
+                        })
+                } else {
+                    setLocalAreasMap(areasMap[cKey])
+                    // Handle auto-selection of area when there's only one option
+                    if (areasMap[cKey]?.length === 1) {
+                        router.push(pathName + '?' + CreateQueryString('area', areasMap[cKey][0]?.areaprefix, searchParams))
                     }
-                    setLocalNumbersMap(numbersMap[aKey])
+                }
+
+                if (area) {
+                    const aKey: string = `${type}_${country}_${area}`
+                    if (!numbersMap[aKey]) {
+                        updateNumbers(type!, country, area)
+                            .then((fetchedNumbers) => {
+                                setLocalNumbersMap(fetchedNumbers)
+                            })
+                    } else {
+                        setLocalNumbersMap(numbersMap[aKey])
+                    }
                 }
             }
         }
-    }, [country, area, countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers, router, pathName, searchParams])
+    }, [area, areasMap, countriesMap, country, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
 
     const countries = localCountriesMap ?
         localCountriesMap.map(country => ({
             id: country.id,
             name: country.countryname + ' +' + country.countryprefix.toString(),
         })) :
-        []
+        null
     const areas = localAreasMap ?
         localAreasMap.map(area => ({
             id: area.areaprefix,
             name: '(' + area.areaprefix.toString() + ') ' + area.areaname,
         })) :
-        []
-
-    const {cart} = useCartStore()
+        null
     const numbers = localNumbersMap ?
         localNumbersMap.filter(number => {
             // Check if this number exists in the cart and has a numeric DID
@@ -145,33 +146,27 @@ export default function OffersPage() {
             // Return true only for numbers NOT in the cart (filter those out)
             return !existsInCart
         }) :
-        []
+        null
     const getNumber: NumberInfo | null = number ?
-        (numbers.find(e => e.did == number) ?? null) :
+        (numbers?.find(e => e.did == number) ?? null) :
         null
 
-    const handleType = async (t: string) => {
-        //setNumberInfo(null)
-        setLoadingCountries(true)
-        setLoadingAreas(false)
-        setLoadingNumbers(false)
+    const handleType = (t: string) => {
+        setLocalAreasMap(null)
+        setLocalNumbersMap(null)
         router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
     }
-    const handleCountry = async (value: number | string) => {
-        //setNumberInfo(null)
-        setLoadingAreas(true)
-        setLoadingNumbers(false)
-        const slug = countries.find(e => e.id == value)
+    const handleCountry = (value: number | string) => {
+        setLocalAreasMap(null)
+        const slug = countries?.find(e => e.id == value)
         router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
     }
-    const handleArea = async (value: number | string) => {
-        //setNumberInfo(null)
-        setLoadingNumbers(true)
+    const handleArea = (value: number | string) => {
+        setLocalNumbersMap(null)
         router.push(pathName + '?' + CreateQueryString('area', value, searchParams, ['number']))
     }
-    const handleNumber = async (number: NumberInfo) => {
+    const handleNumber = (number: NumberInfo) => {
         router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
-        //setNumberInfo(number)
     }
 
     return (
@@ -185,7 +180,6 @@ export default function OffersPage() {
                     data={countries}
                     onSelectAction={handleCountry}
                     selectedOption={country}
-                    loading={loadingCountries}
                     customClass="w-full"
                 />
                 <DropdownSelectGeo
@@ -194,21 +188,22 @@ export default function OffersPage() {
                     data={areas}
                     onSelectAction={handleArea}
                     selectedOption={area}
-                    loading={loadingAreas}
                     customClass="w-full"
                 />
             </div>
             <div
                 className="flex items-center transition duration-300 px-6 overflow-hidden"
                 style={{
-                    display: (type && country && area) ? 'block' : 'none'
+                    display: (searchParams &&
+                        searchParams.has('type') &&
+                        searchParams.has('country') &&
+                        searchParams.has('area')) ? 'block' : 'none'
                 }}
             >
                 <NumberOffersList
                     options={numbers}
                     onSelectAction={handleNumber}
                     selectedOption={number ?? null}
-                    loading={loadingNumbers}
                 />
             </div>
             <div

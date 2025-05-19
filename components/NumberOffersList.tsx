@@ -11,17 +11,17 @@ export default function NumberOffersList({
                                              options,
                                              onSelectAction,
                                              selectedOption,
-                                             loading = false
+                                             //loading = false
                                          }: {
-    options: NumberInfo[]
+    options: NumberInfo[] | null
     onSelectAction: (number: NumberInfo) => void
     selectedOption: string | null
-    loading: boolean
+    //loading: boolean
 }) {
     const handleOptionChange = (value: string) => {
         // Only trigger change if the option isn't already selected
         if (value !== selectedOption) {
-            const selectedNumberInfo = options.find(option => option.did === value)
+            const selectedNumberInfo = options?.find(option => option.did === value)
             if (!selectedNumberInfo) return
 
             onSelectAction(selectedNumberInfo)
@@ -32,7 +32,7 @@ export default function NumberOffersList({
     const handleLabelClick = (did: string) => {
         // Only trigger change if the option isn't already selected
         if (did !== selectedOption) {
-            const selectedNumberInfo = options.find(option => option.did === did)
+            const selectedNumberInfo = options?.find(option => option.did === did)
             if (!selectedNumberInfo) return
 
             onSelectAction(selectedNumberInfo)
@@ -40,7 +40,7 @@ export default function NumberOffersList({
     }
 
     return (
-        <Show when={!loading || options.length > 0}
+        <Show when={options != null}
               fallback={<Loader height={32}/>}>
             <RadioGroup
                 value={selectedOption || undefined}
@@ -48,7 +48,7 @@ export default function NumberOffersList({
                 onValueChange={handleOptionChange}>
                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                     {
-                        options.map((option) => {
+                        options?.map((option) => {
                             const isSelected = selectedOption === option.did
                             return (
                                 <div key={option.did}

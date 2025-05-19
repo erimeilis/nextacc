@@ -4,8 +4,9 @@ import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
 import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
+import {idbStorage} from '@/stores/idbStorage'
 
-interface State {
+interface OffersStore {
     countriesMap: {
         [key: string]: CountryInfo[];
     };
@@ -15,42 +16,29 @@ interface State {
     numbersMap: {
         [key: string]: NumberInfo[];
     };
-    isLoading: boolean;
-    error: unknown;
-}
 
-interface Actions {
     fetchData: () => Promise<void>;
-    updateCountries: (type: string) => Promise<void>;
-    updateAreas: (type: string, countryId: number) => Promise<void>;
-    updateNumbers: (type: string, countryId: number, areaPrefix: number) => Promise<void>;
+    updateCountries: (type: string) => Promise<CountryInfo[]>;
+    updateAreas: (type: string, countryId: number) => Promise<AreaInfo[]>;
+    updateNumbers: (type: string, countryId: number, areaPrefix: number) => Promise<NumberInfo[]>;
 }
 
-const INITIAL_STATE: State = {
-    countriesMap: {},
-    areasMap: {},
-    numbersMap: {},
-    isLoading: false,
-    error: null
-}
-
-export const useOffersStore = create(
-    persist<State & Actions>(
+export const useOffersStore = create<OffersStore>()(
+    persist(
         (set) => ({
-            ...INITIAL_STATE,
+            countriesMap: {},
+            areasMap: {},
+            numbersMap: {},
 
             fetchData: async () => {
                 try {
-                    set({isLoading: true, error: null})
                     // This could be expanded to load initial data if needed
-                    set({isLoading: false})
                 } catch (error) {
                     console.error('Failed to fetch offers data:', error)
-                    set({error, isLoading: false})
                 }
             },
 
-            updateCountries: async (type) => {
+            updateCountries: async (type): Promise<CountryInfo[]> => {
                 const countries = await getCountries({type})
                 set(state => {
                     if (
@@ -66,9 +54,10 @@ export const useOffersStore = create(
                     }
                     return state
                 })
+                return countries // Return the fetched countries
             },
 
-            updateAreas: async (type, countryId) => {
+            updateAreas: async (type, countryId): Promise<AreaInfo[]> => {
                 const areas = await getAreas({type, country: countryId})
                 set(state => {
                     const key = `${type}_${countryId}`
@@ -85,9 +74,10 @@ export const useOffersStore = create(
                     }
                     return state
                 })
+                return areas // Return the fetched areas
             },
 
-            updateNumbers: async (type, countryId, areaPrefix) => {
+            updateNumbers: async (type, countryId, areaPrefix): Promise<NumberInfo[]> => {
                 const numbers = await getNumbers({type, country: countryId, area: areaPrefix})
                 set(state => {
                     const key = `${type}_${countryId}_${areaPrefix}`
@@ -104,12 +94,36 @@ export const useOffersStore = create(
                     }
                     return state
                 })
+                return numbers // Return the fetched numbers
             }
         }),
         {
             name: 'offers-storage',
-            // Optional: specify storage type
-            // getStorage: () => sessionStorage,
+            storage: idbStorage,
+            version: 1,
+            partialize: (state: OffersStore) => ({
+                countriesMap: state.countriesMap,
+                areasMap: state.areasMap,
+                numbersMap: state.numbersMap,
+            }),
+            merge: (persistedState, currentState) => {
+                const persisted = persistedState as Partial<OffersStore> || {}
+                return {
+                    ...currentState,
+                    countriesMap:
+                        persisted.countriesMap && Object.keys(persisted.countriesMap).length > 0
+                            ? persisted.countriesMap
+                            : currentState.countriesMap,
+                    areasMap:
+                        persisted.areasMap && Object.keys(persisted.areasMap).length > 0
+                            ? persisted.areasMap
+                            : currentState.areasMap,
+                    numbersMap:
+                        persisted.numbersMap && Object.keys(persisted.numbersMap).length > 0
+                            ? persisted.numbersMap
+                            : currentState.numbersMap,
+                }
+            },
         }
     )
 )

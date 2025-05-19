@@ -34,18 +34,16 @@ export default function Nav() {
     //    setIsMenuOpen(!isMenuOpen)
     //}
 
-    const [balanceState, setBalanceState] = useState<number | null>(0)
+    const [localBalance, setLocalBalance] = useState<number | null>(0)
     const {balance, updateProfile} = useClientStore()
 
     useEffect(() => {
-        if (!balance) {
+        if (!localBalance) {
             updateProfile()
-        }
-    }, [balance, updateProfile])
-
-    useEffect(() => {
-        setBalanceState(balance)
-    }, [balance])
+                .then(() => setLocalBalance(balance))
+        } else
+            setLocalBalance(balance)
+    }, [balance, localBalance, updateProfile])
 
     return (
         <nav className="w-full px-3 py-1 mx-auto backdrop sticky top-0 shadow lg:px-6 lg:py-2 z-[9999]">
@@ -75,7 +73,7 @@ export default function Nav() {
                         (session.data.user.provider !== 'anonymous')
                     ) ? (
                         <>
-                            <span className="text-sm font-medium text-white">{p('balance')}:</span><span className="text-sm font-bold text-white">${balanceState}</span><Button
+                            <span className="text-sm font-medium text-white">{p('balance')}:</span><span className="text-sm font-bold text-white">${localBalance}</span><Button
                             variant="navIcon" size="icon" className="h-8 w-8" onClick={() => router.push('/profile' + search)}>
                             <PlusCircle className="h-5 w-5"/>
                         </Button>
