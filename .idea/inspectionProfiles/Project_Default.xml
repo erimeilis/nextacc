@@ -1,6 +1,26 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="CssUnknownProperty" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myCustomPropertiesEnabled" value="true" />
+      <option name="myIgnoreVendorSpecificProperties" value="false" />
+      <option name="myCustomPropertiesList">
+        <value>
+          <list size="10">
+            <item index="0" class="java.lang.String" itemvalue="foreground" />
+            <item index="1" class="java.lang.String" itemvalue="primary" />
+            <item index="2" class="java.lang.String" itemvalue="secondary" />
+            <item index="3" class="java.lang.String" itemvalue="muted" />
+            <item index="4" class="java.lang.String" itemvalue="accent" />
+            <item index="5" class="java.lang.String" itemvalue="destructive" />
+            <item index="6" class="java.lang.String" itemvalue="input" />
+            <item index="7" class="java.lang.String" itemvalue="ring" />
+            <item index="8" class="java.lang.String" itemvalue="card" />
+            <item index="9" class="java.lang.String" itemvalue="popover" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
     <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
   </profile>

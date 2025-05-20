@@ -88,7 +88,7 @@ export default async function RootLayout(
               `
             }}/>
         </head>
-        <body className="bg-background text-foreground">
+        <body className="bg-background text-foreground border-border">
         <ThemeProvider
             attribute="class"
             disableTransitionOnChange={true}

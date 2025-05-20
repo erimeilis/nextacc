@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@config "../../tailwind.config.ts";
 @layer base {
     /* Light Equinox theme (default) */
     :root, .equinox {
@@ -220,10 +221,6 @@
 
 }
 
-body {
-    @apply bg-background text-foreground;
-}
-
 /* Price text styling */
 .text-price {
     color: hsl(var(--price));
@@ -262,18 +259,4 @@ body {
 
 .gradient-button:hover {
     filter: brightness(1.1);
-}
-
-
-@layer base {
-    * {
-        @apply border-border;
-
-    }
-
-    body {
-        @apply bg-background text-foreground;
-
-    }
-
 }
