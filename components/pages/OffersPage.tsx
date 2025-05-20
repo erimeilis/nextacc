@@ -31,18 +31,21 @@ export default function OffersPage() {
     const router = useRouter()
     const pathName = usePathname()
     const searchParams = useSearchParams()
-    if (searchParams && !searchParams.has('type')) {
-        // If no type is in the URL and this is an initial render, set voice as default
-        router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
-    }
+
+    useEffect(() => {
+        if (searchParams && !searchParams.has('type')) {
+            // If no type is in the URL and this is an initial render, set voice as default
+            router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
+        }
+    }, [searchParams, pathName, router])
 
     const t = useTranslations('offers')
 
     //const [numberInfo, setNumberInfo] = usePersistState<NumberInfo | null>(null, 'numberInfo')
 
-    const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[] | null>(null)
-    const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>(null)
-    const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>(null)
+    const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[] | null>([])
+    const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>([])
+    const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
     const {countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers} = useOffersStore()
     const {cart} = useCartStore()
 
@@ -160,70 +163,85 @@ export default function OffersPage() {
         null
 
     const handleType = (t: string) => {
-        setLocalAreasMap(null)
+        setLocalAreasMap([])
         setLocalNumbersMap(null)
-        router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
-        // Fetch updated countries in the background
-        updateCountries(t).then((fetchedCountries) => {
-            setLocalCountriesMap(fetchedCountries)
-        })
+
+        // Delay URL update to allow the dropdown to update visually first
+        setTimeout(() => {
+            router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
+            // Fetch updated countries in the background
+            updateCountries(t).then((fetchedCountries) => {
+                setLocalCountriesMap(fetchedCountries)
+            })
+        }, 50); // Small delay to ensure visual update happens first
     }
     const handleCountry = (value: number | string) => {
         setLocalAreasMap(null)
         const slug = countries?.find(e => e.id == value)
-        router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
 
-        console.log('handleCountry', value, slug)
-        // If type and country are valid, fetch updated areas in the background
-        if (type && value) {
-            const newCountryBySlug = localCountriesMap?.find(e =>
-                getSlug(e.countryname) == value)
-            const newCountry = !isNaN(+(value || '')) ?
-                Number(value) :
-                (newCountryBySlug ?
-                    Number(newCountryBySlug?.id) :
-                    null)
-            if (newCountry) {
-                // If areas already exist, set them immediately
-                const cKey: string = `${type}_${newCountry}`
-                if (areasMap[cKey]) {
-                    setLocalAreasMap(areasMap[cKey]) //todo check but guess we don't need that
+        // Delay URL update to allow the dropdown to update visually first
+        setTimeout(() => {
+            router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
+
+            console.log('handleCountry', value, slug)
+            // If type and country are valid, fetch updated areas in the background
+            if (type && value) {
+                const newCountryBySlug = localCountriesMap?.find(e =>
+                    getSlug(e.countryname) == value)
+                const newCountry = !isNaN(+(value || '')) ?
+                    Number(value) :
+                    (newCountryBySlug ?
+                        Number(newCountryBySlug?.id) :
+                        null)
+                if (newCountry) {
+                    // If areas already exist, set them immediately
+                    const cKey: string = `${type}_${newCountry}`
+                    if (areasMap[cKey]) {
+                        setLocalAreasMap(areasMap[cKey]) //todo check but guess we don't need that
+                    }
+                    // Then fetch updated areas in the background
+                    updateAreas(type, newCountry).then((fetchedAreas) => {
+                        setLocalAreasMap(fetchedAreas)
+                    })
                 }
-                // Then fetch updated areas in the background
-                updateAreas(type, newCountry).then((fetchedAreas) => {
-                    setLocalAreasMap(fetchedAreas)
-                })
             }
-        }
+        }, 50); // Small delay to ensure visual update happens first
     }
     const handleArea = (value: number | string) => {
         setLocalNumbersMap(null)
-        router.push(pathName + '?' + CreateQueryString('area', value, searchParams, ['number']))
 
-        // If type, country, and area are valid, fetch updated numbers in the background
-        if (type && country && value) {
-            const newAreaBySlug = localAreasMap?.find(e =>
-                getSlug(e.areaname) == value)
-            const newArea = !isNaN(+(value || '')) ?
-                Number(value) :
-                (areaBySlug ?
-                    Number(newAreaBySlug?.areaprefix) :
-                    null)
-            if (newArea) {
-                // If numbers already exist, set them immediately
-                const aKey: string = `${type}_${country}_${newArea}`
-                if (numbersMap[aKey]) {
-                    setLocalNumbersMap(numbersMap[aKey]) //todo check but guess we don't need that
+        // Delay URL update to allow the dropdown to update visually first
+        setTimeout(() => {
+            router.push(pathName + '?' + CreateQueryString('area', value, searchParams, ['number']))
+
+            // If type, country, and area are valid, fetch updated numbers in the background
+            if (type && country && value) {
+                const newAreaBySlug = localAreasMap?.find(e =>
+                    getSlug(e.areaname) == value)
+                const newArea = !isNaN(+(value || '')) ?
+                    Number(value) :
+                    (areaBySlug ?
+                        Number(newAreaBySlug?.areaprefix) :
+                        null)
+                if (newArea) {
+                    // If numbers already exist, set them immediately
+                    const aKey: string = `${type}_${country}_${newArea}`
+                    if (numbersMap[aKey]) {
+                        setLocalNumbersMap(numbersMap[aKey]) //todo check but guess we don't need that
+                    }
+                    // Then fetch updated numbers in the background
+                    updateNumbers(type, country, newArea).then((fetchedNumbers) => {
+                        setLocalNumbersMap(fetchedNumbers)
+                    })
                 }
-                // Then fetch updated numbers in the background
-                updateNumbers(type, country, newArea).then((fetchedNumbers) => {
-                    setLocalNumbersMap(fetchedNumbers)
-                })
             }
-        }
+        }, 50); // Small delay to ensure visual update happens first
     }
     const handleNumber = (number: NumberInfo) => {
-        router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
+        // Delay URL update to allow the selection to update visually first
+        setTimeout(() => {
+            router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
+        }, 50); // Small delay to ensure visual update happens first
     }
 
     return (

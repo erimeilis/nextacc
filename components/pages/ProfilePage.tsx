@@ -7,10 +7,17 @@ import {UserProfile} from '@/types/UserProfile'
 export default function ProfilePage() {
     const [localProfile, setLocalProfile] = useState<UserProfile | null>(null)
     const {profile, updateProfile} = useClientStore()
+
+    // Set data from the store immediately if available
     useEffect(() => {
         if (profile) {
             setLocalProfile(profile)
-        } else {
+        }
+    }, [profile])
+
+    // Fetch data in the background if not available
+    useEffect(() => {
+        if (!profile) {
             updateProfile()
                 .then((fetchedProfile) => {
                     setLocalProfile(fetchedProfile)

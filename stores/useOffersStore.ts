@@ -3,7 +3,7 @@ import {persist} from 'zustand/middleware'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
-import {getAreas, getCountries, getNumbers} from '@/app/api/redreport/offers'
+import {getAreas, getCountries, getDiscounts, getNumbers} from '@/app/api/redreport/offers'
 import {idbStorage} from '@/stores/idbStorage'
 
 interface OffersStore {
@@ -16,11 +16,13 @@ interface OffersStore {
     numbersMap: {
         [key: string]: NumberInfo[];
     };
+    discounts: { id: string, name: string }[];
 
     fetchData: () => Promise<void>;
     updateCountries: (type: string) => Promise<CountryInfo[]>;
     updateAreas: (type: string, countryId: number) => Promise<AreaInfo[]>;
     updateNumbers: (type: string, countryId: number, areaPrefix: number) => Promise<NumberInfo[]>;
+    updateDiscounts: () => Promise<{ id: string, name: string }[]>;
 }
 
 export const useOffersStore = create<OffersStore>()(
@@ -29,6 +31,7 @@ export const useOffersStore = create<OffersStore>()(
             countriesMap: {},
             areasMap: {},
             numbersMap: {},
+            discounts: [],
 
             fetchData: async () => {
                 try {
@@ -95,6 +98,22 @@ export const useOffersStore = create<OffersStore>()(
                     return state
                 })
                 return numbers // Return the fetched numbers
+            },
+
+            updateDiscounts: async (): Promise<{ id: string, name: string }[]> => {
+                const discounts = await getDiscounts()
+                set(state => {
+                    if (
+                        state.discounts.length === 0 ||
+                        JSON.stringify(state.discounts) !== JSON.stringify(discounts)
+                    ) {
+                        return {
+                            discounts: discounts
+                        }
+                    }
+                    return state
+                })
+                return discounts // Return the fetched discounts
             }
         }),
         {
@@ -105,6 +124,7 @@ export const useOffersStore = create<OffersStore>()(
                 countriesMap: state.countriesMap,
                 areasMap: state.areasMap,
                 numbersMap: state.numbersMap,
+                discounts: state.discounts,
             }),
             merge: (persistedState, currentState) => {
                 const persisted = persistedState as Partial<OffersStore> || {}
@@ -122,6 +142,10 @@ export const useOffersStore = create<OffersStore>()(
                         persisted.numbersMap && Object.keys(persisted.numbersMap).length > 0
                             ? persisted.numbersMap
                             : currentState.numbersMap,
+                    discounts:
+                        persisted.discounts && persisted.discounts.length > 0
+                            ? persisted.discounts
+                            : currentState.discounts,
                 }
             },
         }

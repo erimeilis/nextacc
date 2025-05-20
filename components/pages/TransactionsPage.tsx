@@ -5,12 +5,19 @@ import {useEffect, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 
 export default function TransactionsPage() {
-    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>(null)
+    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>([])
     const {transactions, updateTransactions} = useClientStore()
+
+    // Set data from store immediately if available
     useEffect(() => {
         if (transactions) {
             setLocalTransactions(transactions)
-        } else {
+        }
+    }, [transactions])
+
+    // Fetch data in the background if not available
+    useEffect(() => {
+        if (!transactions) {
             updateTransactions()
                 .then((fetchedTransactions) => {
                     setLocalTransactions(fetchedTransactions)

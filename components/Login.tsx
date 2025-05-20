@@ -186,7 +186,9 @@ export default function Login() {
                                         isRequired={field.isRequired}
                                         placeholder={t(field.placeholder)}
                                         icon={field.icon}
-                                        error={t.has(loginErrors[field.id]) ? t(loginErrors[field.id]) : ''}
+                                        error={loginErrors[field.id] && loginErrors[field.id]!.length > 0
+                                            ? loginErrors[field.id]!.map(err => t(err)).join(', ')
+                                            : ''}
                                     />
                                 }
                             )

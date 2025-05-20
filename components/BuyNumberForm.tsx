@@ -1,5 +1,5 @@
 'use client'
-import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
+import React, {ChangeEvent, SyntheticEvent, useEffect, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
@@ -13,8 +13,6 @@ import {schemaTelegram} from '@/schemas/telegram.schema'
 import {schemaSip} from '@/schemas/sip.schema'
 import {schemaEmail} from '@/schemas/email.schema'
 import {schemaHttps} from '@/schemas/https.schema'
-import useSWR from 'swr'
-import {getDiscounts} from '@/app/api/redreport/offers'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/cart'
@@ -22,6 +20,7 @@ import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
 import {slack} from '@/utils/slack'
 import {useCartStore} from '@/stores/useCartStore'
+import {useOffersStore} from '@/stores/useOffersStore'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -87,8 +86,20 @@ export default function BuyNumberForm({
     }
 
     function Discounts(): { id: string, name: string }[] {
-        const {data} = useSWR({}, getDiscounts, {})
-        return data ?? []
+        const {discounts, updateDiscounts} = useOffersStore()
+
+        // First show cached data from the store
+        // Then update in the background
+        useEffect(() => {
+            updateDiscounts().then()
+        }, [updateDiscounts])
+
+        // Add a default "1 month" option if a discounts array is empty
+        if (discounts.length === 0) {
+            return [{id: '0', name: '1'}]
+        }
+
+        return discounts
     }
 
     const discounts = Discounts()

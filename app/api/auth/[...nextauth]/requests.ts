@@ -2,35 +2,37 @@
 import {KCApiExchangeToken} from '@/types/KCApiExchangeToken'
 import {KCUserRepresentation} from '@/types/KCUserRepresentation'
 import {geoip} from '@/utils/geoip'
-import axios, {AxiosError, AxiosResponse} from 'axios'
 import {KCFederatedIdentityRepresentation} from '@/types/KCFederatedIdentityRepresentation'
 
 const urlKcToken: string = process.env.KEYCLOAK_REALM + '/protocol/openid-connect/token'
 const urlKcUsers: string = process.env.KEYCLOAK_ADMIN_REALM + '/users/'
 
 export async function kcLoginWithToken(token: string): Promise<KCApiExchangeToken | null> {
-    return axios.post(
-        urlKcToken,
-        'client_id=' + process.env.KEYCLOAK_CLIENT_ID +
-        '&client_secret=' + process.env.KEYCLOAK_CLIENT_SECRET +
-        '&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange' +
-        '&subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token' +
-        '&subject_token=' + token +
-        '&subject_issuer=google',
-        {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-    )
-        .then((res: AxiosResponse) => {
+    const options: RequestInit = {
+        cache: 'no-store',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            'client_id': process.env.KEYCLOAK_CLIENT_ID as string,
+            'client_secret': process.env.KEYCLOAK_CLIENT_SECRET as string,
+            'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
+            'subject_token_type': 'urn:ietf:params:oauth:token-type:access_token',
+            'subject_token': token,
+            'subject_issuer': 'google'
+        })
+    }
+
+    return fetch(urlKcToken, options)
+        .then((res: Response) => {
             if (res.status !== 200) {
                 console.log('KcLoginWithToken: ', res.status + ' ' + res.statusText)
                 throw new Error('not ok')
             }
-            return res.data
+            return res.json()
         })
-        .catch((err: AxiosError) => {
+        .catch((err) => {
             console.log('KcLoginWithToken error: ', err.message)
             return null
         })
@@ -293,15 +295,19 @@ export async function kcAddSocial({
             }
         }
     }
-    return axios.post(
-        urlKcUsers + found.id + '/federated-identity/' + provider,
-        rep,
-        {
-            headers: {
-                'Authorization': 'Bearer ' + adminToken,
-            }
-        })
-        .then((res: AxiosResponse) => {
+    const options: RequestInit = {
+        cache: 'no-store',
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + adminToken,
+        },
+        body: JSON.stringify(rep)
+    }
+
+    return fetch(urlKcUsers + found.id + '/federated-identity/' + provider, options)
+        .then((res: Response) => {
             if (!(res.status == 204)) {
                 console.log('kcAddSocial: ', res.status + ' ' + res.statusText)
                 throw new Error('not ok')

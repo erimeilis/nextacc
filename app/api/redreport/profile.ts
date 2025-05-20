@@ -55,7 +55,7 @@ export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<U
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/profile', options)
         .then((res: Response) => {
-            //console.log('redSetUserProfile: ', res.status)
+            //console.log('redSetUserProfile: ', res)
             if (!res.ok) return null
             return res.json()
         })

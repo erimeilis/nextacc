@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useSession} from 'next-auth/react'
 import Show from '@/components/service/Show'
 import Login from '@/components/Login'
@@ -29,14 +29,23 @@ export default function Layout({children}: { children: React.ReactNode }) {
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
-    const activePathName = () => {
+    // Get the current active tab from the URL
+    const getCurrentTab = useCallback(() => {
         if (!pathName) {
             return 'profile'
         } else {
             const segments = pathName.split('/')
             return segments[2] ? segments[2] : 'profile'
         }
-    }
+    }, [pathName])
+
+    // State to track the active tab
+    const [activeTab, setActiveTab] = useState(getCurrentTab())
+
+    // Update activeTab when the URL changes
+    useEffect(() => {
+        setActiveTab(getCurrentTab())
+    }, [getCurrentTab])
 
     return <Show when={(session.status === 'authenticated') && (session.data?.user?.provider !== 'anonymous')}
                  fallback={
@@ -52,8 +61,13 @@ export default function Layout({children}: { children: React.ReactNode }) {
                     <Tab
                         key={tab.slug}
                         type="button"
-                        onClick={() => router.push('/' + tab.slug + search)}
-                        active={activePathName() === tab.slug}
+                        onClick={() => {
+                            // Update active tab state immediately
+                            setActiveTab(tab.slug)
+                            // Then initiate route change
+                            router.push('/' + tab.slug + search)
+                        }}
+                        active={activeTab === tab.slug}
                         icon={tab.icon}
                     >
                         {t(tab.name)}

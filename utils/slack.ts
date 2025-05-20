@@ -1,22 +1,21 @@
 'use server'
-import axios, {AxiosError} from 'axios'
 
 export async function slack(text: string): Promise<boolean> {
     const webhookURL = process.env.SLACK_WEBHOOK as string
-    return axios.post(
-        webhookURL,
-        JSON.stringify({text: text}),
-        {
+
+    try {
+        const response = await fetch(webhookURL, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-            }
-        }
-    )
-        .then((res) => {
-            return res.status === 200
-        }).catch((err: AxiosError) => {
-            console.log('slackAlert error: ', err.message)
-            return false
+            },
+            body: JSON.stringify({text: text})
         })
+
+        return response.status === 200
+    } catch (err) {
+        console.log('slackAlert error: ', err instanceof Error ? err.message : String(err))
+        return false
+    }
 }

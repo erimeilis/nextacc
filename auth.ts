@@ -192,7 +192,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
     callbacks: {
         async signIn(params: {
             user: User | AdapterUser,
-            account: Account | null,
+            account?: Account | null,  // Added '?' to make it optional
             profile?: Profile | undefined,
             email?: {
                 verificationRequest?: boolean | undefined
@@ -206,6 +206,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             if (!params.account || params.account.provider !== 'google') return true
             if (!params.account.access_token) return false
 
+            // Rest of your function remains the same
             const email = params.user.email!
 
             const adminToken = await kcGetAdminAccessToken() //Get Admin token on KC
@@ -303,7 +304,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }
     },
     events: {
-        async signIn({user, account}: { user: User, account: Account | null, profile?: Profile }): Promise<void> {
+        async signIn({user, account}: { user: User, account?: Account | null, profile?: Profile }): Promise<void> {
             console.log(`signIn of ${user.name} from ${user?.provider || account?.provider}`)
         },
         async signOut({token}: { session?: void | AdapterSession | null | undefined, token?: JWT & { user?: User } | null }): Promise<void> {

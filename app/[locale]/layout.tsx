@@ -9,7 +9,6 @@ import {NextIntlClientProvider} from 'next-intl'
 import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
-import SWRProvider from '@/providers/SWRProvider'
 import {Ubuntu} from 'next/font/google'
 
 // Initialize Ubuntu font
@@ -96,19 +95,17 @@ export default async function RootLayout(
             storageKey="theme"
             defaultTheme="system"
         >
-            <SWRProvider>
-                <AuthProvider>
-                    <NextIntlClientProvider messages={messages}>
-                        <Nav/>
-                        <main className="flex items-center justify-center px-4 pt-4 pb-96">
-                            <div className="flex flex-col sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-4">
-                                {offers}
-                                {dashboard}
-                            </div>
-                        </main>
-                    </NextIntlClientProvider>
-                </AuthProvider>
-            </SWRProvider>
+            <AuthProvider>
+                <NextIntlClientProvider messages={messages}>
+                    <Nav/>
+                    <main className="flex items-center justify-center px-4 pt-4 pb-96">
+                        <div className="flex flex-col sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-4">
+                            {offers}
+                            {dashboard}
+                        </div>
+                    </main>
+                </NextIntlClientProvider>
+            </AuthProvider>
         </ThemeProvider>
         </body>
         </html>
