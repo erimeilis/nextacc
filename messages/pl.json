@@ -96,7 +96,10 @@
     "transactions": "Transakcje",
     "numbers": "Moje numery",
     "total_numbers": "Łączna liczba numerów",
-    "total_monthly_cost": "Łączny miesięczny koszt"
+    "total_monthly_cost": "Łączny miesięczny koszt",
+    "select_all": "Zaznacz wszystkie",
+    "delete_selected": "Usuń zaznaczone",
+    "search_numbers": "Szukaj numerów"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",

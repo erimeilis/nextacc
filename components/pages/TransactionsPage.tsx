@@ -6,7 +6,8 @@ import {useClientStore} from '@/stores/useClientStore'
 
 export default function TransactionsPage() {
     const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>([])
-    const {transactions, updateTransactions} = useClientStore()
+    const {getTransactions, updateTransactions} = useClientStore()
+    const transactions = getTransactions()
 
     // Set data from store immediately if available
     useEffect(() => {

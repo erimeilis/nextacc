@@ -45,7 +45,8 @@ export default function NumberOffersList({
             <RadioGroup
                 value={selectedOption || undefined}
                 name="list-radio"
-                onValueChange={handleOptionChange}>
+                onValueChange={handleOptionChange}
+                className="transition-transform duration-300">
                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                     {
                         options?.map((option) => {

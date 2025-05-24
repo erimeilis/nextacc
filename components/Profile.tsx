@@ -146,11 +146,11 @@ export default function Profile({
                                 <Show
                                     when={modeEditProfile}
                                     fallback={
-                                        <div className="flex flex-col sm:flex-row w-full">
-                                            <div className="flex text-xs sm:text-sm p-2 items-center font-normal sm:min-w-32 sm:w-32">
+                                        <div className="flex flex-row w-full">
+                                            <div className="flex text-xs sm:text-sm p-2 items-center font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">
                                                 {t(field.labelText)}:
                                             </div>
-                                            <div className="flex-grow p-2 text-xs sm:text-sm">
+                                            <div className="flex-grow p-2 text-xs sm:text-sm text-right sm:text-left">
                                                 {profileState[field.id]}
                                             </div>
                                         </div>}

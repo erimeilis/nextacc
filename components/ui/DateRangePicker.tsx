@@ -3,9 +3,11 @@
 import React, {useEffect, useState} from 'react'
 import moment from 'moment'
 import * as Dialog from '@radix-ui/react-dialog'
-import {Calendar as CalendarIcon, ChevronLeft, ChevronRight, X} from 'lucide-react'
+import {ChevronLeft, ChevronRight, X} from 'lucide-react'
+import {CalendarDots} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import {useTranslations} from 'next-intl'
+import {VisuallyHidden} from '@radix-ui/react-visually-hidden'
 
 type DateRangePickerProps = {
     startDate: Date | null
@@ -227,11 +229,11 @@ export default function DateRangePicker({
                 <button
                     type="button"
                     className={clsx(
-                        'flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary',
+                        'flex items-center gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                         className
                     )}
                 >
-                    <CalendarIcon className="h-4 w-4"/>
+                    <CalendarDots className="h-4 w-4"/>
                     <span className="flex-grow text-left">
             {formatDateRange()}
           </span>
@@ -250,6 +252,10 @@ export default function DateRangePicker({
             <Dialog.Portal>
                 <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50"/>
                 <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background p-6 rounded-lg shadow-lg z-50 w-[650px] max-w-[95vw]">
+                    {/* Add this line to fix the accessibility issue */}
+                    <VisuallyHidden>
+                        <Dialog.Title>{t('select_date_range')}</Dialog.Title>
+                    </VisuallyHidden>
                     <div className="flex flex-col md:flex-row gap-6">
                         <Calendar
                             currentMonth={startMonth}

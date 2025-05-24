@@ -3,15 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
+import { X, CaretLeft, CaretRight, Calendar } from '@phosphor-icons/react'
 import clsx from 'clsx'
-
-type DatePickerProps = {
-  value: Date | null
-  onChange: (date: Date | null) => void
-  placeholder?: string
-  className?: string
-}
+import { DatePickerProps } from '@/types/DatePickerTypes'
 
 export default function DatePicker({ value, onChange, placeholder = 'Select date...', className = '' }: DatePickerProps) {
   const [open, setOpen] = useState(false)
@@ -41,20 +35,20 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
   const renderCalendarDays = () => {
     const daysInMonth = currentMonth.daysInMonth()
     const firstDayOfMonth = moment(currentMonth).startOf('month').day()
-    
+
     const days = []
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="w-8 h-8" />)
     }
-    
+
     // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       const date = moment(currentMonth).date(i)
       const isSelected = selectedDate && date.format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD')
       const isToday = date.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')
-      
+
       days.push(
         <button
           key={i}
@@ -71,7 +65,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
         </button>
       )
     }
-    
+
     return days
   }
 
@@ -93,7 +87,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
             className
           )}
         >
-          <CalendarIcon className="h-4 w-4" />
+          <Calendar className="h-4 w-4" />
           <span className="flex-grow text-left">
             {selectedDate ? selectedDate.format('MMM DD, YYYY') : placeholder}
           </span>
@@ -108,7 +102,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
           )}
         </button>
       </Dialog.Trigger>
-      
+
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background p-6 rounded-lg shadow-lg z-50 w-[300px]">
@@ -118,7 +112,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
               onClick={prevMonth}
               className="p-1 rounded-full hover:bg-muted"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <CaretLeft className="h-5 w-5" />
             </button>
             <h2 className="text-lg font-medium">
               {currentMonth.format('MMMM YYYY')}
@@ -128,10 +122,10 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
               onClick={nextMonth}
               className="p-1 rounded-full hover:bg-muted"
             >
-              <ChevronRight className="h-5 w-5" />
+              <CaretRight className="h-5 w-5" />
             </button>
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
               <div key={day} className="w-8 h-8 flex items-center justify-center text-xs font-medium text-muted-foreground">
@@ -139,11 +133,11 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
               </div>
             ))}
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1">
             {renderCalendarDays()}
           </div>
-          
+
           <div className="mt-4 flex justify-between">
             <button
               type="button"
@@ -162,7 +156,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
               Today
             </button>
           </div>
-          
+
           <Dialog.Close asChild>
             <button
               type="button"

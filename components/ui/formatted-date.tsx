@@ -8,13 +8,16 @@ interface FormattedDateProps {
   className?: string
   format?: string
   fallback?: string
+  showTime?: boolean
 }
 
 export function FormattedDate({
   date,
   className,
-  format: formatString = 'MMM d, yyyy',
-  fallback = 'N/A'
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  format: formatString = 'MMM d, yy', // Unused but kept for backward compatibility
+  fallback = 'N/A',
+  showTime = false
 }: FormattedDateProps) {
   if (!date) return <span className={cn("text-muted-foreground text-sm", className)}>{fallback}</span>
 
@@ -25,12 +28,16 @@ export function FormattedDate({
       return <span className={cn("text-muted-foreground text-sm", className)}>{fallback}</span>
     }
 
+    // Format the date parts separately to apply different styles
+    const day = format(parsedDate, 'd')
+    const monthYear = format(parsedDate, showTime ? 'MMM, yy HH:mm' : 'MMM, yy')
+
     return (
       <time 
         dateTime={date} 
         className={cn("text-sm", className)}
       >
-        {format(parsedDate, formatString)}
+        {day} <span>{monthYear}</span>
       </time>
     )
   } catch {

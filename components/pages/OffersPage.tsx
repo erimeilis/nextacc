@@ -4,7 +4,7 @@ import NumberTypeSelector from '@/components/NumberTypeSelector'
 import {Card} from '@/components/ui/card'
 import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import CreateQueryString from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
@@ -76,6 +76,14 @@ export default function OffersPage() {
         searchParams.get('number') :
         null
 
+    // Move the handleNumber function above the useEffect that uses it
+    const handleNumber = useCallback((number: NumberInfo) => {
+        // Delay URL update to allow the selection to update visually first
+        setTimeout(() => {
+            router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
+        }, 50) // Small delay to ensure a visual update happens first
+    }, [pathName, router, searchParams])
+
     useEffect(() => {
         if (type) {
             // Initial load of countries - set from store if available
@@ -121,17 +129,25 @@ export default function OffersPage() {
                     // Initial load of numbers - set from store if available
                     if (numbersMap[aKey]) {
                         setLocalNumbersMap(numbersMap[aKey])
+                        // Auto-select the only number if there's just one
+                        if (numbersMap[aKey].length === 1 && !searchParams?.has('number')) {
+                            handleNumber(numbersMap[aKey][0])
+                        }
                     } else {
                         // Only fetch if not available
                         updateNumbers(type!, country, area)
                             .then((fetchedNumbers) => {
                                 setLocalNumbersMap(fetchedNumbers)
+                                // Auto-select the only number if there's just one
+                                if (fetchedNumbers.length === 1 && !searchParams?.has('number')) {
+                                    handleNumber(fetchedNumbers[0])
+                                }
                             })
                     }
                 }
             }
         }
-    }, [area, areasMap, countriesMap, country, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
+    }, [area, areasMap, countriesMap, country, handleNumber, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
 
     const countries = localCountriesMap ?
         localCountriesMap.map(country => ({
@@ -164,7 +180,8 @@ export default function OffersPage() {
 
     const handleType = (t: string) => {
         setLocalAreasMap([])
-        setLocalNumbersMap(null)
+        // Don't clear the number list immediately to prevent flickering
+        // setLocalNumbersMap(null)
 
         // Delay URL update to allow the dropdown to update visually first
         setTimeout(() => {
@@ -173,10 +190,11 @@ export default function OffersPage() {
             updateCountries(t).then((fetchedCountries) => {
                 setLocalCountriesMap(fetchedCountries)
             })
-        }, 50); // Small delay to ensure visual update happens first
+        }, 50) // Small delay to ensure a visual update happens first
     }
     const handleCountry = (value: number | string) => {
-        setLocalAreasMap(null)
+        // Don't clear the area list immediately to prevent flickering
+        // setLocalAreasMap(null)
         const slug = countries?.find(e => e.id == value)
 
         // Delay URL update to allow the dropdown to update visually first
@@ -205,10 +223,11 @@ export default function OffersPage() {
                     })
                 }
             }
-        }, 50); // Small delay to ensure visual update happens first
+        }, 50) // Small delay to ensure a visual update happens first
     }
     const handleArea = (value: number | string) => {
-        setLocalNumbersMap(null)
+        // Don't clear the number list immediately to prevent flickering
+        // setLocalNumbersMap(null)
 
         // Delay URL update to allow the dropdown to update visually first
         setTimeout(() => {
@@ -228,21 +247,31 @@ export default function OffersPage() {
                     const aKey: string = `${type}_${country}_${newArea}`
                     if (numbersMap[aKey]) {
                         setLocalNumbersMap(numbersMap[aKey]) //todo check but guess we don't need that
+                        // Auto-select the only number if there's just one
+                        if (numbersMap[aKey].length === 1 && !searchParams?.has('number')) {
+                            handleNumber(numbersMap[aKey][0])
+                        }
                     }
                     // Then fetch updated numbers in the background
                     updateNumbers(type, country, newArea).then((fetchedNumbers) => {
                         setLocalNumbersMap(fetchedNumbers)
+                        // Auto-select the only number if there's just one
+                        if (fetchedNumbers.length === 1 && !searchParams?.has('number')) {
+                            handleNumber(fetchedNumbers[0])
+                        }
                     })
                 }
             }
-        }, 50); // Small delay to ensure visual update happens first
+        }, 50) // Small delay to ensure a visual update happens first
     }
-    const handleNumber = (number: NumberInfo) => {
-        // Delay URL update to allow the selection to update visually first
-        setTimeout(() => {
-            router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
-        }, 50); // Small delay to ensure visual update happens first
-    }
+
+    // Remove this duplicate definition
+    // const handleNumber = useCallback((number: NumberInfo) => {
+    //     // Delay URL update to allow the selection to update visually first
+    //     setTimeout(() => {
+    //         router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
+    //     }, 50) // Small delay to ensure a visual update happens first
+    // }, [pathName, router, searchParams])
 
     return (
         <Card id="offers"
@@ -267,7 +296,7 @@ export default function OffersPage() {
                 />
             </div>
             <div
-                className="flex items-center transition duration-300 px-4 sm:px-6 overflow-hidden"
+                className="flex items-center transition-all duration-300 px-4 sm:px-6 overflow-hidden"
                 style={{
                     display: (searchParams &&
                         searchParams.has('type') &&

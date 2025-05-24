@@ -3,26 +3,16 @@ import React, {useEffect, useMemo, useState} from 'react'
 import Loader from './service/Loader'
 import Show from '@/components/service/Show'
 import {MoneyTransaction} from '@/types/MoneyTransaction'
+import {FilterConfig, SortConfig, SortDirection} from '@/types/ListFilterTypes'
 import moment from 'moment'
-import {ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Filter} from 'lucide-react'
+import {CaretDown, CaretLeft, CaretRight, CaretUp} from '@phosphor-icons/react'
+import {Checkbox} from '@/components/ui/checkbox'
 import clsx from 'clsx'
 import DateRangePicker from '@/components/ui/DateRangePicker'
 import {useTranslations} from 'next-intl'
+import {Input} from '@/components/ui/input'
+import {FormattedDate} from '@/components/ui/formatted-date'
 
-type SortDirection = 'asc' | 'desc' | null
-type SortConfig = {
-    key: keyof MoneyTransaction | null
-    direction: SortDirection
-}
-
-type FilterConfig = {
-    startDate: Date | null
-    endDate: Date | null
-    amount: string
-    operation: string
-    description: string
-    reseller: boolean | null
-}
 
 const ITEMS_PER_PAGE = 10
 
@@ -31,7 +21,7 @@ export default function MoneyTransactionsList({
                                               }: {
     options: MoneyTransaction[] | null
 }) {
-    const [sortConfig, setSortConfig] = useState<SortConfig>({key: null, direction: null})
+    const [sortConfig, setSortConfig] = useState<SortConfig<MoneyTransaction>>({key: null, direction: null})
     const t = useTranslations('daterange')
     const tr = useTranslations('transactions')
     const [filterConfig, setFilterConfig] = useState<FilterConfig>({
@@ -43,7 +33,7 @@ export default function MoneyTransactionsList({
         reseller: null
     })
     const [currentPage, setCurrentPage] = useState(1)
-    const [showFilters, setShowFilters] = useState(false)
+    // Filters are always visible now
 
     // Reset to first page when filters change
     useEffect(() => {
@@ -156,18 +146,18 @@ export default function MoneyTransactionsList({
 
     const renderSortIcon = (key: keyof MoneyTransaction) => {
         if (sortConfig.key !== key) {
-            return <ChevronDown className="h-4 w-4 opacity-30"/>
+            return <CaretDown className="h-4 w-4 opacity-30"/>
         }
 
         if (sortConfig.direction === 'asc') {
-            return <ChevronUp className="h-4 w-4"/>
+            return <CaretUp className="h-4 w-4"/>
         }
 
         if (sortConfig.direction === 'desc') {
-            return <ChevronDown className="h-4 w-4"/>
+            return <CaretDown className="h-4 w-4"/>
         }
 
-        return <ChevronDown className="h-4 w-4 opacity-30"/>
+        return <CaretDown className="h-4 w-4 opacity-30"/>
     }
 
     const formatCurrency = (amount: number) => {
@@ -184,101 +174,84 @@ export default function MoneyTransactionsList({
                   <div>{tr('empty_list')}</div> :
                   <Loader height={32}/>}>
             <div className="flex flex-col w-full">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">{tr('title')}</h2>
-                    <button
-                        type="button"
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center gap-1 px-3 py-1 text-sm rounded-md bg-muted hover:bg-muted/80"
-                    >
-                        <Filter className="h-4 w-4"/>
-                        {showFilters ? tr('hide_filters') : tr('show_filters')}
-                    </button>
-                </div>
 
-                {showFilters && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-muted/30 rounded-md">
-                        <div className="flex flex-col gap-1 md:col-span-2">
-                            <label className="text-xs font-medium">{t('filter_by_date')}</label>
-                            <DateRangePicker
-                                startDate={filterConfig.startDate}
-                                endDate={filterConfig.endDate}
-                                onRangeChangeAction={(startDate, endDate) => {
-                                    handleFilterChange('startDate', startDate)
-                                    handleFilterChange('endDate', endDate)
-                                }}
-                                placeholder={t('select_date_range')}
-                                className="w-full"
-                            />
-                        </div>
-
+                <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-4 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
                         <div className="flex flex-col gap-1">
-                            <label className="text-xs font-medium">{tr('amount')}</label>
-                            <input
-                                type="text"
-                                value={filterConfig.amount}
-                                onChange={(e) => handleFilterChange('amount', e.target.value)}
-                                placeholder={tr('filter_amount')}
-                                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <label className="text-xs font-medium">{t('filter_by_date')}</label>
+                            <div className="relative w-full">
+                                <DateRangePicker
+                                    startDate={filterConfig.startDate}
+                                    endDate={filterConfig.endDate}
+                                    onRangeChangeAction={(startDate, endDate) => {
+                                        handleFilterChange('startDate', startDate)
+                                        handleFilterChange('endDate', endDate)
+                                    }}
+                                    placeholder={t('select_date_range')}
+                                    className="w-full h-8 text-xs"
+                                />
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-medium">{tr('operation')}</label>
-                            <input
-                                type="text"
-                                value={filterConfig.operation}
-                                onChange={(e) => handleFilterChange('operation', e.target.value)}
-                                placeholder={tr('filter_operation')}
-                                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                            <div className="relative w-full">
+                                <Input
+                                    type="text"
+                                    value={filterConfig.operation}
+                                    onChange={(e) => handleFilterChange('operation', e.target.value)}
+                                    placeholder={tr('filter_operation')}
+                                    className="h-8 text-xs"
+                                />
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-medium">{tr('description')}</label>
-                            <input
-                                type="text"
-                                value={filterConfig.description}
-                                onChange={(e) => handleFilterChange('description', e.target.value)}
-                                placeholder={tr('filter_description')}
-                                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-medium">{tr('filter_reseller')}</label>
-                            <select
-                                value={filterConfig.reseller === null ? '' : filterConfig.reseller.toString()}
-                                onChange={(e) => {
-                                    const value = e.target.value
-                                    handleFilterChange('reseller', value === '' ? null : value === 'true')
-                                }}
-                                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                                <option value="">{tr('all')}</option>
-                                <option value="true">{tr('yes')}</option>
-                                <option value="false">{tr('no')}</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-end">
-                            <button
-                                type="button"
-                                onClick={() => setFilterConfig({
-                                    startDate: null,
-                                    endDate: null,
-                                    amount: '',
-                                    operation: '',
-                                    description: '',
-                                    reseller: null
-                                })}
-                                className="px-3 py-2 text-sm rounded-md bg-muted hover:bg-muted/80"
-                            >
-                                {tr('clear_filters')}
-                            </button>
+                            <div className="relative w-full">
+                                <Input
+                                    type="text"
+                                    value={filterConfig.description}
+                                    onChange={(e) => handleFilterChange('description', e.target.value)}
+                                    placeholder={tr('filter_description')}
+                                    className="h-8 text-xs"
+                                />
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
+
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            id="reseller-filter"
+                            checked={filterConfig.reseller === true}
+                            onCheckedChange={(checked) => {
+                                // If it was checked and now unchecked, set to false (no)
+                                // If it was false and now checked, set to true (yes)
+                                handleFilterChange('reseller', checked)
+                            }}
+                        />
+                        <label htmlFor="reseller-filter" className="text-xs font-medium">
+                            {tr('filter_reseller')}
+                        </label>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => setFilterConfig({
+                            startDate: null,
+                            endDate: null,
+                            amount: '',
+                            operation: '',
+                            description: '',
+                            reseller: null
+                        })}
+                        className="px-3 py-1 text-xs rounded-md bg-muted hover:bg-muted/80"
+                    >
+                        {tr('clear_filters')}
+                    </button>
+                </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
@@ -346,8 +319,8 @@ export default function MoneyTransactionsList({
                                         i % 2 !== 0 ? 'bg-muted/30 dark:bg-muted/20' : ''
                                     )}
                                 >
-                                    <td className="p-3">{moment(transaction.datetime).format('MMM DD, YYYY HH:mm')}</td>
-                                    <td className="p-3">{formatCurrency(transaction.amount)}</td>
+                                    <td className="p-3"><FormattedDate date={transaction.datetime.toString()} showTime={true}/></td>
+                                    <td className="p-3 text-primary font-medium">{formatCurrency(transaction.amount)}</td>
                                     <td className="p-3">{transaction.operation}</td>
                                     <td className="p-3">{transaction.description}</td>
                                     <td className="p-3">{transaction.reseller ? tr('yes') : tr('no')}</td>
@@ -365,49 +338,109 @@ export default function MoneyTransactionsList({
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
-                        <div className="text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-2 border-t border-border pt-2">
+                        <div className="text-xs text-muted-foreground order-2 sm:order-1">
                             {tr('showing_results', {
                                 start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
                                 end: Math.min(currentPage * ITEMS_PER_PAGE, sortedData.length),
                                 total: sortedData.length
                             })}
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 order-1 sm:order-2">
                             <button
                                 type="button"
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
                                 className={clsx(
-                                    'p-2 rounded-md',
+                                    'p-1 rounded-md',
                                     currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
                                 )}
                             >
-                                <ChevronLeft className="h-4 w-4"/>
+                                <CaretLeft className="h-3 w-3"/>
                             </button>
-                            {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    type="button"
-                                    onClick={() => setCurrentPage(page)}
-                                    className={clsx(
-                                        'w-8 h-8 rounded-md text-sm',
-                                        currentPage === page ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-                                    )}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                            {/* Page numbers with ellipsis for mobile */}
+                            {Array.from({length: totalPages}, (_, i) => i + 1)
+                                .map(page => {
+                                    // Show ellipsis for gaps in pagination on mobile
+                                    const showOnMobile =
+                                        page === 1 ||
+                                        page === totalPages ||
+                                        page === currentPage ||
+                                        page === currentPage - 1 ||
+                                        page === currentPage + 1
+
+                                    // Show ellipsis after page 2 if there's a gap
+                                    const showEllipsisAfter =
+                                        page === 2 &&
+                                        currentPage > 4 &&
+                                        totalPages > 5
+
+                                    // Show ellipsis before the last page - 1 if there's a gap
+                                    const showEllipsisBefore =
+                                        page === totalPages - 2 &&
+                                        currentPage < totalPages - 3 &&
+                                        totalPages > 5
+
+                                    if (showEllipsisAfter && !showOnMobile) {
+                                        return (
+                                            <div
+                                                key={`ellipsis-after-${page}`}
+                                                className="w-6 h-6 flex items-center justify-center text-xs hidden sm:flex"
+                                            >
+                                                ...
+                                            </div>
+                                        )
+                                    }
+
+                                    if (showEllipsisBefore && !showOnMobile) {
+                                        return (
+                                            <div
+                                                key={`ellipsis-before-${page}`}
+                                                className="w-6 h-6 flex items-center justify-center text-xs hidden sm:flex"
+                                            >
+                                                ...
+                                            </div>
+                                        )
+                                    }
+
+                                    // For mobile, show ellipsis if there's a gap between page 2 and the last page
+                                    if (page === 2 && !showOnMobile && totalPages > 3) {
+                                        return (
+                                            <div
+                                                key="ellipsis-mobile"
+                                                className="w-6 h-6 flex items-center justify-center text-xs sm:hidden"
+                                            >
+                                                ...
+                                            </div>
+                                        )
+                                    }
+
+                                    return (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={clsx(
+                                                'w-6 h-6 rounded-md text-xs',
+                                                !showOnMobile ? 'hidden sm:block' : '',
+                                                currentPage === page ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                                            )}
+                                        >
+                                            {page}
+                                        </button>
+                                    )
+                                })
+                            }
                             <button
                                 type="button"
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
                                 className={clsx(
-                                    'p-2 rounded-md',
+                                    'p-1 rounded-md',
                                     currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
                                 )}
                             >
-                                <ChevronRight className="h-4 w-4"/>
+                                <CaretRight className="h-3 w-3"/>
                             </button>
                         </div>
                     </div>

@@ -60,6 +60,7 @@
     "invalid_telegram_username": "Invalid telegram username",
     "invalid_sip": "Invalid SIP",
     "invalid_url": "Invalid URL",
+    "invalid_email": "Invalid email address",
     "pay_for": "Pay for:",
     "month": "{count, plural, one {month} other {months}}",
     "select_qty": "Qty",
@@ -96,7 +97,10 @@
     "transactions": "Transactions",
     "numbers": "My numbers",
     "total_numbers": "Total Numbers",
-    "total_monthly_cost": "Total Monthly Cost"
+    "total_monthly_cost": "Total Monthly Cost",
+    "select_all": "Select all",
+    "delete_selected": "Delete selected",
+    "search_numbers": "Search numbers"
   },
   "profile": {
     "signed_in_as": "Signed in as",

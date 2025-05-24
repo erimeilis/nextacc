@@ -29,7 +29,8 @@ export default function MiniCart({
     const [loadingButton, setLoadingButton] = useState<string | null>(null)
     const persistentId = getPersistState<string>('persistentId', 'no-id')
     const {updateData} = useCartStore()
-    const {balance} = useClientStore()
+    const {getBalance} = useClientStore()
+    const balance = getBalance()
 
     // Calculate total sum of selected items
     const calculateTotal = () => {

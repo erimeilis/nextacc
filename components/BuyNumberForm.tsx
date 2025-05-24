@@ -7,12 +7,13 @@ import Button from '@/components/shared/Button'
 import Input from '@/components/shared/Input'
 import {voiceDestinationsFields} from '@/constants/voiceDestinationFields'
 import {smsDestinationsFields} from '@/constants/smsDestinationFields'
-import {validateInputData} from '@/utils/validation'
+import {validateFormData, validateInputData} from '@/utils/validation'
 import {schemaPhone} from '@/schemas/phone.schema'
 import {schemaTelegram} from '@/schemas/telegram.schema'
 import {schemaSip} from '@/schemas/sip.schema'
 import {schemaEmail} from '@/schemas/email.schema'
 import {schemaHttps} from '@/schemas/https.schema'
+import {z} from 'zod'
 import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/cart'
@@ -41,7 +42,7 @@ export default function BuyNumberForm({
         'country': '',
     }, 'persistentClientInfo')
     const {updateData} = useCartStore()
-    const { toast } = useToast()
+    const {toast} = useToast()
     const router = useRouter()
     const getClientInfo = async () => {
         const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
@@ -58,13 +59,83 @@ export default function BuyNumberForm({
     })
     const handleAddToCart = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
-        //TODO add validation here
 
         // Get the button that was clicked
         const buttonId = (e.nativeEvent as SubmitEvent).submitter?.id || null
         setLoadingButton(buttonId)
+
+        // Clear previous form errors
+        setFormErrors({})
+
         try {
             if (numberInfo) {
+                // Create form a data object for validation
+                const formData = {
+                    qty: discountState,
+                    voiceType: voiceTypeState,
+                    voiceDestination: voiceDestinationState,
+                    smsType: smsTypeState,
+                    smsDestination: smsDestinationState
+                }
+
+                // Validate form data
+                const schema = createFormSchema(numberInfo)
+                const {errors} = validateFormData(schema, formData)
+
+                // If there are validation errors, display them and stop submission
+                if (errors) {
+                    setFormErrors(errors)
+                    console.error('Validation errors:', errors)
+
+                    // Show error toast for validation
+                    toast({
+                        variant: 'destructive',
+                        title: 'Validation Error',
+                        description: 'Please check the form for errors',
+                    })
+
+                    return
+                }
+
+                // Additional validation for specific field types
+                let hasFieldErrors = false
+
+                // Validate voice destination based on type
+                if (numberInfo.voice || numberInfo.toll_free) {
+                    if (voiceTypeState === 'voicePhone' && voiceDestinationErrorState) {
+                        hasFieldErrors = true
+                    } else if (voiceTypeState === 'voiceTelegram' && voiceDestinationErrorState) {
+                        hasFieldErrors = true
+                    } else if (voiceTypeState === 'voiceSip' && voiceDestinationErrorState) {
+                        hasFieldErrors = true
+                    }
+                }
+
+                // Validate SMS destination based on type
+                if (numberInfo.sms) {
+                    if (smsTypeState === 'smsPhone' && smsDestinationErrorState) {
+                        hasFieldErrors = true
+                    } else if (smsTypeState === 'smsEmail' && smsDestinationErrorState) {
+                        hasFieldErrors = true
+                    } else if ((smsTypeState === 'smsHttps' || smsTypeState === 'smsTelegram' || smsTypeState === 'smsSlack') && smsDestinationErrorState) {
+                        hasFieldErrors = true
+                    }
+                }
+
+                // If there are field-specific errors, stop submission
+                if (hasFieldErrors) {
+                    console.error('Field validation errors exist')
+
+                    // Show error toast for field validation
+                    toast({
+                        variant: 'destructive',
+                        title: 'Validation Error',
+                        description: 'Please check the form for errors',
+                    })
+
+                    return
+                }
+
                 console.log('Adding to cart:', numberInfo)
                 await getClientInfo()
                 const data = await addToCart({
@@ -85,9 +156,9 @@ export default function BuyNumberForm({
                     updateData(data)
                     // Show success toast
                     toast({
-                        variant: "success",
-                        title: "Success",
-                        description: "Item added to cart successfully",
+                        variant: 'success',
+                        title: 'Success',
+                        description: 'Item added to cart successfully',
                         onDismiss: () => {
                             // Open minicart when toast is dismissed
                             const url = new URL(window.location.href)
@@ -101,9 +172,9 @@ export default function BuyNumberForm({
             console.error('Error adding to cart:', error)
             // Show error toast
             toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to add item to cart",
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to add item to cart',
                 onDismiss: () => {
                     // Open minicart when toast is dismissed
                     const url = new URL(window.location.href)
@@ -125,7 +196,7 @@ export default function BuyNumberForm({
             updateDiscounts().then()
         }, [updateDiscounts])
 
-        // Add a default "1 month" option if a discounts array is empty
+        // Add a default "1 month" option if a discount array is empty
         if (discounts.length === 0) {
             return [{id: '0', name: '1'}]
         }
@@ -155,6 +226,36 @@ export default function BuyNumberForm({
     const [smsDestinationErrorState, setSmsDestinationErrorState] = useState<string>('')
     const [discountState, setDiscountState] = useState<string>('0')
     const [loadingButton, setLoadingButton] = useState<string | null>(null)
+    const [formErrors, setFormErrors] = useState<{ [index: string]: string[] | undefined }>({})
+
+    // Create a form validation schema based on the numberInfo properties
+    const createFormSchema = (numberInfo: NumberInfo | null) => {
+        if (!numberInfo) return z.object({})
+
+        // Base schema with common fields
+        const baseSchema = z.object({
+            qty: z.string().min(1, {message: 'qty_required'}),
+        })
+
+        // Add voice validation if voice or toll_free is enabled
+        const voiceSchema = numberInfo.voice || numberInfo.toll_free
+            ? z.object({
+                voiceType: z.string().min(1, {message: 'voice_type_required'}),
+                voiceDestination: z.string().min(1, {message: 'voice_destination_required'}),
+            })
+            : z.object({})
+
+        // Add SMS validation if SMS is enabled
+        const smsSchema = numberInfo.sms
+            ? z.object({
+                smsType: z.string().min(1, {message: 'sms_type_required'}),
+                smsDestination: z.string().min(1, {message: 'sms_destination_required'}),
+            })
+            : z.object({})
+
+        // Merge all schemas
+        return baseSchema.merge(voiceSchema).merge(smsSchema)
+    }
 
     const handleVoiceTypeChange = (value: string) => {
         setVoiceTypeState(value)
@@ -276,7 +377,11 @@ export default function BuyNumberForm({
                                 isRequired={numberInfo.voice || numberInfo.toll_free}
                                 placeholder={voiceDestination ? voiceDestination.placeholder : ''}
                                 icon={voiceDestination ? voiceDestination.icon : undefined}
-                                error={t.has(voiceDestinationErrorState) ? t(voiceDestinationErrorState) : ''}
+                                error={
+                                    formErrors.voiceDestination && formErrors.voiceDestination.length > 0
+                                        ? formErrors.voiceDestination.map(err => t(err)).join(', ')
+                                        : (t.has(voiceDestinationErrorState) ? t(voiceDestinationErrorState) : '')
+                                }
                                 customClass="w-full"
                             />
                         </div>
@@ -308,7 +413,11 @@ export default function BuyNumberForm({
                                 isRequired={numberInfo.sms || numberInfo.toll_free}
                                 placeholder={smsDestination ? smsDestination.placeholder : ''}
                                 icon={smsDestination ? smsDestination.icon : undefined}
-                                error={t.has(smsDestinationErrorState) ? t(smsDestinationErrorState) : ''}
+                                error={
+                                    formErrors.smsDestination && formErrors.smsDestination.length > 0
+                                        ? formErrors.smsDestination.map(err => t(err)).join(', ')
+                                        : (t.has(smsDestinationErrorState) ? t(smsDestinationErrorState) : '')
+                                }
                                 customClass="w-full"
                             />
                         </div>

@@ -22,11 +22,18 @@ interface ClientStore {
     updateTransactions: () => Promise<MoneyTransaction[] | null>
     updateNumbers: () => Promise<NumberInfo[] | null>
     reset: () => void
+    isUserLoggedIn: () => boolean // Add this new method
+    ensureUserLoggedIn: () => boolean
+    getBalance: () => number | null
+    getProfile: () => UserProfile | null
+    getInfo: () => ClientInfo | null
+    getTransactions: () => MoneyTransaction[] | null
+    getNumbers: () => NumberInfo[] | null
 }
 
 export const useClientStore = create<ClientStore>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             balance: null,
             profile: null,
             info: null,
@@ -41,6 +48,41 @@ export const useClientStore = create<ClientStore>()(
                     transactions: null,
                     numbers: null,
                 })
+            },
+
+            // Add a new method for checking login status without side effects
+            isUserLoggedIn: () => {
+                const profile = get().profile
+                return !!(profile && profile.id !== undefined && profile.id !== null)
+            },
+
+            ensureUserLoggedIn: () => {
+                const isLoggedIn = get().isUserLoggedIn()
+                if (!isLoggedIn) {
+                    get().reset()
+                }
+                return isLoggedIn
+            },
+
+            // Update all getters to use isUserLoggedIn instead of ensureUserLoggedIn
+            getBalance: () => {
+                return get().isUserLoggedIn() ? get().balance : null
+            },
+
+            getProfile: () => {
+                return get().isUserLoggedIn() ? get().profile : null
+            },
+
+            getInfo: () => {
+                return get().isUserLoggedIn() ? get().info : null
+            },
+
+            getTransactions: () => {
+                return get().isUserLoggedIn() ? get().transactions : null
+            },
+
+            getNumbers: () => {
+                return get().isUserLoggedIn() ? get().numbers : null
             },
 
             fetchData: async () => {

@@ -23,6 +23,7 @@
     "signup": "Зареєструватися",
     "restore": "Відновити пароль",
     "invalid_email": "Неправильна адреса електронної пошти",
+    "invalid_phone": "Недійсний номер телефону",
     "short_password": "Пароль не може бути таким коротким",
     "passwords_mismatch": "Паролі не збігаються",
     "no_user": "Користувача не знайдено",
@@ -95,7 +96,10 @@
     "transactions": "Транзакції",
     "numbers": "Мої номери",
     "total_numbers": "Загальна кількість номерів",
-    "total_monthly_cost": "Загальна щомісячна вартість"
+    "total_monthly_cost": "Загальна щомісячна вартість",
+    "select_all": "Вибрати всі",
+    "delete_selected": "Видалити вибрані",
+    "search_numbers": "Пошук номерів"
   },
   "profile": {
     "signed_in_as": "Вхід як",

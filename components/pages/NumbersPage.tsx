@@ -6,7 +6,8 @@ import {useClientStore} from '@/stores/useClientStore'
 
 export default function NumbersPage() {
     const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>([])
-    const {numbers, updateNumbers} = useClientStore()
+    const {getNumbers, updateNumbers} = useClientStore()
+    const numbers = getNumbers()
 
     // Set data from the store immediately if available
     useEffect(() => {
