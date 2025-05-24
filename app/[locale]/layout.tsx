@@ -9,15 +9,8 @@ import {NextIntlClientProvider} from 'next-intl'
 import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
-import {Ubuntu} from 'next/font/google'
 import {Toaster} from '@/components/ui/toaster'
-
-// Initialize Ubuntu font
-const ubuntu = Ubuntu({
-    weight: ['300', '400', '500', '700'],
-    subsets: ['latin', 'cyrillic'],
-    display: 'swap',
-})
+import {ubuntu} from '@/app/fonts' // Import from the fonts file
 
 // Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/service/Nav'), {
@@ -58,7 +51,7 @@ export default async function RootLayout(
     })
 
     return (
-        <html lang={locale} suppressHydrationWarning className={ubuntu.className}>
+        <html lang={locale} suppressHydrationWarning className={`${ubuntu.variable}`}>
         <head>
             <title>NextAcc</title>
             <link rel="icon" href="/icon.png" type="image/png"/>
@@ -89,7 +82,7 @@ export default async function RootLayout(
               `
             }}/>
         </head>
-        <body className="bg-background text-foreground border-border">
+        <body className={`${ubuntu.className} bg-background text-foreground border-border`}>
         <ThemeProvider
             attribute="class"
             disableTransitionOnChange={true}
@@ -107,7 +100,7 @@ export default async function RootLayout(
                     </main>
                 </NextIntlClientProvider>
             </AuthProvider>
-            <Toaster />
+            <Toaster/>
         </ThemeProvider>
         </body>
         </html>
