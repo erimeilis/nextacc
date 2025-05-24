@@ -21,6 +21,8 @@ import {ClientInfo} from '@/types/ClientInfo'
 import {slack} from '@/utils/slack'
 import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
+import {useToast} from '@/hooks/use-toast'
+import {useRouter} from 'next/navigation'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -39,6 +41,8 @@ export default function BuyNumberForm({
         'country': '',
     }, 'persistentClientInfo')
     const {updateData} = useCartStore()
+    const { toast } = useToast()
+    const router = useRouter()
     const getClientInfo = async () => {
         const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
         const info = await res.json()
@@ -61,6 +65,7 @@ export default function BuyNumberForm({
         setLoadingButton(buttonId)
         try {
             if (numberInfo) {
+                console.log('Adding to cart:', numberInfo)
                 await getClientInfo()
                 const data = await addToCart({
                     clientInfo: persistentClientInfo,
@@ -76,10 +81,36 @@ export default function BuyNumberForm({
                         {type: smsTypeState, destination: smsDestinationState} :
                         undefined
                 })
-                if (data) updateData(data)
+                if (data) {
+                    updateData(data)
+                    // Show success toast
+                    toast({
+                        variant: "success",
+                        title: "Success",
+                        description: "Item added to cart successfully",
+                        onDismiss: () => {
+                            // Open minicart when toast is dismissed
+                            const url = new URL(window.location.href)
+                            url.searchParams.set('cart', 'open')
+                            router.push(url.pathname + url.search)
+                        }
+                    })
+                }
             }
         } catch (error) {
             console.error('Error adding to cart:', error)
+            // Show error toast
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to add item to cart",
+                onDismiss: () => {
+                    // Open minicart when toast is dismissed
+                    const url = new URL(window.location.href)
+                    url.searchParams.set('cart', 'open')
+                    router.push(url.pathname + url.search)
+                }
+            })
         } finally {
             setLoadingButton(null)
         }
@@ -306,7 +337,7 @@ export default function BuyNumberForm({
                         <div className="flex items-center text-xs font-medium">{t('month', {count: qty !== undefined ? qty.name : 1})}</div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-card to-muted/30 dark:from-card dark:to-muted/30 rounded-lg overflow-hidden shadow-md border border-border">
+                    <div className="bg-gradient-to-br from-card to-muted/30 dark:from-card dark:to-muted/30 rounded-lg overflow-hidden shadow-md border border-muted/25">
                         <Table>
                             <TableHeader>
                                 <TableRow>

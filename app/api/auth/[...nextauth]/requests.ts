@@ -23,7 +23,7 @@ export async function kcLoginWithToken(token: string): Promise<KCApiExchangeToke
             'subject_issuer': 'google'
         })
     }
-
+    console.log('KcLoginWithToken: ', options)
     return fetch(urlKcToken, options)
         .then((res: Response) => {
             if (res.status !== 200) {
@@ -378,7 +378,7 @@ export async function redLoginOrSignupWithToken(token: string): Promise<number |
             'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify({
-            'site': process.env.SITE_ID
+            'site_id': process.env.SITE_ID
         })
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/check', options)
@@ -387,7 +387,7 @@ export async function redLoginOrSignupWithToken(token: string): Promise<number |
             return res.json()
         })
         .then((data) => {
-            //console.log('redLoginOrSignupWithToken success: ', data)
+            console.log('redLoginOrSignupWithToken success: ', data)
             return parseInt(data)
         })
         .catch((err) => {
@@ -399,7 +399,7 @@ export async function redLoginOrSignupWithToken(token: string): Promise<number |
 export async function redGetUserByCreds(username: string, password = ''): Promise<number | null> {
     let body = {
         'username': username,
-        'site': process.env.SITE_ID,
+        'site_id': process.env.SITE_ID,
     }
     if (password !== '') body = Object.assign(body, {
         'password': password

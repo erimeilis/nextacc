@@ -93,7 +93,9 @@
   "dashboard": {
     "profile": "Профіль",
     "transactions": "Транзакції",
-    "numbers": "Мої номери"
+    "numbers": "Мої номери",
+    "total_numbers": "Загальна кількість номерів",
+    "total_monthly_cost": "Загальна щомісячна вартість"
   },
   "profile": {
     "signed_in_as": "Вхід як",
@@ -118,6 +120,49 @@
     "empty": "Ваш кошик порожній",
     "buy_now": "Купити вибране зараз",
     "remove_selected": "Видалити вибране",
-    "select_to_proceed": "Будь ласка, виберіть номери"
+    "select_to_proceed": "Будь ласка, виберіть номери",
+    "cart_total": "Сума кошика",
+    "insufficient_balance": "Недостатній баланс. Будь ласка, поповніть свій рахунок."
+  },
+  "daterange": {
+    "locale": "uk",
+    "select_date_range": "Виберіть діапазон дат",
+    "select_start_date": "Виберіть початкову дату",
+    "select_end_date": "Виберіть кінцеву дату",
+    "clear": "Очистити",
+    "today": "Сьогодні",
+    "close": "Закрити",
+    "apply": "Застосувати",
+    "previous_month": "Попередній місяць",
+    "next_month": "Наступний місяць",
+    "sunday_short": "Нд",
+    "monday_short": "Пн",
+    "tuesday_short": "Вт",
+    "wednesday_short": "Ср",
+    "thursday_short": "Чт",
+    "friday_short": "Пт",
+    "saturday_short": "Сб",
+    "filter_by_date": "Фільтрувати за діапазоном дат"
+  },
+  "transactions": {
+    "title": "Транзакції",
+    "show_filters": "Показати фільтри",
+    "hide_filters": "Сховати фільтри",
+    "clear_filters": "Очистити фільтри",
+    "date_time": "Дата і час",
+    "amount": "Сума",
+    "operation": "Операція",
+    "description": "Опис",
+    "reseller": "Реселлер",
+    "filter_amount": "Фільтрувати за сумою...",
+    "filter_operation": "Фільтрувати за операцією...",
+    "filter_description": "Фільтрувати за описом...",
+    "filter_reseller": "Реселлер",
+    "all": "Всі",
+    "yes": "Так",
+    "no": "Ні",
+    "no_transactions": "Транзакції не знайдено",
+    "showing_results": "Показано з {start} по {end} з {total} транзакцій",
+    "empty_list": "У вас ще немає транзакцій"
   }
 }

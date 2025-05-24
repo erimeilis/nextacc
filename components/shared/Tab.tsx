@@ -1,7 +1,7 @@
 'use client'
 import React, {FC, SVGProps} from 'react'
 
-const fixedTabClass = 'w-full flex items-center justify-center rounded-t-md p-4 text-sm font-medium first:ml-0 focus:outline-none focus:ring-none ' +
+const fixedTabClass = 'w-full flex items-center justify-center rounded-t-md p-2 sm:p-4 text-xs sm:text-sm font-medium first:ml-0 focus:outline-none focus:ring-none ' +
     'border-border dark:border-border '
 const commonClass = 'shadow-inner shadow-sm border-b border-r last:border-r-0 border-border ' +
     'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground ' +

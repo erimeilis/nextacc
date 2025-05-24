@@ -206,7 +206,7 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
             if (!params.account || params.account.provider !== 'google') return true
             if (!params.account.access_token) return false
 
-            // Rest of your function remains the same
+            // The Rest of your function remains the same
             const email = params.user.email!
 
             const adminToken = await kcGetAdminAccessToken() //Get Admin token on KC

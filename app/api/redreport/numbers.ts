@@ -7,7 +7,7 @@ export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers')
-    url.searchParams.append('site', process.env.SITE_ID || '')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
         cache: 'reload',
@@ -17,16 +17,16 @@ export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
             'Content-Type': 'application/json;charset=UTF-8',
             'Authorization': 'Bearer ' + session?.token,
         }
-        // Removed body as GET requests cannot have bodies
     }
 
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            //console.log('redGetMyNumbers: ', res.status)
+            console.log('redGetMyNumbers: ', res.status)
             if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
+            console.log('redGetMyNumbers: ', data.data)
             return data.data.dids
         })
         .catch((err) => {

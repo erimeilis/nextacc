@@ -8,7 +8,7 @@ export default function NumbersPage() {
     const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>([])
     const {numbers, updateNumbers} = useClientStore()
 
-    // Set data from store immediately if available
+    // Set data from the store immediately if available
     useEffect(() => {
         if (numbers) {
             setLocalNumbers(numbers)

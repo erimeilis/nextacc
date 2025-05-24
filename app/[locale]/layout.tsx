@@ -10,6 +10,7 @@ import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import {Ubuntu} from 'next/font/google'
+import {Toaster} from '@/components/ui/toaster'
 
 // Initialize Ubuntu font
 const ubuntu = Ubuntu({
@@ -98,14 +99,15 @@ export default async function RootLayout(
             <AuthProvider>
                 <NextIntlClientProvider messages={messages}>
                     <Nav/>
-                    <main className="flex items-center justify-center px-4 pt-4 pb-96">
-                        <div className="flex flex-col sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-4">
+                    <main className="flex items-center justify-center px-2 sm:px-4 pt-2 sm:pt-4 pb-96">
+                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-2 sm:gap-4">
                             {offers}
                             {dashboard}
                         </div>
                     </main>
                 </NextIntlClientProvider>
             </AuthProvider>
+            <Toaster />
         </ThemeProvider>
         </body>
         </html>

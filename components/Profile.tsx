@@ -101,38 +101,40 @@ export default function Profile({
         when={typeof userProfile !== 'undefined' && userProfile !== null}
         fallback={<Loader height={350}/>}>
         <div id="profile" className="transition duration-300 ease">
-            <div className="flex items-center justify-between gap-4 pb-4 border-b border-border dark:border-border drop-shadow-sm">
-                <div className="text-sm px-2">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
-                <Button
-                    onClick={() => {
-                    }}
-                    type="button"
-                    className="text-sm"
-                >
-                    {t('balance')}: {userProfile?.currency == 'USD' ?
-                    '$' + userProfile?.balance.toFixed(2) :
-                    userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
-                </Button>
-                <Button
-                    onClick={() => {
-                        resetClientStore()
-                        resetCartStore()
-                        signOut({redirectTo: '/' + search})
-                            .then(() => {
-                                resetPersistentId()
-                            })
-                    }}
-                    type="button"
-                    className="text-sm"
-                >
-                    {t('signout')}
-                </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 pb-4 border-b border-border dark:border-border drop-shadow-sm">
+                <div className="text-xs sm:text-sm px-2 text-center sm:text-left">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
+                <div className="flex flex-row gap-2">
+                    <Button
+                        onClick={() => {
+                        }}
+                        type="button"
+                        className="text-xs sm:text-sm"
+                    >
+                        {t('balance')}: {userProfile?.currency == 'USD' ?
+                        '$' + userProfile?.balance.toFixed(2) :
+                        userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            resetClientStore()
+                            resetCartStore()
+                            signOut({redirectTo: '/' + search})
+                                .then(() => {
+                                    resetPersistentId()
+                                })
+                        }}
+                        type="button"
+                        className="text-xs sm:text-sm"
+                    >
+                        {t('signout')}
+                    </Button>
+                </div>
             </div>
             <div className="flex items-center justify-between pt-2">
                 <form
                     id="profile_form"
                     onSubmit={handleProfileSubmit}
-                    className="flex flex-row gap-4 w-full"
+                    className="flex flex-col sm:flex-row gap-4 w-full"
                     method="post"
                 >
                     <div className="flex flex-col w-full">
@@ -144,11 +146,11 @@ export default function Profile({
                                 <Show
                                     when={modeEditProfile}
                                     fallback={
-                                        <div className="flex flex-row w-full">
-                                            <div className="flex text-sm p-2 items-center font-normal min-w-32 w-32">
+                                        <div className="flex flex-col sm:flex-row w-full">
+                                            <div className="flex text-xs sm:text-sm p-2 items-center font-normal sm:min-w-32 sm:w-32">
                                                 {t(field.labelText)}:
                                             </div>
-                                            <div className="flex-grow p-2 text-sm">
+                                            <div className="flex-grow p-2 text-xs sm:text-sm">
                                                 {profileState[field.id]}
                                             </div>
                                         </div>}
@@ -170,11 +172,11 @@ export default function Profile({
                             </div>
                         )}
                     </div>
-                    <div className="flex flex-col grow justify-end min-w-36">
+                    <div className="flex flex-row sm:flex-col justify-center sm:justify-end mt-4 sm:mt-0 sm:min-w-36">
                         <Show
                             when={modeEditProfile}
                             fallback={
-                                <div className="flex flex-col grow justify-end transition duration-600 ease">
+                                <div className="flex flex-row sm:flex-col justify-center sm:justify-end transition duration-600 ease">
                                     <Button
                                         type="button"
                                         onClick={handleToggle}
@@ -185,10 +187,10 @@ export default function Profile({
                                     </Button>
                                 </div>
                             }>
-                            <div className="flex flex-col grow justify-end transition duration-600 ease">
+                            <div className="flex flex-row sm:flex-col justify-center sm:justify-end gap-2 sm:gap-0 transition duration-600 ease">
                                 <Button
                                     type="submit"
-                                    className="flex text-nowrap text-xs mb-2"
+                                    className="flex text-nowrap text-xs sm:mb-2"
                                     disabled={!ableButtonEditProfile}
                                     icon={CheckCircle}
                                     loading={modeButtonEditProfile}
@@ -198,7 +200,7 @@ export default function Profile({
                                 <Button
                                     type="button"
                                     onClick={handleToggle}
-                                    className="flex text-nowrap text-xs mb-2"
+                                    className="flex text-nowrap text-xs sm:mb-2"
                                     icon={X}
                                 >
                                     {t('dont_edit_profile')}

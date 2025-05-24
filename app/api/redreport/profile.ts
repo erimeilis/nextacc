@@ -8,10 +8,11 @@ import {auth} from '@/auth'
 
 export async function redGetUserProfile(): Promise<UserProfile | null> {
     const session = await auth()
+
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/profile')
-    url.searchParams.append('site', process.env.SITE_ID || '')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
         cache: 'reload',
@@ -24,7 +25,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
     }
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            //console.log('redGetUserProfile: ', res.status)
+            console.log('redGetUserProfile: ', res.status)
             if (!res.ok) return null
             return res.json()
         })
@@ -49,7 +50,7 @@ export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<U
             'Authorization': 'Bearer ' + session?.token,
         },
         body: JSON.stringify({
-            'site': process.env.SITE_ID,
+            'site_id': process.env.SITE_ID,
             'fields': fields
         })
     }

@@ -8,7 +8,7 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/transactions')
-    url.searchParams.append('site', process.env.SITE_ID || '')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
     url.searchParams.append('from', moment().subtract(360, 'days').toISOString())
     url.searchParams.append('to', moment().toISOString())
 
@@ -23,7 +23,6 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
     }
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            //console.log('redGetMoneyTransactionReport: ', res.status)
             if (!res.ok) return null
             return res.json()
         })

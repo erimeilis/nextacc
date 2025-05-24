@@ -8,10 +8,10 @@ export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> 
     if (!session || !session.user || session.user.provider === 'anonymous') return []
 
     // Create URL with query parameters instead of using body
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/calls');
-    url.searchParams.append('site', process.env.SITE_ID || '');
-    url.searchParams.append('from', moment().subtract(360, 'days').toISOString());
-    url.searchParams.append('to', moment().toISOString());
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/calls')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+    url.searchParams.append('from', moment().subtract(360, 'days').toISOString())
+    url.searchParams.append('to', moment().toISOString())
 
     const options: RequestInit = {
         cache: 'no-store',

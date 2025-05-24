@@ -7,6 +7,7 @@ import {useTranslations} from 'next-intl'
 import {Checkbox} from '@/components/ui/checkbox'
 import Show from '@/components/service/Show'
 import {useCartStore} from '@/stores/useCartStore'
+import {useClientStore} from '@/stores/useClientStore'
 import {getPersistState} from '@/utils/usePersistState'
 import {removeFromCart} from '@/app/api/redreport/cart'
 import {ChatCircleText, Headset, Phone, X} from '@phosphor-icons/react'
@@ -28,6 +29,18 @@ export default function MiniCart({
     const [loadingButton, setLoadingButton] = useState<string | null>(null)
     const persistentId = getPersistState<string>('persistentId', 'no-id')
     const {updateData} = useCartStore()
+    const {balance} = useClientStore()
+
+    // Calculate total sum of selected items
+    const calculateTotal = () => {
+        return selectedItems.reduce((total, itemId) => {
+            const item = cartItems.find(item => item.id === itemId)
+            return total + (item?.sum || 0)
+        }, 0)
+    }
+
+    const cartTotal = calculateTotal()
+    const isBalanceInsufficient = balance !== null && cartTotal > balance
 
     const handleRemoveFromCart = async (e?: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         if (e) e.preventDefault()
@@ -61,7 +74,7 @@ export default function MiniCart({
     }
 
     return (
-        <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-l-lg border-l fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
+        <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-l-lg border-l border-border/50 fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
             {/* Hide the default drawer handle for the right-side drawer */}
             <style jsx global>{`
                 .max-w-md > div:first-child {
@@ -168,6 +181,19 @@ export default function MiniCart({
                 <DrawerFooter className="flex-column flex-wrap justify-between items-end px-4 py-8">
                     <Show when={(selectedItems.length > 0)}
                           fallback={<div className="w-full text-center">{t('select_to_proceed')}</div>}>
+                        <div className="w-full mb-4">
+                            <div className="flex justify-end items-center">
+                                <span className="text-sm font-medium mr-2">{t('cart_total')}:</span>
+                                <span className={`text-lg font-bold ${isBalanceInsufficient ? 'text-red-500' : 'text-primary'}`}>
+                                    ${cartTotal.toFixed(2)}
+                                </span>
+                            </div>
+                            {isBalanceInsufficient && (
+                                <p className="text-xs text-red-500 mt-1 text-right">
+                                    {t('insufficient_balance')}
+                                </p>
+                            )}
+                        </div>
                         <Button
                             type="button"
                             style="pillow"

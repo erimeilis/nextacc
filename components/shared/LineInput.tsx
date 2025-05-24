@@ -48,10 +48,10 @@ export default function LineInput({
     }
 
     return (
-        <div className="flex flex-row w-full">
+        <div className="flex flex-col sm:flex-row w-full">
             <Label
                 htmlFor={labelFor}
-                className="flex text-sm p-2 items-center font-normal min-w-32 w-32"
+                className="flex text-xs sm:text-sm p-2 items-center font-normal sm:min-w-32 sm:w-32"
             >
                 {labelText}:
             </Label>

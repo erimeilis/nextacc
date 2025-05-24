@@ -45,24 +45,24 @@ const ClientOnlyNav = ({
 }) => {
     return (
         <>
-            <div className="flex items-center gap-2 ml-4">
+            <div className="hidden sm:flex items-center gap-2 ml-4">
                 {session &&
                 session.status === 'authenticated' &&
                 session.data &&
                 session.data.user &&
                 (session.data.user.provider !== 'anonymous') ? (
                     <>
-                        <span className="text-sm font-medium text-white">{p('balance')}:</span>
-                        <span className="text-sm font-bold text-white">
+                        <span className="text-xs sm:text-sm font-medium text-white">{p('balance')}:</span>
+                        <span className="text-xs sm:text-sm font-bold text-white">
                             ${displayBalance.toFixed(2)}
                         </span>
                         <Button
                             variant="navIcon"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-6 w-6 sm:h-8 sm:w-8"
                             onClick={() => router.push('/profile' + search)}
                         >
-                            <PlusCircle className="h-5 w-5"/>
+                            <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5"/>
                         </Button>
                     </>
                 ) : null}

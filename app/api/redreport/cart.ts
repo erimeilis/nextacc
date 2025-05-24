@@ -30,6 +30,7 @@ export async function addToCart(
         console.log('addToCart: no uid or number')
         return []
     }
+    console.log('addToCart: ', uid, number, countryId, areaCode, qty, voice, sms)
     const session = await auth()
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
     const appIp = await getAppIp()
@@ -50,7 +51,7 @@ export async function addToCart(
         },
         credentials: 'include',
         body: JSON.stringify({
-            'site': process.env.SITE_ID,
+            'site_id': process.env.SITE_ID,
             'did': number.did,
             'where_did': number.where_did,
             'country_id': countryId,
@@ -89,7 +90,7 @@ export async function getCart(
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
 
     const url = new URL(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/get' : '/api/cart/get'))
-    url.searchParams.append('site', process.env.SITE_ID || '')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
         cache: 'no-store',
@@ -135,7 +136,7 @@ export async function removeFromCart(
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
 
     const url = new URL(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart/remove' : '/api/cart/remove'))
-    url.searchParams.append('site', process.env.SITE_ID || '')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
     id.forEach(itemId => {
         url.searchParams.append('id[]', itemId.toString())
     })
