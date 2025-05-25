@@ -36,6 +36,7 @@ export default function BuyNumberForm({
 }) {
     const t = useTranslations('offers')
     const d = useTranslations('docs')
+    const toastT = useTranslations('toast')
     const persistentId = getPersistState<string>('persistentId', 'no-id')
     const [persistentClientInfo, setPersistentClientInfo] = usePersistState<ClientInfo>({
         'ip': '',
@@ -90,8 +91,8 @@ export default function BuyNumberForm({
                     // Show error toast for validation
                     toast({
                         variant: 'destructive',
-                        title: 'Validation Error',
-                        description: 'Please check the form for errors',
+                        title: toastT('validation_error_title'),
+                        description: toastT('validation_error_description'),
                     })
 
                     return
@@ -129,8 +130,8 @@ export default function BuyNumberForm({
                     // Show error toast for field validation
                     toast({
                         variant: 'destructive',
-                        title: 'Validation Error',
-                        description: 'Please check the form for errors',
+                        title: toastT('validation_error_title'),
+                        description: toastT('validation_error_description'),
                     })
 
                     return
@@ -157,8 +158,8 @@ export default function BuyNumberForm({
                     // Show success toast
                     toast({
                         variant: 'success',
-                        title: 'Success',
-                        description: 'Item added to cart successfully',
+                        title: toastT('success_title'),
+                        description: toastT('cart_add_success'),
                         onDismiss: () => {
                             // Open minicart when toast is dismissed
                             const url = new URL(window.location.href)
@@ -173,8 +174,8 @@ export default function BuyNumberForm({
             // Show error toast
             toast({
                 variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to add item to cart',
+                title: toastT('error_title'),
+                description: toastT('cart_add_error'),
                 onDismiss: () => {
                     // Open minicart when toast is dismissed
                     const url = new URL(window.location.href)

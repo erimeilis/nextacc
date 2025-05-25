@@ -112,7 +112,7 @@ function Calendar({
                     <ChevronLeft className="h-5 w-5"/>
                 </button>
                 <h2 className="text-lg font-medium">
-                    {currentMonth.format('MMMM YYYY')}
+                    {currentMonth.format('MMMM')} {currentMonth.format('YYYY')}
                 </h2>
                 <button
                     type="button"
@@ -210,18 +210,20 @@ export default function DateRangePicker({
 
     const formatDateRange = () => {
         if (selectedStartDate && selectedEndDate) {
-            return `${selectedStartDate.format('MMM DD, YYYY')} - ${selectedEndDate.format('MMM DD, YYYY')}`
+            return `${selectedStartDate.format('ll')} - ${selectedEndDate.format('ll')}`
         } else if (selectedStartDate) {
-            return `${selectedStartDate.format('MMM DD, YYYY')} - ${t('select_end_date')}`
+            return `${selectedStartDate.format('ll')} - ${t('select_end_date')}`
         } else if (selectedEndDate) {
-            return `${t('select_start_date')} - ${selectedEndDate.format('MMM DD, YYYY')}`
+            return `${t('select_start_date')} - ${selectedEndDate.format('ll')}`
         } else {
             return placeholder
         }
     }
 
     // Set locale for a moment based on the current locale
-    moment.locale(t('locale'))
+    useEffect(() => {
+        moment.locale(t('locale'))
+    }, [t])
 
     return (
         <Dialog.Root open={open} onOpenChange={setOpen}>

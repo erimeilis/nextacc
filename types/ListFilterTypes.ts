@@ -10,5 +10,5 @@ export type FilterConfig = {
     amount: string
     operation: string
     description: string
-    reseller: boolean | null
+    reseller: boolean
 }

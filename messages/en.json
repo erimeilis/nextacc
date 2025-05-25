@@ -169,5 +169,13 @@
     "no_transactions": "No transactions found",
     "showing_results": "Showing {start} to {end} of {total} transactions",
     "empty_list": "You have no transactions yet"
+  },
+  "toast": {
+    "validation_error_title": "Validation Error",
+    "validation_error_description": "Please check the form for errors",
+    "success_title": "Success",
+    "cart_add_success": "Item added to cart successfully",
+    "error_title": "Error",
+    "cart_add_error": "Failed to add item to cart"
   }
 }

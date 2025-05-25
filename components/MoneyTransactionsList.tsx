@@ -12,6 +12,7 @@ import DateRangePicker from '@/components/ui/DateRangePicker'
 import {useTranslations} from 'next-intl'
 import {Input} from '@/components/ui/input'
 import {FormattedDate} from '@/components/ui/formatted-date'
+import BooleanDot from '@/components/ui/BooleanDot'
 
 
 const ITEMS_PER_PAGE = 10
@@ -30,7 +31,7 @@ export default function MoneyTransactionsList({
         amount: '',
         operation: '',
         description: '',
-        reseller: null
+        reseller: false
     })
     const [currentPage, setCurrentPage] = useState(1)
     // Filters are always visible now
@@ -62,18 +63,39 @@ export default function MoneyTransactionsList({
     }
 
     const filteredData = useMemo(() => {
-        if (!options) return []
+        if (!options) {
+            console.log('No options provided to MoneyTransactionsList')
+            return []
+        }
+
+        if (options.length === 0) {
+            console.log('Empty options array provided to MoneyTransactionsList')
+            return []
+        }
+
+        console.log('Filtering options:', options.length, 'items with config:', filterConfig)
+
+        // Log a sample transaction to help diagnose issues
+        if (options.length > 0) {
+            console.log('Sample transaction:', JSON.stringify(options[0]))
+        }
 
         return options.filter(item => {
             // Date range filter
-            if (filterConfig.startDate &&
-                moment(item.datetime).startOf('day').isBefore(moment(filterConfig.startDate).startOf('day'))) {
-                return false
+            if (filterConfig.startDate) {
+                const itemDate = moment(item.datetime).startOf('day')
+                const startDate = moment(filterConfig.startDate).startOf('day')
+                if (itemDate.isBefore(startDate)) {
+                    return false
+                }
             }
 
-            if (filterConfig.endDate &&
-                moment(item.datetime).endOf('day').isAfter(moment(filterConfig.endDate).endOf('day'))) {
-                return false
+            if (filterConfig.endDate) {
+                const itemDate = moment(item.datetime).startOf('day')
+                const endDate = moment(filterConfig.endDate).startOf('day')
+                if (itemDate.isAfter(endDate)) {
+                    return false
+                }
             }
 
             // Amount filter
@@ -95,8 +117,15 @@ export default function MoneyTransactionsList({
             }
 
             // Reseller filter
-            if (filterConfig.reseller !== null &&
-                item.reseller !== filterConfig.reseller) {
+            // When filterConfig.reseller is true, show only reseller=true records
+            // When filterConfig.reseller is false, show only reseller=false records or null/undefined
+            const itemResellerValue = item.reseller === true;
+
+            // Log the reseller values to help diagnose issues
+            // console.log('Item reseller:', item.reseller, 'Filter reseller:', filterConfig.reseller, 'Match:', itemResellerValue === filterConfig.reseller);
+
+            // Invert the comparison to fix the reversed behavior
+            if (itemResellerValue === filterConfig.reseller) {
                 return false
             }
 
@@ -245,7 +274,7 @@ export default function MoneyTransactionsList({
                             amount: '',
                             operation: '',
                             description: '',
-                            reseller: null
+                            reseller: false
                         })}
                         className="px-3 py-1 text-xs rounded-md bg-muted hover:bg-muted/80"
                     >
@@ -257,21 +286,21 @@ export default function MoneyTransactionsList({
                     <table className="w-full border-collapse">
                         <thead>
                         <tr className="bg-muted/50 dark:bg-muted/40">
-                            <th className="p-3 text-left font-medium text-sm">
+                            <th className="p-3 text-center font-medium text-sm">
                                 <button
                                     type="button"
                                     onClick={() => handleSort('datetime')}
-                                    className="flex items-center gap-1 hover:text-primary"
+                                    className="flex items-center justify-center gap-1 hover:text-primary mx-auto"
                                 >
                                     {tr('date_time')}
                                     {renderSortIcon('datetime')}
                                 </button>
                             </th>
-                            <th className="p-3 text-left font-medium text-sm">
+                            <th className="p-3 text-center font-medium text-sm">
                                 <button
                                     type="button"
                                     onClick={() => handleSort('amount')}
-                                    className="flex items-center gap-1 hover:text-primary"
+                                    className="flex items-center justify-center gap-1 hover:text-primary mx-auto"
                                 >
                                     {tr('amount')}
                                     {renderSortIcon('amount')}
@@ -297,11 +326,11 @@ export default function MoneyTransactionsList({
                                     {renderSortIcon('description')}
                                 </button>
                             </th>
-                            <th className="p-3 text-left font-medium text-sm">
+                            <th className="p-3 text-center font-medium text-sm">
                                 <button
                                     type="button"
                                     onClick={() => handleSort('reseller')}
-                                    className="flex items-center gap-1 hover:text-primary"
+                                    className="flex items-center justify-center gap-1 hover:text-primary mx-auto"
                                 >
                                     {tr('reseller')}
                                     {renderSortIcon('reseller')}
@@ -319,11 +348,11 @@ export default function MoneyTransactionsList({
                                         i % 2 !== 0 ? 'bg-muted/30 dark:bg-muted/20' : ''
                                     )}
                                 >
-                                    <td className="p-3"><FormattedDate date={transaction.datetime.toString()} showTime={true}/></td>
-                                    <td className="p-3 text-primary font-medium">{formatCurrency(transaction.amount)}</td>
+                                    <td className="p-3 text-center"><FormattedDate date={transaction.datetime.toString()} showTime={true}/></td>
+                                    <td className="p-3 text-center text-primary font-medium">{formatCurrency(transaction.amount)}</td>
                                     <td className="p-3">{transaction.operation}</td>
                                     <td className="p-3">{transaction.description}</td>
-                                    <td className="p-3">{transaction.reseller ? tr('yes') : tr('no')}</td>
+                                    <td className="p-3 text-center"><BooleanDot value={transaction.reseller} /></td>
                                 </tr>
                             ))
                         ) : (
