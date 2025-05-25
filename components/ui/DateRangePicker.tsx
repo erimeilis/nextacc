@@ -112,7 +112,7 @@ function Calendar({
                     <ChevronLeft className="h-5 w-5"/>
                 </button>
                 <h2 className="text-lg font-medium">
-                    {currentMonth.format('MMMM')} {currentMonth.format('YYYY')}
+                    {t(currentMonth.format('MMMM').toLowerCase())} {currentMonth.format('YYYY')}
                 </h2>
                 <button
                     type="button"

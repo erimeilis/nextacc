@@ -7,19 +7,12 @@ const Checkbox = React.forwardRef<
     HTMLInputElement,
     React.InputHTMLAttributes<HTMLInputElement> & { onCheckedChange?: (checked: boolean) => void }
 >(({className, onCheckedChange, ...props}, ref) => {
-    // Track checked state internally
-    const [checked, setChecked] = React.useState<boolean>(props.checked || false)
-
-    // Update internal state when prop change
-    React.useEffect(() => {
-        if (props.checked !== undefined) {
-            setChecked(props.checked)
-        }
-    }, [props.checked])
+    // We don't need to track checked state internally, we'll use the props directly
+    // This ensures the component always reflects the current props.checked value
+    const checked = props.checked || false
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Update internal state
-        setChecked(e.target.checked)
+        console.log('Checkbox handleChange called with:', e.target.checked)
 
         // Call the onCheckedChange prop with the checked state if it exists
         onCheckedChange?.(e.target.checked)
@@ -33,8 +26,17 @@ const Checkbox = React.forwardRef<
 
     // Function to handle clicks on the custom checkbox
     const handleCustomCheckboxClick = () => {
+        console.log('handleCustomCheckboxClick called, current checked state:', checked)
         if (inputRef.current && !props.disabled) {
-            inputRef.current.click()
+            console.log('Clicking input element')
+            // Instead of clicking the input element, directly call the onCheckedChange prop
+            // This should ensure the event is always triggered
+            onCheckedChange?.(!checked)
+
+            // Also trigger the onChange event on the input element
+            const event = new Event('change', { bubbles: true })
+            Object.defineProperty(event, 'target', { value: { checked: !checked } })
+            inputRef.current.dispatchEvent(event)
         }
     }
 

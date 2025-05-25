@@ -146,7 +146,19 @@
     "thursday_short": "Чт",
     "friday_short": "Пт",
     "saturday_short": "Сб",
-    "filter_by_date": "Фільтрувати за діапазоном дат"
+    "filter_by_date": "Фільтрувати за діапазоном дат",
+    "january": "Січень",
+    "february": "Лютий",
+    "march": "Березень",
+    "april": "Квітень",
+    "may": "Травень",
+    "june": "Червень",
+    "july": "Липень",
+    "august": "Серпень",
+    "september": "Вересень",
+    "october": "Жовтень",
+    "november": "Листопад",
+    "december": "Грудень"
   },
   "transactions": {
     "title": "Транзакції",

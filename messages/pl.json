@@ -146,7 +146,19 @@
     "thursday_short": "Cz",
     "friday_short": "Pt",
     "saturday_short": "Sb",
-    "filter_by_date": "Filtruj według zakresu dat"
+    "filter_by_date": "Filtruj według zakresu dat",
+    "january": "Styczeń",
+    "february": "Luty",
+    "march": "Marzec",
+    "april": "Kwiecień",
+    "may": "Maj",
+    "june": "Czerwiec",
+    "july": "Lipiec",
+    "august": "Sierpień",
+    "september": "Wrzesień",
+    "october": "Październik",
+    "november": "Listopad",
+    "december": "Grudzień"
   },
   "transactions": {
     "title": "Transakcje",
