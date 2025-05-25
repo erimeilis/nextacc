@@ -4,7 +4,8 @@
   },
   "common": {
     "locale": "uk",
-    "refresh": "Відновити сторінку"
+    "refresh": "Відновити сторінку",
+    "search": "Пошук..."
   },
   "login": {
     "email": "Електронна адреса",
@@ -113,7 +114,11 @@
     "update_profile": "Оновити профіль",
     "edit_profile": "Редагувати профіль",
     "dont_edit_profile": "Скасувати",
-    "balance": "Баланс"
+    "balance": "Баланс",
+    "payment": "Оплата",
+    "recommended_topup": "Рекомендоване поповнення",
+    "topup_description": "Поповніть свій баланс для придбання номерів та послуг",
+    "topup_now": "Поповнити зараз"
   },
   "cart": {
     "number": "Номер",

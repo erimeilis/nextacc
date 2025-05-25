@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {CheckIcon} from 'lucide-react'
+import {CheckIcon} from '@phosphor-icons/react'
 
 import {cn} from '@/lib/utils'
 

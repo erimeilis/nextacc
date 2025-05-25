@@ -16,9 +16,9 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 import {Button} from '@/components/ui/button'
 import CartButton from '@/components/CartButton'
+import PaymentButton from '@/components/PaymentButton'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
-import {PlusCircle} from 'lucide-react'
 
 // Component that only renders client-side to avoid hydration issues
 const ClientOnlyNav = ({
@@ -56,14 +56,7 @@ const ClientOnlyNav = ({
                         <span className="text-xs sm:text-sm font-bold text-white">
                             ${displayBalance.toFixed(2)}
                         </span>
-                        <Button
-                            variant="navIcon"
-                            size="icon"
-                            className="h-6 w-6 sm:h-8 sm:w-8"
-                            onClick={() => router.push('/profile' + search)}
-                        >
-                            <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5"/>
-                        </Button>
+                        <PaymentButton />
                     </>
                 ) : null}
             </div>

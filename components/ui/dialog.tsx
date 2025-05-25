@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import {X} from 'lucide-react'
+import {X} from '@phosphor-icons/react'
 import * as VisuallyHiddenPrimitive from '@radix-ui/react-visually-hidden'
 
 import {cn} from '@/lib/utils'

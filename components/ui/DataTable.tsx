@@ -2,7 +2,7 @@
 import React, {useEffect, useMemo, useState} from 'react'
 import Loader from '../service/Loader'
 import Show from '@/components/service/Show'
-import {CaretDown, CaretLeft, CaretRight, CaretUp} from '@phosphor-icons/react'
+import {CaretDownIcon, CaretLeftIcon, CaretRightIcon, CaretUpIcon} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import {Checkbox} from '@/components/ui/checkbox'
 import {useTranslations} from 'next-intl'
@@ -50,6 +50,7 @@ export type DataTableProps<T, F> = {
     className?: string
     onRowClick?: (item: T) => void
     rowClassName?: (item: T) => string
+    textSize?: 'text-xs' | 'text-sm' | 'text-base'
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 10
@@ -84,6 +85,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
         className = '',
         onRowClick,
         rowClassName,
+        textSize = 'text-xs',
     } = props
 
     const [sortConfig, setSortConfig] = useState<SortConfig<T>>(initialSort)
@@ -195,18 +197,18 @@ export default function DataTable<T extends object, F extends Record<string, unk
         if (!sortable) return null
 
         if (sortConfig.key !== key) {
-            return <CaretDown className="h-4 w-4 opacity-30"/>
+            return <CaretDownIcon className="h-4 w-4 opacity-30"/>
         }
 
         if (sortConfig.direction === 'asc') {
-            return <CaretUp className="h-4 w-4"/>
+            return <CaretUpIcon className="h-4 w-4"/>
         }
 
         if (sortConfig.direction === 'desc') {
-            return <CaretDown className="h-4 w-4"/>
+            return <CaretDownIcon className="h-4 w-4"/>
         }
 
-        return <CaretDown className="h-4 w-4 opacity-30"/>
+        return <CaretDownIcon className="h-4 w-4 opacity-30"/>
     }
 
     return (
@@ -311,7 +313,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
                             {columns.map((column, index) => (
                                 <th
                                     key={index}
-                                    className={`p-3 text-${column.align || 'left'} font-medium text-sm`}
+                                    className={`p-3 text-${column.align || 'left'} font-medium ${textSize}`}
                                 >
                                     <button
                                         type="button"
@@ -337,7 +339,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
                                 <tr
                                     key={i}
                                     className={clsx(
-                                        'text-sm',
+                                        textSize,
                                         i % 2 !== 0 ? 'bg-muted/30 dark:bg-muted/20' : '',
                                         onRowClick && 'cursor-pointer hover:bg-muted/50',
                                         rowClassName && rowClassName(item)
@@ -356,7 +358,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className="p-3 text-center text-sm text-muted-foreground">
+                                <td colSpan={columns.length} className={`p-3 text-center ${textSize} text-muted-foreground`}>
                                     {emptyMessage}
                                 </td>
                             </tr>
@@ -387,7 +389,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
                                     currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
                                 )}
                             >
-                                <CaretLeft className="h-3 w-3"/>
+                                <CaretLeftIcon className="h-3 w-3"/>
                             </button>
 
                             {pagination.showPageNumbers && Array.from({length: totalPages}, (_, i) => i + 1)
@@ -472,7 +474,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
                                     currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
                                 )}
                             >
-                                <CaretRight className="h-3 w-3"/>
+                                <CaretRightIcon className="h-3 w-3"/>
                             </button>
                         </div>
                     </div>

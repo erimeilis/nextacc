@@ -4,6 +4,7 @@ import {useSession} from 'next-auth/react'
 import Show from '@/components/service/Show'
 import Login from '@/components/Login'
 import Loader from '@/components/service/Loader'
+import SkeletonLoader from '@/components/service/SkeletonLoader'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {profileTabs} from '@/constants/profileTabs'
 import {useTranslations} from 'next-intl'
@@ -41,10 +42,14 @@ export default function Layout({children}: { children: React.ReactNode }) {
 
     // State to track the active tab
     const [activeTab, setActiveTab] = useState(getCurrentTab())
+    // State to track loading state when switching tabs
+    const [isLoading, setIsLoading] = useState(false)
 
     // Update activeTab when the URL changes
     useEffect(() => {
         setActiveTab(getCurrentTab())
+        // When URL changes, content has loaded
+        setIsLoading(false)
     }, [getCurrentTab])
 
     return <Show when={(session.status === 'authenticated') && (session.data?.user?.provider !== 'anonymous')}
@@ -64,6 +69,8 @@ export default function Layout({children}: { children: React.ReactNode }) {
                         onClick={() => {
                             // Update active tab state immediately
                             setActiveTab(tab.slug)
+                            // Set loading state to true
+                            setIsLoading(true)
                             // Then initiate route change
                             router.push('/' + tab.slug + search)
                         }}
@@ -74,7 +81,13 @@ export default function Layout({children}: { children: React.ReactNode }) {
                     </Tab>
                 )}
             </nav>
-            <div className="h-full justify-center gap-4 p-6">{children}</div>
+            <div className="h-full justify-center gap-4 p-6">
+                {isLoading ? (
+                    <SkeletonLoader />
+                ) : (
+                    children
+                )}
+            </div>
         </div>
     </Show>
 }

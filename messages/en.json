@@ -4,7 +4,8 @@
   },
   "common": {
     "locale": "en",
-    "refresh": "Refresh page"
+    "refresh": "Refresh page",
+    "search": "Search..."
   },
   "login": {
     "email": "Email address",
@@ -114,7 +115,11 @@
     "update_profile": "Update profile",
     "edit_profile": "Edit profile",
     "dont_edit_profile": "Cancel",
-    "balance": "Balance"
+    "balance": "Balance",
+    "payment": "Payment",
+    "recommended_topup": "Recommended topup",
+    "topup_description": "Top up your balance to purchase numbers and services",
+    "topup_now": "Top up now"
   },
   "cart": {
     "number": "Number",

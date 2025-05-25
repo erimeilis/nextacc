@@ -3,8 +3,8 @@
 import React, {useEffect, useState} from 'react'
 import moment from 'moment'
 import * as Dialog from '@radix-ui/react-dialog'
-import {ChevronLeft, ChevronRight, X} from 'lucide-react'
-import {CalendarDots} from '@phosphor-icons/react'
+import {CaretLeftIcon, CaretRightIcon, XIcon} from '@phosphor-icons/react'
+import {CalendarDotsIcon} from '@phosphor-icons/react'
 import clsx from 'clsx'
 import {useTranslations} from 'next-intl'
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden'
@@ -109,7 +109,7 @@ function Calendar({
                     className="p-1 rounded-full hover:bg-muted"
                     aria-label={t('previous_month')}
                 >
-                    <ChevronLeft className="h-5 w-5"/>
+                    <CaretLeftIcon className="h-5 w-5"/>
                 </button>
                 <h2 className="text-lg font-medium">
                     {t(currentMonth.format('MMMM').toLowerCase())} {currentMonth.format('YYYY')}
@@ -120,7 +120,7 @@ function Calendar({
                     className="p-1 rounded-full hover:bg-muted"
                     aria-label={t('next_month')}
                 >
-                    <ChevronRight className="h-5 w-5"/>
+                    <CaretRightIcon className="h-5 w-5"/>
                 </button>
             </div>
 
@@ -235,12 +235,12 @@ export default function DateRangePicker({
                         className
                     )}
                 >
-                    <CalendarDots className="h-4 w-4"/>
+                    <CalendarDotsIcon className="h-4 w-4"/>
                     <span className="flex-grow text-left">
             {formatDateRange()}
           </span>
                     {(selectedStartDate || selectedEndDate) && (
-                        <X
+                        <XIcon
                             className="h-4 w-4 opacity-70 hover:opacity-100"
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -320,7 +320,7 @@ export default function DateRangePicker({
                             className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted"
                             aria-label={t('close')}
                         >
-                            <X className="h-4 w-4"/>
+                            <XIcon className="h-4 w-4"/>
                         </button>
                     </Dialog.Close>
                 </Dialog.Content>

@@ -4,7 +4,8 @@
   },
   "common": {
     "locale": "pl",
-    "refresh": "Odśwież"
+    "refresh": "Odśwież",
+    "search": "Szukaj..."
   },
   "login": {
     "email": "Adres e-mail",
@@ -113,7 +114,11 @@
     "update_profile": "Aktualizuj profil",
     "edit_profile": "Edytuj profil",
     "dont_edit_profile": "Anuluj",
-    "balance": "Saldo"
+    "balance": "Saldo",
+    "payment": "Płatność",
+    "recommended_topup": "Zalecane doładowanie",
+    "topup_description": "Doładuj swoje konto, aby kupić numery i usługi",
+    "topup_now": "Doładuj teraz"
   },
   "cart": {
     "number": "Numer",
