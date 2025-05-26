@@ -5,7 +5,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Show from '@/components/service/Show'
 import {Label} from '@/components/ui/label'
 import {Radio, RadioGroup} from '@/components/ui/radio-group'
-import {ChatCircleText, Headset, Phone} from '@phosphor-icons/react'
+import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon} from '@phosphor-icons/react'
 
 export default function NumberOffersList({
                                              options,
@@ -47,13 +47,13 @@ export default function NumberOffersList({
                 name="list-radio"
                 onValueChange={handleOptionChange}
                 className="transition-transform duration-300">
-                <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+                <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 p-0 sm:p-2">
                     {
                         options?.map((option) => {
                             const isSelected = selectedOption === option.did
                             return (
                                 <div key={option.did}
-                                     className="flex flex-row items-center gap-3 p-2 rounded-md border border-border hover:bg-muted/50 transition-colors overflow-hidden">
+                                     className={`flex flex-row items-center gap-3 p-2 rounded-md border border-border hover:bg-muted/50 transition-colors overflow-hidden ${options?.length === 1 ? 'col-span-2' : ''}`}>
                                     <Radio
                                         id={option.did}
                                         value={option.did}
@@ -65,9 +65,9 @@ export default function NumberOffersList({
                                         onClick={isSelected ? undefined : () => handleLabelClick(option.did)}
                                     >
                                         {option.name}
-                                        {option.voice ? <Phone weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
-                                        {option.sms ? <ChatCircleText weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
-                                        {option.toll_free ? <Headset weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
+                                        {option.voice ? <PhoneIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
+                                        {option.sms ? <ChatCircleTextIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
+                                        {option.toll_free ? <HeadsetIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
                                     </Label>
                                 </div>
                             )

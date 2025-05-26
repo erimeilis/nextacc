@@ -10,7 +10,7 @@ import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
 import {getPersistState} from '@/utils/usePersistState'
 import {removeFromCart} from '@/app/api/redreport/cart'
-import {ChatCircleText, Headset, Phone, X} from '@phosphor-icons/react'
+import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 
 interface MiniCartProps {
     cartItems: CartItem[]
@@ -75,8 +75,8 @@ export default function MiniCart({
     }
 
     return (
-        <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-l-lg border-l border-border/50 fixed right-0 left-auto h-full inset-y-0 bottom-auto mt-0 top-0">
-            {/* Hide the default drawer handle for the right-side drawer */}
+        <DrawerContent className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+            {/* Hide the default drawer handle for the right-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {
                     display: none;
@@ -121,9 +121,9 @@ export default function MiniCart({
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-md font-bold">{item.did}</span>
-                                                        {item.did_info?.voice && <Phone weight="fill" className="text-muted-foreground" size={16}/>}
-                                                        {item.did_info?.sms && <ChatCircleText weight="fill" className="text-muted-foreground" size={16}/>}
-                                                        {item.did_info?.toll_free && <Headset weight="fill" className="text-muted-foreground" size={16}/>}
+                                                        {item.did_info?.voice && <PhoneIcon weight="fill" className="text-muted-foreground" size={16}/>}
+                                                        {item.did_info?.sms && <ChatCircleTextIcon weight="fill" className="text-muted-foreground" size={16}/>}
+                                                        {item.did_info?.toll_free && <HeadsetIcon weight="fill" className="text-muted-foreground" size={16}/>}
                                                     </div>
                                                     <span className="text-md font-bold text-primary">${item.sum}</span>
                                                 </div>
@@ -166,7 +166,7 @@ export default function MiniCart({
                                                     className="flex items-center justify-center w-4 h-4 rounded-full bg-transparent text-red-700 hover:text-red-600 transition-all duration-300"
                                                     aria-label="Remove item"
                                                 >
-                                                    <X size={14} weight="bold"/>
+                                                    <XIcon size={14} weight="bold"/>
                                                 </button>
                                             </div>
                                         </div>

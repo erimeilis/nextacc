@@ -65,7 +65,7 @@ const ClientOnlyNav = ({
                         </span>
 
                         {/* Single PaymentButton for both mobile and desktop */}
-                        <PaymentButton />
+                        <PaymentButton/>
                     </>
                 ) : null}
             </div>
@@ -121,7 +121,7 @@ const ClientOnlyNav = ({
                                 ))}
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
-                            <div className="sm:hidden block p-2 flex items-center space-x-2">
+                            <div className="sm:hidden p-2 flex items-center space-x-2">
                                 <LocaleSwitcher/>
                                 <ThemeToggle/>
                             </div>
@@ -219,8 +219,33 @@ export default function Nav() {
         }
     }, [balance, displayBalance, isAnimating, isClient])
 
+    // Function to close drawers by removing cart and payment parameters from URL
+    const closeDrawers = (e: React.MouseEvent) => {
+        // Don't close drawers if clicking on drawer triggers or their children
+        const target = e.target as HTMLElement
+        const isCartButton = target.closest('[data-drawer-trigger="cart"]')
+        const isPaymentButton = target.closest('[data-drawer-trigger="payment"]')
+
+        if (isCartButton || isPaymentButton) {
+            return
+        }
+
+        const url = new URL(window.location.href)
+        const hasCart = url.searchParams.has('cart')
+        const hasPayment = url.searchParams.has('payment')
+
+        if (hasCart || hasPayment) {
+            url.searchParams.delete('cart')
+            url.searchParams.delete('payment')
+            router.push(url.pathname + url.search)
+        }
+    }
+
     return (
-        <nav className="w-full px-3 py-1 mx-auto backdrop fixed bottom-0 sm:fixed sm:bottom-auto sm:top-0 shadow lg:px-6 lg:py-2 z-[9999]">
+        <nav
+            className="w-full px-3 py-1 mx-auto backdrop fixed bottom-0 sm:fixed sm:bottom-auto sm:top-0 shadow lg:px-6 lg:py-2 z-[9999]"
+            onClick={closeDrawers}
+        >
             <div className="flex flex-wrap items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Image

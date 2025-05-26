@@ -5,7 +5,7 @@ import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} fro
 import {useTranslations} from 'next-intl'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
-import {Wallet} from '@phosphor-icons/react'
+import {WalletIcon} from '@phosphor-icons/react'
 
 interface PaymentProps {
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
@@ -29,8 +29,8 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const recommendedTopup = Math.max(0, cartTotal - balance + 100)
 
     return (
-        <DrawerContent className="min-w-[20vw] w-fit max-w-[80vw] rounded-r-lg border-r border-border/50 fixed left-0 right-auto h-full inset-y-0 bottom-auto mt-0 top-0">
-            {/* Hide the default drawer handle for the left-side drawer */}
+        <DrawerContent className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+            {/* Hide the default drawer handle for the left-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {
                     display: none;
@@ -72,7 +72,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                         <div className="bg-muted rounded-md p-4">
                             <p className="text-sm text-center mb-4">{p('topup_description')}</p>
                             <div className="flex justify-center">
-                                <Wallet size={64} className="text-primary"/>
+                                <WalletIcon size={64} className="text-primary"/>
                             </div>
                         </div>
                     </div>

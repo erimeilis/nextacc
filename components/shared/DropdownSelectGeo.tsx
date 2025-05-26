@@ -3,8 +3,8 @@ import Loader from '@/components/service/Loader'
 import {Label} from '@/components/ui/label'
 import {useEffect, useRef, useState} from 'react'
 import getSlug from '@/utils/getSlug'
-import { useTranslations } from 'next-intl'
-import { MagnifyingGlassIcon, CheckIcon, CaretDownIcon } from '@phosphor-icons/react'
+import {useTranslations} from 'next-intl'
+import {CaretDownIcon, CheckIcon, MagnifyingGlassIcon} from '@phosphor-icons/react'
 
 export default function DropdownSelectGeo({
                                               selectId,
@@ -27,7 +27,7 @@ export default function DropdownSelectGeo({
     const [localSelectedOption, setLocalSelectedOption] = useState<number | string | null>(selectedOption || null)
     const [isOpen, setIsOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+    const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0})
     const dropdownRef = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null)
     const searchInputRef = useRef<HTMLInputElement>(null)
@@ -53,14 +53,17 @@ export default function DropdownSelectGeo({
         }
     }, [])
 
-    // Calculate dropdown position and focus search input when dropdown opens
+    // Calculate the dropdown position and focus search input when the dropdown opens
     useEffect(() => {
         const updatePosition = () => {
             if (buttonRef.current) {
                 const rect = buttonRef.current.getBoundingClientRect()
+                const buttonHeight = rect.height
+
+                // For absolute positioning, we need to position relative to the parent container
                 setDropdownPosition({
-                    top: rect.bottom + window.scrollY,
-                    left: rect.left + window.scrollX,
+                    top: buttonHeight - 8, // Position below the button with a small negative offset
+                    left: 0, // Align with the left edge of the parent container
                     width: rect.width
                 })
             }
@@ -71,15 +74,22 @@ export default function DropdownSelectGeo({
                 searchInputRef.current.focus()
             }
 
+            // Initial position update
             updatePosition()
+
+            // Update position immediately after opening
+            setTimeout(updatePosition, 0)
 
             // Update position on scroll and resize
             window.addEventListener('scroll', updatePosition, true)
             window.addEventListener('resize', updatePosition)
+            // Also listen for touchmove events for mobile scrolling
+            window.addEventListener('touchmove', updatePosition, { passive: true })
 
             return () => {
                 window.removeEventListener('scroll', updatePosition, true)
                 window.removeEventListener('resize', updatePosition)
+                window.removeEventListener('touchmove', updatePosition)
             }
         }
     }, [isOpen])
@@ -89,7 +99,7 @@ export default function DropdownSelectGeo({
         if (isOpen && selectedItemRef.current && listRef.current) {
             // Small delay to ensure the list is rendered
             setTimeout(() => {
-                selectedItemRef.current?.scrollIntoView({ block: 'nearest' })
+                selectedItemRef.current?.scrollIntoView({block: 'nearest'})
             }, 100)
         }
     }, [isOpen])
@@ -111,17 +121,17 @@ export default function DropdownSelectGeo({
         }, 0)
     }
 
-    const filteredItems = data?.filter(item => 
+    const filteredItems = data?.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
-    const selectedItem = data?.find(item => 
-        item.id === localSelectedOption || 
+    const selectedItem = data?.find(item =>
+        item.id === localSelectedOption ||
         (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
     )
 
     return (
-        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef}>
+        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{ position: 'relative' }}>
             <Label
                 htmlFor={selectId}
                 className="pl-1 mb-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
@@ -138,38 +148,40 @@ export default function DropdownSelectGeo({
                 cursor-pointer text-sm h-full w-full border-none
                 bg-accent text-foreground focus:ring-1 focus:ring-ring disabled:text-muted-foreground disabled:bg-muted
                 dark:bg-accent dark:text-foreground dark:focus:ring-ring dark:disabled:text-muted-foreground dark:disabled:bg-muted
-                animate-in fade-in zoom-in-95 duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                animate-in fade-in zoom-in-95 hover:scale-[1.01] active:scale-[0.99]"
                 disabled={!data || data.length === 0}
             >
                 <span className="truncate">
                     {selectedItem ? selectedItem.name : selectTitle}
                 </span>
-                <CaretDownIcon 
-                    className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                <CaretDownIcon
+                    className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     weight="bold"
                 />
             </button>
 
             {/* Dropdown */}
             {isOpen && (
-                <div 
-                    className="fixed z-[9999] rounded-md bg-background dark:bg-background shadow-lg border border-border max-h-[60vh] flex flex-col"
-                    style={{ 
+                <div
+                    className="absolute z-[9999] rounded-md bg-background dark:bg-background shadow-lg border border-border max-h-[60vh] flex flex-col"
+                    style={{
                         maxHeight: 'min(60vh, 300px)',
                         top: dropdownPosition.top + 'px',
                         left: dropdownPosition.left + 'px',
-                        width: dropdownPosition.width + 'px'
+                        width: dropdownPosition.width + 'px',
+                        maxWidth: '100vw', // Prevent overflow on small screens
+                        overflowX: 'hidden' // Prevent horizontal scrolling
                     }}
                 >
                     {/* Search input - only show if there are 5 or more items */}
                     {data && data.length >= 5 && (
                         <div className="p-2 border-b border-border sticky top-0 bg-background dark:bg-background z-10">
                             <div className="relative w-full">
-                                <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                                <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16}/>
                                 <input
                                     ref={searchInputRef}
                                     type="text"
-                                    placeholder={t('search', { fallback: 'Search...' })}
+                                    placeholder={t('search', {fallback: 'Search...'})}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full pl-8 p-2 h-8 text-xs rounded-md border border-border bg-accent dark:bg-accent focus:outline-none focus:ring-1 focus:ring-ring"
@@ -179,7 +191,7 @@ export default function DropdownSelectGeo({
                     )}
 
                     {/* Options list */}
-                    <div 
+                    <div
                         ref={listRef}
                         className="overflow-y-auto flex-1 py-1"
                         style={{
@@ -189,8 +201,8 @@ export default function DropdownSelectGeo({
                     >
                         {filteredItems && filteredItems.length > 0 ? (
                             filteredItems.map(item => {
-                                const isSelected = item.id === localSelectedOption || 
-                                    (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption);
+                                const isSelected = item.id === localSelectedOption ||
+                                    (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
 
                                 return (
                                     <div
@@ -202,9 +214,9 @@ export default function DropdownSelectGeo({
                                         }`}
                                     >
                                         <span className={`text-sm ${isSelected ? 'font-bold' : ''}`}>{item.name}</span>
-                                        {isSelected && <CheckIcon className="h-4 w-4 text-foreground" />}
+                                        {isSelected && <CheckIcon className="h-4 w-4 text-foreground"/>}
                                     </div>
-                                );
+                                )
                             })
                         ) : (
                             <div className="px-3 py-2 text-muted-foreground">No results found</div>

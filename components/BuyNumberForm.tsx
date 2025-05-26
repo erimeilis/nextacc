@@ -14,7 +14,7 @@ import {schemaSip} from '@/schemas/sip.schema'
 import {schemaEmail} from '@/schemas/email.schema'
 import {schemaHttps} from '@/schemas/https.schema'
 import {z} from 'zod'
-import {ChatText, PhoneTransfer} from '@phosphor-icons/react'
+import {ChatTextIcon, PhoneTransferIcon} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table'
 import {addToCart} from '@/app/api/redreport/cart'
 import usePersistState, {getPersistState} from '@/utils/usePersistState'
@@ -353,10 +353,10 @@ export default function BuyNumberForm({
                         <span className="text-price font-semibold mx-2 flex items-center">${numberInfo.fix_rate}</span>
                     </div>
                     {numberInfo.voice || numberInfo.toll_free ? (
-                        <div className="flex w-full flex-col xl:flex-row items-start gap-4">
+                        <div className="flex w-full flex-col xl:flex-row items-start sm:gap-2">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <div className="flex flex-row items-center gap-3 mt-8">
-                                    <PhoneTransfer size={24} className="text-primary"/>
+                                <div className="flex flex-row items-center gap-3">
+                                    <PhoneTransferIcon size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
                                     selectId="voiceType"
@@ -384,15 +384,16 @@ export default function BuyNumberForm({
                                         : (t.has(voiceDestinationErrorState) ? t(voiceDestinationErrorState) : '')
                                 }
                                 customClass="w-full pl-9 sm:pl-0"
+                                hideLabel={true}
                             />
                         </div>
                     ) : null}
 
                     {numberInfo.sms ? (
-                        <div className="flex w-full flex-col xl:flex-row items-start gap-4">
+                        <div className="flex w-full flex-col xl:flex-row items-start sm:gap-2">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <div className="flex flex-row items-center gap-3 mt-8">
-                                    <ChatText size={24} className="text-primary"/>
+                                <div className="flex flex-row items-center gap-3">
+                                    <ChatTextIcon size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
                                     selectId="smsType"
@@ -420,6 +421,7 @@ export default function BuyNumberForm({
                                         : (t.has(smsDestinationErrorState) ? t(smsDestinationErrorState) : '')
                                 }
                                 customClass="w-full pl-9 sm:pl-0"
+                                hideLabel={true}
                             />
                         </div>
                     ) : null}

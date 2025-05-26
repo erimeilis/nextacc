@@ -185,5 +185,13 @@
     "no_transactions": "Транзакції не знайдено",
     "showing_results": "Показано з {start} по {end} з {total} транзакцій",
     "empty_list": "У вас ще немає транзакцій"
+  },
+  "toast": {
+    "validation_error_title": "Помилка валідації",
+    "validation_error_description": "Будь ласка, перевірте форму на наявність помилок",
+    "success_title": "Успіх",
+    "cart_add_success": "Товар успішно додано до кошика",
+    "error_title": "Помилка",
+    "cart_add_error": "Не вдалося додати товар до кошика"
   }
 }

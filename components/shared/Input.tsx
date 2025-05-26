@@ -1,6 +1,6 @@
 'use client'
-import { Label } from '@/components/ui/label'
-import { Input as TextInput } from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import {Input as TextInput} from '@/components/ui/input'
 import React, {ChangeEvent, FC, SVGProps, useState} from 'react'
 import {Eye, EyeSlash} from '@phosphor-icons/react'
 
@@ -26,7 +26,8 @@ export default function Input({
                                   icon, // eslint-disable-line @typescript-eslint/no-unused-vars
                                   error = '',
                                   size = 'md',
-                                  disabled = false
+                                  disabled = false,
+                                  hideLabel = false
                               }: {
     handleChangeAction: (event: ChangeEvent<HTMLInputElement>) => void
     value: string
@@ -42,6 +43,7 @@ export default function Input({
     error?: string
     size?: 'sm' | 'md' | 'lg'
     disabled?: boolean
+    hideLabel?: boolean
 }) {
     const displayErr = error === '' ? 'invisible' : 'visible'
     const displayEye = type === 'password' ? 'visible' : 'invisible'
@@ -52,13 +54,15 @@ export default function Input({
     }
 
     return (
-        <div className={`flex flex-col space-y-2 mb-4 ${customClass}`}>
-            <Label
-                htmlFor={labelFor}
-                className="text-sm font-medium"
-            >
-                {labelText}
-            </Label>
+        <div className={`flex flex-col space-y-1 mb-4 ${customClass}`}>
+            {!hideLabel && (
+                <Label
+                    htmlFor={labelFor}
+                    className="text-xs font-normal pl-1"
+                >
+                    {labelText}
+                </Label>
+            )}
             <div className="relative">
                 <TextInput
                     onChange={handleChangeAction}
@@ -73,11 +77,11 @@ export default function Input({
                     readOnly={disabled}
                 />
                 <div className={`absolute flex right-0 top-0 h-full w-10 ${displayEye}`}>
-                    <button 
-                        type="button" 
-                        tabIndex={-1} 
-                        aria-hidden="true" 
-                        className="flex items-center justify-center z-10 text-muted-foreground hover:text-foreground text-sm h-full w-full transition-colors" 
+                    <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        className="flex items-center justify-center z-10 text-muted-foreground hover:text-foreground text-sm h-full w-full transition-colors"
                         onClick={switchPass}
                     >
                         {typeState === 'password' ? <Eye size={20}/> : <EyeSlash size={20}/>}

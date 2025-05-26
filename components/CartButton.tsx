@@ -1,8 +1,8 @@
 'use client'
 import React, {useEffect, useState} from 'react'
 import {Button} from '@/components/ui/button'
-import {ShoppingBag} from '@phosphor-icons/react'
-import {Drawer, DrawerTrigger} from '@/components/ui/drawer'
+import {ShoppingBagIcon} from '@phosphor-icons/react'
+import {Drawer} from '@/components/ui/drawer'
 import MiniCart from '@/components/MiniCart'
 import {useCartStore} from '@/stores/useCartStore'
 import {CartItem} from '@/types/CartItem'
@@ -15,6 +15,7 @@ export default function CartButton() {
     const {cart, totalItems, totalPrice, selectedItems, fetchData, selectItem} = useCartStore()
     const router = useRouter()
     const searchParams = useSearchParams()
+    const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
 
     useEffect(() => {
         fetchData().then()
@@ -26,15 +27,33 @@ export default function CartButton() {
         setTotalPriceState(totalPrice)
     }, [cart, totalItems, totalPrice])
 
+    // Effect to handle responsive direction
+    useEffect(() => {
+        const handleResize = () => {
+            setDrawerDirection(window.innerWidth < 640 ? 'bottom' : 'right')
+        }
+
+        // Set initial direction
+        handleResize()
+
+        // Add event listener for window resize
+        window.addEventListener('resize', handleResize)
+
+        // Cleanup
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
     // State for controlling the sidebar
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
-    // Check for cart parameter in URL and open the sidebar if present
+    // Check for cart parameter in URL and open/close the sidebar accordingly
     useEffect(() => {
         if (searchParams) {
             const cartParam = searchParams.get('cart')
             if (cartParam === 'open') {
                 setSidebarOpen(true)
+            } else {
+                setSidebarOpen(false)
             }
         }
     }, [searchParams])
@@ -67,26 +86,38 @@ export default function CartButton() {
     }
 
     return (
-        <Drawer open={sidebarOpen} onOpenChange={handleSidebarChange} direction="right" snapPoints={[1]}>
-            <DrawerTrigger asChild>
-                {<Button
-                    variant="navIcon"
-                    className="relative p-2"
-                >
-                    <span className="text-opacity-80 text-xs mr-1">${totalPriceState}</span>
-                    <ShoppingBag size={24}/>
-                    <span
-                        className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                        {totalItemsState}
-                    </span>
-                </Button>}
-            </DrawerTrigger>
-            <MiniCart
-                cartItems={cartState}
-                selectedItems={selectedItems}
-                setSelectedItemsAction={selectItem}
-                setSidebarOpenAction={handleSidebarChange}
-            />
-        </Drawer>
+        <>
+            <Button
+                variant="navIcon"
+                className="relative p-2"
+                data-drawer-trigger="cart"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSidebarChange(!sidebarOpen);
+                }}
+            >
+                <span className="text-opacity-80 text-xs mr-1">${totalPriceState}</span>
+                <ShoppingBagIcon size={24}/>
+                <span
+                    className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    {totalItemsState}
+                </span>
+            </Button>
+
+            <Drawer 
+                open={sidebarOpen} 
+                onOpenChange={handleSidebarChange} 
+                direction={drawerDirection} 
+                snapPoints={[1]}
+            >
+                <MiniCart
+                    cartItems={cartState}
+                    selectedItems={selectedItems}
+                    setSelectedItemsAction={selectItem}
+                    setSidebarOpenAction={handleSidebarChange}
+                />
+            </Drawer>
+        </>
     )
 }

@@ -185,5 +185,13 @@
     "no_transactions": "Nie znaleziono transakcji",
     "showing_results": "Wyświetlanie od {start} do {end} z {total} transakcji",
     "empty_list": "Nie masz jeszcze żadnych transakcji"
+  },
+  "toast": {
+    "validation_error_title": "Błąd walidacji",
+    "validation_error_description": "Sprawdź formularz pod kątem błędów",
+    "success_title": "Sukces",
+    "cart_add_success": "Produkt został pomyślnie dodany do koszyka",
+    "error_title": "Błąd",
+    "cart_add_error": "Nie udało się dodać produktu do koszyka"
   }
 }

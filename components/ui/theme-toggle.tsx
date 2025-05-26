@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {Moon, Palette, Sun} from '@phosphor-icons/react'
+import {MoonIcon, PaletteIcon, SunIcon} from '@phosphor-icons/react'
 import {useTheme} from 'next-themes'
 import usePersistState from '@/utils/usePersistState'
 
@@ -45,8 +45,8 @@ export function ThemeToggle() {
                 className="rounded-lg p-2.5 text-sm"
                 onClick={toggleDarkMode}
             >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0"/>
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
+                <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0"/>
+                <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
                 <span className="sr-only">Toggle dark mode</span>
             </Button>
 
@@ -57,7 +57,7 @@ export function ThemeToggle() {
                         size="icon"
                         className="rounded-lg p-2.5 text-sm"
                     >
-                        <Palette className="h-5 w-5"/>
+                        <PaletteIcon className="h-5 w-5"/>
                         <span className="sr-only">Toggle color theme</span>
                     </Button>
                 </DropdownMenuTrigger>

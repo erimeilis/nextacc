@@ -1,9 +1,10 @@
 'use client'
 import Loader from '@/components/service/Loader'
-import { Label } from '@/components/ui/label'
-import {ChangeEvent} from 'react'
+import {Label} from '@/components/ui/label'
+import {useEffect, useRef, useState} from 'react'
 import getSlug from '@/utils/getSlug'
-import Show from '@/components/service/Show'
+import {CaretDownIcon, CheckIcon} from '@phosphor-icons/react'
+import {createPortal} from 'react-dom'
 
 export default function DropdownSelect({
                                            selectId,
@@ -22,63 +23,213 @@ export default function DropdownSelect({
     loading?: boolean
     customClass?: string
 }) {
-    const items = data.map(item => (
-        <option
-            value={item.id}
-            key={item.id}
-            data-slug={getSlug(item.name)}
-            className="flex-1 text-wrap"
-        >
-            {item.name}
-        </option>
-    ))
-    const handleOptionChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        onSelectAction(event.target.value)
+    const [localSelectedOption, setLocalSelectedOption] = useState<string | null>(selectedOption || null)
+    const [isOpen, setIsOpen] = useState(false)
+    const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0})
+    const dropdownRef = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const listRef = useRef<HTMLDivElement>(null)
+    const selectedItemRef = useRef<HTMLDivElement>(null)
+
+    // Update local state when prop changes
+    useEffect(() => {
+        setLocalSelectedOption(selectedOption || null)
+    }, [selectedOption])
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // Check if the click is on an option in the dropdown
+            const target = event.target as HTMLElement
+            const isClickOnOption = target.closest('.dropdown-option') !== null
+
+            // Only close if not clicking on an option and not within the dropdown container
+            if (!isClickOnOption && dropdownRef.current && !dropdownRef.current.contains(target)) {
+                setIsOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
+
+    // Calculate the dropdown position
+    useEffect(() => {
+        const updatePosition = () => {
+            if (buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect()
+                const isMobile = window.innerWidth < 768 // Check if device is mobile
+                const isQtyDropdown = selectId.toLowerCase().includes('qty') || selectId.toLowerCase().includes('quantity')
+
+                // For portal positioning with fixed position, we need viewport-relative coordinates
+                // Use a more aggressive offset for quantity dropdowns on mobile
+                const offset = isQtyDropdown && isMobile ? -20 : -5
+
+                setDropdownPosition({
+                    top: rect.bottom + window.scrollY + offset, // Position closer to the button with adjusted offset
+                    left: rect.left + window.scrollX, // Align with the left edge of the button
+                    width: rect.width
+                })
+            }
+        }
+
+        if (isOpen) {
+            // Initial position update
+            updatePosition()
+
+            // Update position immediately after opening
+            setTimeout(updatePosition, 0)
+
+            // Update position on scroll and resize
+            window.addEventListener('scroll', updatePosition, true)
+            window.addEventListener('resize', updatePosition)
+            // Also listen for touchmove events for mobile scrolling
+            window.addEventListener('touchmove', updatePosition, {passive: true})
+
+            return () => {
+                window.removeEventListener('scroll', updatePosition, true)
+                window.removeEventListener('resize', updatePosition)
+                window.removeEventListener('touchmove', updatePosition)
+            }
+        }
+    }, [isOpen, selectId])
+
+    // Scroll selected item into view
+    useEffect(() => {
+        if (isOpen && selectedItemRef.current && listRef.current) {
+            // Small delay to ensure the list is rendered
+            setTimeout(() => {
+                selectedItemRef.current?.scrollIntoView({block: 'nearest'})
+            }, 100)
+        }
+    }, [isOpen])
+
+    const toggleDropdown = () => {
+        const newIsOpen = !isOpen
+        setIsOpen(newIsOpen)
+
+        // If opening the dropdown, update position immediately
+        if (newIsOpen && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect()
+            const isMobile = window.innerWidth < 768 // Check if device is mobile
+            const isQtyDropdown = selectId.toLowerCase().includes('qty') || selectId.toLowerCase().includes('quantity')
+
+            // Use a more aggressive offset for quantity dropdowns on mobile
+            const offset = isQtyDropdown && isMobile ? -20 : -5
+
+            setDropdownPosition({
+                top: rect.bottom + window.scrollY + offset,
+                left: rect.left + window.scrollX,
+                width: rect.width
+            })
+        }
     }
+
+    const handleOptionSelect = (id: string) => {
+        console.log('handleOptionSelect called with id:', id)
+        // Update local state immediately
+        setLocalSelectedOption(id)
+        setIsOpen(false)
+
+        // Delay calling the parent's handler to allow the UI to update first
+        setTimeout(() => {
+            console.log('Calling onSelectAction with id:', id)
+            onSelectAction(id)
+        }, 0)
+    }
+
+    const selectedItem = data.find(item =>
+        item.id === localSelectedOption ||
+        (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
+    )
+
     return (
-        <Show
-            when={!loading || items.length > 0}
-            fallback={<Loader height={8}/>}
-        >
-            <div className={`min-w-[200px] ${customClass}`}>
-                {!customClass.includes('hide-label') && (
-                    <Label
-                        htmlFor={selectId}
-                        className="text-sm font-medium mb-2 block">
-                        {selectTitle}
-                    </Label>
-                )}
-                <div className="relative">
-                    <select
-                        id={selectId}
-                        name={selectId}
-                        className={`flex w-full rounded-md border border-input bg-background ring-offset-background 
-                        appearance-none cursor-pointer
-                        focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 
-                        disabled:cursor-not-allowed disabled:opacity-50 
-                        ${customClass.includes('text-') ? customClass.split(' ').filter(cls => cls.startsWith('text-')).join(' ') : 'text-sm'}
-                        ${customClass.includes('h-') ? customClass.split(' ').filter(cls => cls.startsWith('h-')).join(' ') : 'h-10'}
-                        ${customClass.includes('h-8') ? 'px-3 py-1' : 'px-3 py-2'}`}
-                        value={selectedOption ?? 'none'}
-                        onChange={handleOptionChange}
-                        disabled={data.length === 0}
+        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
+            <Label
+                htmlFor={selectId}
+                className="pl-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
+                {selectTitle}
+            </Label>
+
+            {/* Custom select button */}
+            <button
+                ref={buttonRef}
+                type="button"
+                id={selectId}
+                onClick={toggleDropdown}
+                className="flex items-center justify-between rounded-md pl-1 pr-3 py-2 transition-all duration-300 ease-in-out
+                focus:outline-none hover:drop-shadow-md focus:drop-shadow-md cursor-pointer text-sm h-full w-full border-none
+                text-foreground disabled:text-muted-foreground disabled:bg-muted border-muted border-b
+                dark:text-foreground dark:disabled:text-muted-foreground dark:disabled:bg-muted
+                animate-in fade-in zoom-in-95 hover:scale-[1.01] active:scale-[0.99]"
+                disabled={data.length === 0 || loading}
+            >
+                <span className="truncate">
+                    {selectedItem ? selectedItem.name : selectTitle}
+                </span>
+                <CaretDownIcon
+                    className={`pl-1 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    weight="bold"
+                />
+            </button>
+
+            {/* Dropdown */}
+            {isOpen && createPortal(
+                <div
+                    className="absolute z-[99999] rounded-md bg-background dark:bg-background shadow-lg border border-border min-w-[60px] max-h-[60vh] flex flex-col"
+                    style={{
+                        maxHeight: 'min(60vh, 300px)',
+                        top: dropdownPosition.top + 'px',
+                        left: dropdownPosition.left + 'px',
+                        width: dropdownPosition.width + 'px',
+                        maxWidth: '100vw', // Prevent overflow on small screens
+                        overflowX: 'hidden', // Prevent horizontal scrolling
+                        pointerEvents: 'auto' // Ensure clicks are captured
+                    }}
+                >
+                    {/* Options list */}
+                    <div
+                        ref={listRef}
+                        className="overflow-y-auto flex-1 py-1"
+                        style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'hsl(var(--primary)) hsl(var(--muted))'
+                        }}
                     >
-                        <option
-                            value="none"
-                            disabled
-                            hidden
-                        >
-                            {selectTitle}
-                        </option>
-                        {items}
-                    </select>
-                    <div className={`pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground ${customClass.includes('h-8') ? 'scale-90' : ''}`}>
-                        <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                        {data && data.length > 0 ? (
+                            data.map(item => {
+                                const isSelected = item.id === localSelectedOption ||
+                                    (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        ref={isSelected ? selectedItemRef : null}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            console.log('Option clicked:', item.id)
+                                            handleOptionSelect(item.id)
+                                        }}
+                                        className={`dropdown-option px-3 py-2 cursor-pointer flex items-center justify-between hover:bg-accent dark:hover:bg-accent ${
+                                            isSelected ? 'bg-accent/50 dark:bg-accent/50' : ''
+                                        }`}
+                                    >
+                                        <span className={`text-sm ${isSelected ? 'font-bold' : ''}`}>{item.name}</span>
+                                        {isSelected && <CheckIcon className="pl-1 h-4 w-4 text-foreground"/>}
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            <div className="px-3 py-2 text-muted-foreground">No results found</div>
+                        )}
                     </div>
-                </div>
-            </div>
-        </Show>
+                </div>,
+                document.body
+            )}
+
+            {loading && <div className="hidden"><Loader height={8}/></div>}
+        </div>
     )
 }
