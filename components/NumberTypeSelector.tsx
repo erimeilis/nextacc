@@ -17,13 +17,14 @@ export default function NumberTypeSelector({
     }
     const t = useTranslations('offers')
     return (
-        <nav className="flex flex-row w-full justify-evenly bg-background dark:bg-background">
+        <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
             {options.map((option) =>
                 <Tab
                     key={option}
                     type="button"
                     onClick={() => handleOptionChange(option)}
                     active={selectedOption === option}
+                    className="rounded-t-none sm:rounded-t-md"
                 >
                     {t(option)}
                 </Tab>

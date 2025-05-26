@@ -24,7 +24,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     }
 
     const cartTotal = calculateCartTotal()
-    
+
     // Calculate recommended topup amount
     const recommendedTopup = Math.max(0, cartTotal - balance + 100)
 
@@ -36,9 +36,9 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                     display: none;
                 }
             `}</style>
-            <div className="flex flex-col h-full w-full">
+            <div className="flex flex-col h-full w-full pb-9 sm:pb-2">
                 <DrawerHeader className="flex flex-row items-center justify-between">
-                    <DrawerTitle>{p('payment')}</DrawerTitle>
+                    <DrawerTitle className="hidden"></DrawerTitle>
                     <DrawerClose onClick={() => setSidebarOpenAction(false)}/>
                 </DrawerHeader>
 
@@ -57,22 +57,22 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                                 <span className="text-sm font-medium">{p('balance')}:</span>
                                 <span className="text-lg font-bold text-primary">${balance.toFixed(2)}</span>
                             </div>
-                            
+
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium">{t('cart_total')}:</span>
                                 <span className="text-lg font-bold text-primary">${cartTotal.toFixed(2)}</span>
                             </div>
-                            
+
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium">{p('recommended_topup')}:</span>
                                 <span className="text-lg font-bold text-primary">${recommendedTopup.toFixed(2)}</span>
                             </div>
                         </div>
-                        
+
                         <div className="bg-muted rounded-md p-4">
                             <p className="text-sm text-center mb-4">{p('topup_description')}</p>
                             <div className="flex justify-center">
-                                <Wallet size={64} className="text-primary" />
+                                <Wallet size={64} className="text-primary"/>
                             </div>
                         </div>
                     </div>

@@ -92,8 +92,8 @@ export default async function RootLayout(
             <AuthProvider>
                 <NextIntlClientProvider messages={messages}>
                     <Nav/>
-                    <main className="flex items-center justify-center px-2 sm:px-4 pt-2 sm:pt-4 pb-96">
-                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-2 sm:gap-4">
+                    <main className="flex items-center justify-center px-0 sm:px-2 pt-0 sm:pt-18 pb-18 sm:pb-0">
+                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-8 sm:gap-4">
                             {offers}
                             {dashboard}
                         </div>

@@ -59,7 +59,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
                          <Loader height={350}/>
                      </Show>
                  }>
-        <div className="flex flex-col rounded-md w-full border border-border bg-gradient-to-br from-secondary to-background drop-shadow text-foreground
+        <div className="flex flex-col rounded-none sm:rounded-lg w-full border-none sm:border border-border bg-gradient-to-br from-secondary to-background drop-shadow text-foreground
         dark:border-border dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground overflow-hidden">
             <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
                 {profileTabs.map(tab =>
@@ -83,7 +83,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
             </nav>
             <div className="h-full justify-center gap-4 p-6">
                 {isLoading ? (
-                    <SkeletonLoader />
+                    <SkeletonLoader/>
                 ) : (
                     children
                 )}

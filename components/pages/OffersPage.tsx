@@ -275,7 +275,8 @@ export default function OffersPage() {
 
     return (
         <Card id="offers"
-              className="bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background border border-border p-0 pb-6 sm:pb-8 overflow-hidden w-full">
+              className="rounded-none sm:rounded-lg bg-gradient-to-br from-secondary to-background dark:bg-gradient-to-br dark:from-secondary dark:to-background
+              border-none sm:border border-border p-0 pb-6 sm:pb-8 overflow-hidden w-full">
             <NumberTypeSelector options={numberTypes} onSelectAction={handleType} selectedOption={type}/>
             <div className="flex flex-col md:flex-row items-center gap-4 justify-between my-4 px-4 sm:px-6">
                 <DropdownSelectGeo

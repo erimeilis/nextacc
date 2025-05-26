@@ -383,7 +383,7 @@ export default function BuyNumberForm({
                                         ? formErrors.voiceDestination.map(err => t(err)).join(', ')
                                         : (t.has(voiceDestinationErrorState) ? t(voiceDestinationErrorState) : '')
                                 }
-                                customClass="w-full"
+                                customClass="w-full pl-9 sm:pl-0"
                             />
                         </div>
                     ) : null}
@@ -419,7 +419,7 @@ export default function BuyNumberForm({
                                         ? formErrors.smsDestination.map(err => t(err)).join(', ')
                                         : (t.has(smsDestinationErrorState) ? t(smsDestinationErrorState) : '')
                                 }
-                                customClass="w-full"
+                                customClass="w-full pl-9 sm:pl-0"
                             />
                         </div>
                     ) : null}

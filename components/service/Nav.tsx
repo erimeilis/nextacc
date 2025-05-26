@@ -45,25 +45,38 @@ const ClientOnlyNav = ({
 }) => {
     return (
         <>
-            <div className="hidden sm:flex items-center gap-2 ml-4">
+            {/* Balance - responsive for both mobile and desktop */}
+            <div className="flex items-center gap-2 ml-4">
                 {session &&
                 session.status === 'authenticated' &&
                 session.data &&
                 session.data.user &&
                 (session.data.user.provider !== 'anonymous') ? (
                     <>
-                        <span className="text-xs sm:text-sm font-medium text-white">{p('balance')}:</span>
-                        <span className="text-xs sm:text-sm font-bold text-white">
+                        {/* For mobile - without label */}
+                        <span className="sm:hidden text-xs font-bold text-white">
                             ${displayBalance.toFixed(2)}
                         </span>
+
+                        {/* For desktop - with label */}
+                        <span className="hidden sm:inline text-xs sm:text-sm font-medium text-white">{p('balance')}:</span>
+                        <span className="hidden sm:inline text-xs sm:text-sm font-bold text-white">
+                            ${displayBalance.toFixed(2)}
+                        </span>
+
+                        {/* Single PaymentButton for both mobile and desktop */}
                         <PaymentButton />
                     </>
                 ) : null}
             </div>
 
             <div className="flex md:order-2 gap-2 items-center ml-auto">
-                <LocaleSwitcher/>
-                <ThemeToggle/>
+                <div className="hidden sm:block">
+                    <LocaleSwitcher/>
+                </div>
+                <div className="hidden sm:block">
+                    <ThemeToggle/>
+                </div>
                 <CartButton/>
                 {(session &&
                     session.status === 'authenticated' &&
@@ -108,6 +121,11 @@ const ClientOnlyNav = ({
                                 ))}
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
+                            <div className="sm:hidden block p-2 flex items-center space-x-2">
+                                <LocaleSwitcher/>
+                                <ThemeToggle/>
+                            </div>
+                            <DropdownMenuSeparator className="sm:hidden block"/>
                             <DropdownMenuItem onClick={() => {
                                 resetClientStore()
                                 resetCartStore()
@@ -202,7 +220,7 @@ export default function Nav() {
     }, [balance, displayBalance, isAnimating, isClient])
 
     return (
-        <nav className="w-full px-3 py-1 mx-auto backdrop sticky top-0 shadow lg:px-6 lg:py-2 z-[9999]">
+        <nav className="w-full px-3 py-1 mx-auto backdrop fixed bottom-0 sm:fixed sm:bottom-auto sm:top-0 shadow lg:px-6 lg:py-2 z-[9999]">
             <div className="flex flex-wrap items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Image

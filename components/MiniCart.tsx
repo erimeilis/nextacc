@@ -82,9 +82,9 @@ export default function MiniCart({
                     display: none;
                 }
             `}</style>
-            <div className="flex flex-col h-full w-full">
+            <div className="flex flex-col h-full w-full pb-9 sm:pb-2">
                 <DrawerHeader className="flex flex-row items-center justify-between">
-                    <DrawerTitle> </DrawerTitle>
+                    <DrawerTitle className="hidden"></DrawerTitle>
                     <DrawerClose onClick={() => setSidebarOpenAction(false)}/>
                 </DrawerHeader>
 
