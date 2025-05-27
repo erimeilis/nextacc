@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {ShoppingBagIcon} from '@phosphor-icons/react'
 import {Drawer} from '@/components/ui/drawer'
-import MiniCart from '@/components/MiniCart'
+import MiniCart from '@/components/drawers/MiniCart'
 import {useCartStore} from '@/stores/useCartStore'
 import {CartItem} from '@/types/CartItem'
 import {useRouter, useSearchParams} from 'next/navigation'
@@ -92,9 +92,9 @@ export default function CartButton() {
                 className="relative p-2"
                 data-drawer-trigger="cart"
                 onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSidebarChange(!sidebarOpen);
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleSidebarChange(!sidebarOpen)
                 }}
             >
                 <span className="text-opacity-80 text-xs mr-1">${totalPriceState}</span>
@@ -105,10 +105,10 @@ export default function CartButton() {
                 </span>
             </Button>
 
-            <Drawer 
-                open={sidebarOpen} 
-                onOpenChange={handleSidebarChange} 
-                direction={drawerDirection} 
+            <Drawer
+                open={sidebarOpen}
+                onOpenChange={handleSidebarChange}
+                direction={drawerDirection}
                 snapPoints={[1]}
             >
                 <MiniCart

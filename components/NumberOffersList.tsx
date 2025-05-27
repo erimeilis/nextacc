@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Loader from './service/Loader'
+import Loader from '@/components/service/Loader'
 import {NumberInfo} from '@/types/NumberInfo'
 import Show from '@/components/service/Show'
 import {Label} from '@/components/ui/label'
@@ -46,7 +46,7 @@ export default function NumberOffersList({
                 value={selectedOption || undefined}
                 name="list-radio"
                 onValueChange={handleOptionChange}
-                className="transition-transform duration-300">
+                className="transition-all duration-500 ease-in-out">
                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 p-0 sm:p-2">
                     {
                         options?.map((option) => {

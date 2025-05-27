@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react'
 import {Button} from '@/components/ui/button'
 import {PlusCircleIcon} from '@phosphor-icons/react'
 import {Drawer} from '@/components/ui/drawer'
-import Payment from '@/components/Payment'
+import Payment from '@/components/drawers/Payment'
 import {useRouter, useSearchParams} from 'next/navigation'
 
 export default function PaymentButton() {

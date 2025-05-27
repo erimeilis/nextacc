@@ -339,12 +339,12 @@ export default function BuyNumberForm({
         <form
             id="buyNumberForm"
             name="buyNumberForm"
-            className="mt-8 space-y-8 transition-transform duration-300"
+            className="mt-8 space-y-8 transition-all duration-500 ease-in-out"
             onSubmit={handleAddToCart}
             method="post"
         >
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
-                <div className="w-full space-y-6">
+                <div className="w-full space-y-4 sm:space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
                         <span className="flex items-center">{t('setupfee')}:</span>
                         <span className="text-price font-semibold mx-2 flex items-center">${numberInfo.setup_rate}</span>
@@ -355,7 +355,7 @@ export default function BuyNumberForm({
                     {numberInfo.voice || numberInfo.toll_free ? (
                         <div className="flex w-full flex-col xl:flex-row items-start sm:gap-2">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <div className="flex flex-row items-center gap-3">
+                                <div className="flex flex-row items-center">
                                     <PhoneTransferIcon size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
@@ -392,7 +392,7 @@ export default function BuyNumberForm({
                     {numberInfo.sms ? (
                         <div className="flex w-full flex-col xl:flex-row items-start sm:gap-2">
                             <div className="flex w-full flex-row items-center gap-3">
-                                <div className="flex flex-row items-center gap-3">
+                                <div className="flex flex-row items-center">
                                     <ChatTextIcon size={24} className="text-primary"/>
                                 </div>
                                 <DropdownSelect
@@ -451,7 +451,7 @@ export default function BuyNumberForm({
 
                     <div className="bg-gradient-to-br from-card to-muted/30 dark:from-card dark:to-muted/30 rounded-lg overflow-hidden shadow-md border border-muted/25">
                         <Table>
-                            <TableHeader>
+                            <TableHeader className="p-2">
                                 <TableRow>
                                     <TableHead colSpan={4} className="bg-gradient-to-r from-muted/60 to-muted/40 text-center font-medium">{t('discount')}</TableHead>
                                 </TableRow>
@@ -459,11 +459,11 @@ export default function BuyNumberForm({
                             <TableBody>
                                 {discounts.map(d => {
                                     return (d.id !== '0') ? (
-                                        <TableRow key={d.name} className="text-sm">
-                                            <TableCell className="whitespace-nowrap">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
-                                            <TableCell className="text-price font-medium">-{d.id}%</TableCell>
+                                        <TableRow key={d.name} className="text-xs p-1">
+                                            <TableCell className="whitespace-nowrap pl-4 py-3">{t('more_than')} {d.name} {t('month', {count: d.name})}</TableCell>
+                                            <TableCell className="text-price font-medium p-3">-{d.id}%</TableCell>
                                             <TableCell>=</TableCell>
-                                            <TableCell className="whitespace-nowrap text-right font-medium">
+                                            <TableCell className="whitespace-nowrap text-right font-medium pr-4 p-3">
                                                 ${Number(Number(d.id) / 100 * (numberInfo.fix_rate * Number(d.name) + numberInfo.setup_rate)).toFixed(2)}
                                             </TableCell>
                                         </TableRow>

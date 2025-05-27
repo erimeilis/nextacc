@@ -13,7 +13,7 @@ import {Toaster} from '@/components/ui/toaster'
 import {ubuntu} from '@/app/fonts' // Import from the fonts file
 
 // Dynamically import a Nav component to reduce the initial bundle size
-const Nav = dynamic(() => import('@/components/service/Nav'), {
+const Nav = dynamic(() => import('@/components/nav/Nav'), {
     ssr: true,
     loading: () => <div className="h-16"></div> // Simple placeholder while loading
 })
@@ -92,8 +92,8 @@ export default async function RootLayout(
             <AuthProvider>
                 <NextIntlClientProvider messages={messages}>
                     <Nav/>
-                    <main className="flex items-center justify-center px-0 sm:px-2 pt-0 sm:pt-18 pb-18 sm:pb-0">
-                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-8 sm:gap-4">
+                    <main className="flex items-center justify-center px-0 sm:px-2 pt-0 sm:pt-18 pb-14 sm:pb-0">
+                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
                             {offers}
                             {dashboard}
                         </div>

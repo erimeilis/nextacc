@@ -4,7 +4,7 @@ import NumberTypeSelector from '@/components/NumberTypeSelector'
 import {Card} from '@/components/ui/card'
 import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import CreateQueryString from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
@@ -178,6 +178,56 @@ export default function OffersPage() {
         (numbers?.find(e => e.did == number) ?? null) :
         null
 
+    // Ref for the BuyNumberForm container
+    const buyNumberFormRef = useRef<HTMLDivElement>(null)
+
+    // Effect to scroll to BuyNumberForm when a number is selected with a smooth bounce effect
+    useEffect(() => {
+        if (getNumber && buyNumberFormRef.current) {
+            // Use setTimeout to ensure the form is rendered before scrolling
+            setTimeout(() => {
+                const yOffset = -10; // 10px offset from the top of the screen
+                const element = buyNumberFormRef.current;
+                if (!element) return; // Early return if element is null
+                const targetY = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                const currentY = window.pageYOffset;
+
+                // Create a gentle bounce effect by first overshooting then settling
+                const createBounceEffect = () => {
+                    // First scroll slightly past the target (subtle overshoot)
+                    window.scrollTo({
+                        top: targetY - 15, // Reduced overshoot for smoother animation
+                        behavior: 'smooth'
+                    });
+
+                    // Then after a delay, settle at the exact target position with a smooth transition
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: targetY,
+                            behavior: 'smooth'
+                        });
+                    }, 400); // Increased delay for smoother transition
+                };
+
+                // Ensure we're scrolling from top to bottom
+                if (currentY > targetY) {
+                    // If we're already below the target, first scroll up to create a "from top" effect
+                    // Use smooth scrolling for a more gradual transition
+                    window.scrollTo({
+                        top: Math.max(0, targetY - 120), // Reduced distance for smoother effect
+                        behavior: 'smooth' // Changed to smooth for more gradual transition
+                    });
+
+                    // Increased delay to allow the first scroll to complete more naturally
+                    setTimeout(createBounceEffect, 350);
+                } else {
+                    // Normal case - we're scrolling down with bounce effect
+                    createBounceEffect();
+                }
+            }, 150); // Increased delay to ensure everything is properly rendered
+        }
+    }, [getNumber]);
+
     const handleType = (t: string) => {
         setLocalAreasMap([])
         // Don't clear the number list immediately to prevent flickering
@@ -312,14 +362,17 @@ export default function OffersPage() {
                 />
             </div>
             <div
-                className="flex flex-col px-4 sm:px-6 transition duration-300 text-foreground dark:text-foreground overflow-hidden"
+                ref={buyNumberFormRef}
+                className="flex flex-col px-4 sm:px-6 transition-all duration-500 ease-in-out text-foreground dark:text-foreground overflow-hidden"
             >
                 <Show when={typeof getNumber !== 'undefined' && getNumber !== null}>
-                    <BuyNumberForm
-                        numberInfo={getNumber!}
-                        countryId={country}
-                        areaCode={area}
-                    />
+                    <div className="animate-in fade-in duration-700 ease-in-out">
+                        <BuyNumberForm
+                            numberInfo={getNumber!}
+                            countryId={country}
+                            areaCode={area}
+                        />
+                    </div>
                 </Show>
             </div>
         </Card>

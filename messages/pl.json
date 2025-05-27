@@ -131,7 +131,8 @@
     "remove_selected": "Usuń zaznaczone",
     "select_to_proceed": "Proszę wybrać nomery",
     "cart_total": "Suma koszyka",
-    "insufficient_balance": "Niewystarczające saldo. Proszę doładować konto."
+    "insufficient_balance": "Niewystarczające saldo. Proszę doładować konto.",
+    "checkout": "Do kasy"
   },
   "daterange": {
     "locale": "pl",

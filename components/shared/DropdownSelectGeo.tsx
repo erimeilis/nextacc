@@ -58,12 +58,17 @@ export default function DropdownSelectGeo({
         const updatePosition = () => {
             if (buttonRef.current) {
                 const rect = buttonRef.current.getBoundingClientRect()
-                const buttonHeight = rect.height
+                const windowHeight = window.innerHeight
 
-                // For absolute positioning, we need to position relative to the parent container
+                // Check if there's enough space below the button
+                const spaceBelow = windowHeight - rect.bottom
+                const dropdownHeight = 300 // Approximate max height of dropdown
+                const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight
+
+                // For fixed positioning, we need viewport coordinates
                 setDropdownPosition({
-                    top: buttonHeight - 8, // Position below the button with a small negative offset
-                    left: 0, // Align with the left edge of the parent container
+                    top: showAbove ? rect.top - dropdownHeight : rect.bottom, // Position above or below based on available space
+                    left: rect.left, // Align with the left edge of the button
                     width: rect.width
                 })
             }
@@ -163,14 +168,15 @@ export default function DropdownSelectGeo({
             {/* Dropdown */}
             {isOpen && (
                 <div
-                    className="absolute z-[9999] rounded-md bg-background dark:bg-background shadow-lg border border-border max-h-[60vh] flex flex-col"
+                    className="fixed z-[9999] rounded-md bg-background dark:bg-background shadow-lg border border-border max-h-[60vh] flex flex-col"
                     style={{
                         maxHeight: 'min(60vh, 300px)',
                         top: dropdownPosition.top + 'px',
                         left: dropdownPosition.left + 'px',
                         width: dropdownPosition.width + 'px',
                         maxWidth: '100vw', // Prevent overflow on small screens
-                        overflowX: 'hidden' // Prevent horizontal scrolling
+                        overflowX: 'hidden', // Prevent horizontal scrolling
+                        overflowY: 'auto' // Enable vertical scrolling
                     }}
                 >
                     {/* Search input - only show if there are 5 or more items */}

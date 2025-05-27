@@ -54,7 +54,7 @@ export default function Input({
     }
 
     return (
-        <div className={`flex flex-col space-y-1 mb-4 ${customClass}`}>
+        <div className={`flex flex-col ${customClass}`}>
             {!hideLabel && (
                 <Label
                     htmlFor={labelFor}

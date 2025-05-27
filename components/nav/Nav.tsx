@@ -1,24 +1,21 @@
 'use client'
-import LocaleSwitcher from '@/components/service/LocaleSwitcher'
+import LocaleSwitcher from '@/components/nav/LocaleSwitcher'
 import logoLight from '@/app/[locale]/icon-light.png'
 import logo from '@/app/[locale]/icon.png'
-import {signOut, useSession} from 'next-auth/react'
+import {useSession} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
-import {resetPersistentId} from '@/utils/resetPersistentId'
 import React, {useEffect, useRef, useState} from 'react'
-import {createHash} from 'crypto'
 import Link from 'next/link'
-import {profileTabs} from '@/constants/profileTabs'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {ThemeToggle} from '@/components/ui/theme-toggle'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
-import {Button} from '@/components/ui/button'
-import CartButton from '@/components/CartButton'
-import PaymentButton from '@/components/PaymentButton'
+import MobileSwitchers from '@/components/nav/MobileSwitchers'
+import CartButton from '@/components/nav/CartButton'
+import PaymentButton from '@/components/nav/PaymentButton'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
+import MobileClientButton from '@/components/nav/MobileClientButton'
+import DesktopProfileMenu from '@/components/nav/DesktopProfileMenu'
 
 // Component that only renders client-side to avoid hydration issues
 const ClientOnlyNav = ({
@@ -30,7 +27,8 @@ const ClientOnlyNav = ({
                            p,
                            t,
                            search,
-                           router
+                           router,
+                           searchParams
                        }: {
     session: ReturnType<typeof useSession>;
     balance?: number;
@@ -42,7 +40,70 @@ const ClientOnlyNav = ({
     t: (key: string) => string;
     search: string;
     router: ReturnType<typeof useRouter>;
+    searchParams: ReturnType<typeof useSearchParams>;
 }) => {
+    const [showMobileSwitchers, setShowMobileSwitchers] = useState(false)
+    const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
+    const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
+
+    // Effect to handle a responsive direction for the drawer
+    useEffect(() => {
+        const handleResize = () => {
+            setDrawerDirection(window.innerWidth < 640 ? 'bottom' : 'right')
+        }
+
+        // Set the initial direction
+        handleResize()
+
+        // Add event listener for window resize
+        window.addEventListener('resize', handleResize)
+
+        // Cleanup
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
+    // Check for profile parameter in URL and open/close the drawer accordingly
+    useEffect(() => {
+        if (searchParams) {
+            const profileParam = searchParams.get('profile')
+            if (profileParam === 'open') {
+                setProfileDrawerOpen(true)
+            } else {
+                setProfileDrawerOpen(false)
+            }
+        }
+    }, [searchParams])
+
+    // Custom function to handle drawer open/close and update URL
+    const handleProfileDrawerChangeAction = (openState: boolean | ((prevState: boolean) => boolean)) => {
+        // Determine the new open state
+        const open = typeof openState === 'function'
+            ? (openState as ((prevState: boolean) => boolean))(profileDrawerOpen)
+            : openState
+
+        setProfileDrawerOpen(open)
+
+        // Update URL based on drawer state
+        if (open) {
+            // Add profile=open parameter to URL
+            const url = new URL(window.location.href)
+            url.searchParams.set('profile', 'open')
+            router.push(url.pathname + url.search)
+        } else {
+            // Remove profile parameter from URL
+            const url = new URL(window.location.href)
+            url.searchParams.delete('profile')
+            router.push(url.pathname + url.search)
+        }
+    }
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowMobileSwitchers(true)
+        }, 1200)
+
+        return () => clearTimeout(timer)
+    }, [])
     return (
         <>
             {/* Balance - responsive for both mobile and desktop */}
@@ -71,12 +132,22 @@ const ClientOnlyNav = ({
             </div>
 
             <div className="flex md:order-2 gap-2 items-center ml-auto">
-                <div className="hidden sm:block">
+                {/* Desktop switchers - always visible */}
+                <div className="hidden sm:flex items-center gap-2">
                     <LocaleSwitcher/>
-                </div>
-                <div className="hidden sm:block">
                     <ThemeToggle/>
                 </div>
+                {/* Mobile switchers - only visible when not logged in */}
+                {!(session &&
+                    session.status === 'authenticated' &&
+                    session.data &&
+                    session.data.user &&
+                    (session.data.user.provider !== 'anonymous')
+                ) ? (
+                    <div className={`sm:hidden transition-opacity duration-500 ${showMobileSwitchers ? 'opacity-100' : 'opacity-0'}`}>
+                        <MobileSwitchers/>
+                    </div>
+                ) : null}
                 <CartButton/>
                 {(session &&
                     session.status === 'authenticated' &&
@@ -84,60 +155,30 @@ const ClientOnlyNav = ({
                     session.data.user &&
                     (session.data.user.provider !== 'anonymous')
                 ) ? (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                <Avatar>
-                                    <AvatarImage
-                                        src={
-                                            session.data.user.image ??
-                                            'https://gravatar.com/avatar/' + createHash('sha256').update(session.data.user.email!.toLowerCase()).digest('hex')
-                                        }
-                                        alt="User settings"
-                                    />
-                                    <AvatarFallback>
-                                        {session.data.user.name?.charAt(0) || 'U'}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56 z-[10000]" align="end" forceMount>
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium">{session.data.user.name}</p>
-                                    <p className="text-xs text-muted-foreground">{session.data.user.email}</p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator/>
-                            <DropdownMenuGroup>
-                                {profileTabs.map(tab => (
-                                    <DropdownMenuItem
-                                        key={tab.slug}
-                                        onClick={() => router.push('/' + tab.slug + search)}
-                                    >
-                                        {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-4 w-4'})}
-                                        <span>{t(tab.name)}</span>
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator/>
-                            <div className="sm:hidden p-2 flex items-center space-x-2">
-                                <LocaleSwitcher/>
-                                <ThemeToggle/>
-                            </div>
-                            <DropdownMenuSeparator className="sm:hidden block"/>
-                            <DropdownMenuItem onClick={() => {
-                                resetClientStore()
-                                resetCartStore()
-                                signOut({redirectTo: '/' + search})
-                                    .then(() => {
-                                        resetPersistentId()
-                                    })
-                            }}>
-                                {l('signout')}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <>
+                        {/* Desktop: DropdownMenu */}
+                        <DesktopProfileMenu
+                            session={session}
+                            resetClientStoreAction={resetClientStore}
+                            resetCartStoreAction={resetCartStore}
+                            lAction={l}
+                            tAction={t}
+                            search={search}
+                        />
+
+                        {/* Mobile: Drawer */}
+                        <MobileClientButton
+                            session={session}
+                            profileDrawerOpen={profileDrawerOpen}
+                            handleProfileDrawerChangeAction={handleProfileDrawerChangeAction}
+                            drawerDirection={drawerDirection}
+                            resetClientStoreAction={resetClientStore}
+                            resetCartStoreAction={resetCartStore}
+                            lAction={l}
+                            tAction={t}
+                            search={search}
+                        />
+                    </>
                 ) : null}
             </div>
         </>
@@ -219,24 +260,27 @@ export default function Nav() {
         }
     }, [balance, displayBalance, isAnimating, isClient])
 
-    // Function to close drawers by removing cart and payment parameters from URL
+    // Function to close drawers by removing cart, payment, and profile parameters from URL
     const closeDrawers = (e: React.MouseEvent) => {
         // Don't close drawers if clicking on drawer triggers or their children
         const target = e.target as HTMLElement
         const isCartButton = target.closest('[data-drawer-trigger="cart"]')
         const isPaymentButton = target.closest('[data-drawer-trigger="payment"]')
+        const isProfileButton = target.closest('[data-drawer-trigger="profile"]')
 
-        if (isCartButton || isPaymentButton) {
+        if (isCartButton || isPaymentButton || isProfileButton) {
             return
         }
 
         const url = new URL(window.location.href)
         const hasCart = url.searchParams.has('cart')
         const hasPayment = url.searchParams.has('payment')
+        const hasProfile = url.searchParams.has('profile')
 
-        if (hasCart || hasPayment) {
+        if (hasCart || hasPayment || hasProfile) {
             url.searchParams.delete('cart')
             url.searchParams.delete('payment')
+            url.searchParams.delete('profile')
             router.push(url.pathname + url.search)
         }
     }
@@ -247,7 +291,7 @@ export default function Nav() {
             onClick={closeDrawers}
         >
             <div className="flex flex-wrap items-center justify-between">
-                <Link href="/" className="flex items-center">
+                <Link href="/public" className="flex items-center">
                     <Image
                         src={logo}
                         width={48}
@@ -277,6 +321,7 @@ export default function Nav() {
                         t={t}
                         search={search}
                         router={router}
+                        searchParams={searchParams}
                     />
                 ) : (
                     <>
@@ -285,8 +330,17 @@ export default function Nav() {
 
                         {/* Server-side placeholder for authentication UI */}
                         <div className="flex md:order-2 gap-2 items-center ml-auto">
-                            <LocaleSwitcher/>
-                            <ThemeToggle/>
+                            {/* Desktop switchers */}
+                            <div className="hidden sm:block">
+                                <LocaleSwitcher/>
+                            </div>
+                            <div className="hidden sm:block">
+                                <ThemeToggle/>
+                            </div>
+                            {/* Mobile switchers - match client-side size and initial opacity */}
+                            <div className="sm:hidden opacity-0">
+                                <MobileSwitchers/>
+                            </div>
                             <CartButton/>
                         </div>
                     </>

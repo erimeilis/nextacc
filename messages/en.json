@@ -132,7 +132,8 @@
     "remove_selected": "Remove selected",
     "select_to_proceed": "Please, select numbers",
     "cart_total": "Cart Total",
-    "insufficient_balance": "Insufficient balance. Please top up your account."
+    "insufficient_balance": "Insufficient balance. Please top up your account.",
+    "checkout": "Checkout"
   },
   "daterange": {
     "locale": "en",

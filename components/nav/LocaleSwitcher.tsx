@@ -38,7 +38,7 @@ export default function LocaleSwitcher() {
                     {t('locale')}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-fit z-[10000]" align="end" forceMount>
+            <DropdownMenuContent className="w-fit z-[10000] shadow-xl shadow-mute dark:shadow-black" align="end" forceMount>
                 {routing.locales.map((locale) => (
                     <DropdownMenuItem
                         key={locale}

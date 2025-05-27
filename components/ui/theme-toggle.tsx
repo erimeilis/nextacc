@@ -61,7 +61,7 @@ export function ThemeToggle() {
                         <span className="sr-only">Toggle color theme</span>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 z-[10000]" align="end" forceMount>
+                <DropdownMenuContent className="w-56 z-[10000] shadow-xl shadow-mute dark:shadow-black" align="end" forceMount>
                     <DropdownMenuItem onClick={() => handleThemeChange('equinox')} className="flex items-center gap-2">
                         <div className="relative w-5 h-5">
                             <div className="absolute inset-0 rounded-full bg-orange-500"></div>
