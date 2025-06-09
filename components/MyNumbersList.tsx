@@ -5,7 +5,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/checkbox'
 import {Button} from '@/components/ui/button'
-import {ChartPieSlice, ChatCircleText, Headset, Info, MagnifyingGlass, Pencil, Phone, X} from '@phosphor-icons/react'
+import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PencilIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/table'
 import {FormattedDate} from '@/components/ui/formatted-date'
@@ -104,7 +104,7 @@ export default function MyNumbersList({
                 <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
                     <div className="flex items-center flex-1">
                         <div className="relative w-full sm:max-w-xs">
-                            <MagnifyingGlass className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                            <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
                             <Input
                                 placeholder={t('search_numbers')}
                                 value={searchQuery}
@@ -137,24 +137,24 @@ export default function MyNumbersList({
 
                                 {/* Feature icons */}
                                 <div className="flex items-center justify-center space-x-2 w-20">
-                                    {option.voice && <Phone weight="fill" className="text-primary" size={14}/>}
-                                    {option.sms && <ChatCircleText weight="fill" className="text-primary" size={14}/>}
-                                    {option.toll_free && <Headset weight="fill" className="text-primary" size={14}/>}
+                                    {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
+                                    {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
+                                    {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
                                 </div>
 
                                 {/* Action buttons */}
                                 <div className="flex items-center justify-end space-x-1 w-28">
                                     <Button variant="navIcon" size="icon" onClick={() => handleSettings(option)} title="Settings">
-                                        <Pencil className="text-primary" size={14}/>
+                                        <PencilIcon className="text-primary" size={14}/>
                                     </Button>
                                     <Button variant="navIcon" size="icon" onClick={() => toggleNumberInfo(option.did)} title="Info">
-                                        <Info className="text-primary" size={14}/>
+                                        <InfoIcon className="text-primary" size={14}/>
                                     </Button>
                                     <Button variant="navIcon" size="icon" onClick={() => handleCallStatistics(option)} title="Call Statistics">
-                                        <ChartPieSlice className="text-primary" size={14}/>
+                                        <ChartPieSliceIcon className="text-primary" size={14}/>
                                     </Button>
                                     <Button variant="navIcon" size="icon" onClick={() => handleDelete(option)} title="Delete">
-                                        <X className="text-primary" size={14}/>
+                                        <XIcon className="text-primary" size={14}/>
                                     </Button>
                                 </div>
                             </div>
@@ -189,9 +189,9 @@ export default function MyNumbersList({
                                             <TableRow>
                                                 <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Features</TableCell>
                                                 <TableCell className="text-right sm:text-left flex justify-end sm:justify-start space-x-2">
-                                                    {option.voice && <Phone weight="fill" className="text-primary" size={14}/>}
-                                                    {option.sms && <ChatCircleText weight="fill" className="text-primary" size={14}/>}
-                                                    {option.toll_free && <Headset weight="fill" className="text-primary" size={14}/>}
+                                                    {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
+                                                    {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
+                                                    {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
                                                 </TableCell>
                                             </TableRow>
                                             <Show when={!!option.incoming_per_minute}>

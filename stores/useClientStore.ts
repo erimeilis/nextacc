@@ -3,10 +3,12 @@ import {UserProfile} from '@/types/UserProfile'
 import {ClientInfo} from '@/types/ClientInfo'
 import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {NumberInfo} from '@/types/NumberInfo'
+import {UploadInfo} from '@/types/UploadInfo'
 import {redGetUserProfile} from '@/app/api/redreport/profile'
 import {getClientInfo} from '@/app/api/other/ipinfo'
 import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
 import {redGetMyNumbers} from '@/app/api/redreport/numbers'
+import {redGetMyUploads, redUploadFile, redDeleteUpload} from '@/app/api/redreport/uploads'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -16,11 +18,15 @@ interface ClientStore {
     info: ClientInfo | null
     transactions: MoneyTransaction[] | null
     numbers: NumberInfo[] | null
+    uploads: UploadInfo[] | null
     fetchData: () => Promise<void>
     updateProfile: () => Promise<UserProfile | null>
     updateInfo: (info: ClientInfo) => ClientInfo | null
     updateTransactions: () => Promise<MoneyTransaction[] | null>
     updateNumbers: () => Promise<NumberInfo[] | null>
+    updateUploads: () => Promise<UploadInfo[] | null>
+    uploadFile: (file: File) => Promise<boolean>
+    deleteUpload: (fileId: string) => Promise<boolean>
     reset: () => void
     isUserLoggedIn: () => boolean // Add this new method
     ensureUserLoggedIn: () => boolean
@@ -29,6 +35,7 @@ interface ClientStore {
     getInfo: () => ClientInfo | null
     getTransactions: () => MoneyTransaction[] | null
     getNumbers: () => NumberInfo[] | null
+    getUploads: () => UploadInfo[] | null
 }
 
 export const useClientStore = create<ClientStore>()(
@@ -39,6 +46,7 @@ export const useClientStore = create<ClientStore>()(
             info: null,
             transactions: null,
             numbers: null,
+            uploads: null,
 
             reset: () => {
                 set({
@@ -47,6 +55,7 @@ export const useClientStore = create<ClientStore>()(
                     info: null,
                     transactions: null,
                     numbers: null,
+                    uploads: null,
                 })
             },
 
@@ -85,16 +94,21 @@ export const useClientStore = create<ClientStore>()(
                 return get().isUserLoggedIn() ? get().numbers : null
             },
 
+            getUploads: () => {
+                return get().isUserLoggedIn() ? get().uploads : null
+            },
+
             fetchData: async () => {
                 const profilePromise = redGetUserProfile()
                 const infoPromise = getClientInfo()
                 const transactionsPromise = redGetMoneyTransactionReport()
                 const numbersPromise = redGetMyNumbers()
+                const uploadsPromise = redGetMyUploads()
 
                 const [
-                    profile, info, transactions, numbers
+                    profile, info, transactions, numbers, uploads
                 ] = await Promise.all([
-                    profilePromise, infoPromise, transactionsPromise, numbersPromise
+                    profilePromise, infoPromise, transactionsPromise, numbersPromise, uploadsPromise
                 ])
                 set({
                     balance: profile?.balance ?? 0,
@@ -102,6 +116,7 @@ export const useClientStore = create<ClientStore>()(
                     info: info,
                     transactions: transactions,
                     numbers: numbers,
+                    uploads: uploads,
                 })
             },
             updateProfile: async (): Promise<UserProfile | null> => {
@@ -164,6 +179,47 @@ export const useClientStore = create<ClientStore>()(
                 })
                 return numbers
             },
+
+            updateUploads: async (): Promise<UploadInfo[] | null> => {
+                const uploads = await redGetMyUploads()
+                set(state => {
+                    if (
+                        state.uploads === undefined ||
+                        state.uploads !== uploads
+                    ) {
+                        return {
+                            uploads: uploads
+                        }
+                    }
+                    return state
+                })
+                return uploads
+            },
+
+            uploadFile: async (file: File): Promise<boolean> => {
+                const success = await redUploadFile(file)
+
+                if (success) {
+                    // Refresh the upload list
+                    await get().updateUploads()
+                }
+
+                return success
+            },
+
+            deleteUpload: async (fileId: string): Promise<boolean> => {
+                const success = await redDeleteUpload(fileId)
+
+                if (success) {
+                    // Update the local state by removing the deleted file
+                    set((state) => ({
+                        ...state,
+                        uploads: state.uploads?.filter(upload => upload.filename !== fileId) || null,
+                    }))
+                }
+
+                return success
+            },
         }),
         {
             name: 'client-storage',
@@ -173,6 +229,7 @@ export const useClientStore = create<ClientStore>()(
                 profile: state.profile,
                 transactions: state.transactions,
                 numbers: state.numbers,
+                uploads: state.uploads,
                 balance: state.balance,
                 info: state.info,
             }),
@@ -192,6 +249,10 @@ export const useClientStore = create<ClientStore>()(
                         persisted.numbers && Object.keys(persisted.numbers).length > 0
                             ? persisted.numbers
                             : currentState.numbers,
+                    uploads:
+                        persisted.uploads && Object.keys(persisted.uploads).length > 0
+                            ? persisted.uploads
+                            : currentState.uploads,
                     balance:
                         persisted.balance ? persisted.balance : currentState.balance,
                     info:

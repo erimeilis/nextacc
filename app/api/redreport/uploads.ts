@@ -1,0 +1,88 @@
+'use server'
+import {auth} from '@/auth'
+import {UploadInfo} from '@/types/UploadInfo'
+
+export async function redGetMyUploads(): Promise<UploadInfo[] | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        cache: 'reload',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        }
+    }
+
+    return fetch(url.toString(), options)
+        .then((res: Response) => {
+            if (!res.ok) return null
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data.uploads
+        })
+        .catch((err) => {
+            console.log('redGetMyUploads error: ', err.message)
+            return null
+        })
+}
+
+export async function redUploadFile(file: File): Promise<boolean> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return false
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const options: RequestInit = {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + session?.token,
+        },
+        body: formData
+    }
+
+    return fetch(url.toString(), options)
+        .then((res: Response) => {
+            return res.ok
+        })
+        .catch((err) => {
+            console.log('redUploadFile error: ', err.message)
+            return false
+        })
+}
+
+export async function redDeleteUpload(fileId: string): Promise<boolean> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return false
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads/' + fileId)
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        }
+    }
+
+    return fetch(url.toString(), options)
+        .then((res: Response) => {
+            return res.ok
+        })
+        .catch((err) => {
+            console.log('redDeleteUpload error: ', err.message)
+            return false
+        })
+}

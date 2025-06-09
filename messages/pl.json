@@ -96,11 +96,26 @@
     "profile": "Profil",
     "transactions": "Transakcje",
     "numbers": "Moje numery",
+    "uploads": "Pliki",
     "total_numbers": "Łączna liczba numerów",
     "total_monthly_cost": "Łączny miesięczny koszt",
+    "total_uploads": "Łączna liczba plików",
+    "total_size": "Łączny rozmiar",
     "select_all": "Zaznacz wszystkie",
     "delete_selected": "Usuń zaznaczone",
-    "search_numbers": "Szukaj numerów"
+    "search_numbers": "Szukaj numerów",
+    "search_uploads": "Szukaj plików",
+    "upload_file": "Prześlij plik",
+    "uploading": "Przesyłanie...",
+    "no_uploads": "Nie masz jeszcze żadnych plików",
+    "no_results": "Nie znaleziono wyników",
+    "filename": "Nazwa pliku",
+    "type": "Typ",
+    "size": "Rozmiar",
+    "upload_date": "Data przesłania",
+    "actions": "Akcje",
+    "download": "Pobierz",
+    "delete": "Usuń"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",
@@ -193,6 +208,7 @@
     "success_title": "Sukces",
     "cart_add_success": "Produkt został pomyślnie dodany do koszyka",
     "error_title": "Błąd",
-    "cart_add_error": "Nie udało się dodać produktu do koszyka"
+    "cart_add_error": "Nie udało się dodać produktu do koszyka",
+    "number_not_available": "Numer jest niedostępny"
   }
 }

@@ -97,11 +97,26 @@
     "profile": "Profile",
     "transactions": "Transactions",
     "numbers": "My numbers",
+    "uploads": "Uploads",
     "total_numbers": "Total Numbers",
     "total_monthly_cost": "Total Monthly Cost",
+    "total_uploads": "Total Uploads",
+    "total_size": "Total Size",
     "select_all": "Select all",
     "delete_selected": "Delete selected",
-    "search_numbers": "Search numbers"
+    "search_numbers": "Search numbers",
+    "search_uploads": "Search uploads",
+    "upload_file": "Upload File",
+    "uploading": "Uploading...",
+    "no_uploads": "You have no uploads yet",
+    "no_results": "No results found",
+    "filename": "Filename",
+    "type": "Type",
+    "size": "Size",
+    "upload_date": "Upload Date",
+    "actions": "Actions",
+    "download": "Download",
+    "delete": "Delete"
   },
   "profile": {
     "signed_in_as": "Signed in as",
@@ -194,6 +209,7 @@
     "success_title": "Success",
     "cart_add_success": "Item added to cart successfully",
     "error_title": "Error",
-    "cart_add_error": "Failed to add item to cart"
+    "cart_add_error": "Failed to add item to cart",
+    "number_not_available": "Number is not available"
   }
 }

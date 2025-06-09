@@ -1,5 +1,5 @@
 import {Tab} from '@/types/Tab'
-import {ChartPieSliceIcon, SimCardIcon, UserIcon} from '@phosphor-icons/react'
+import {ChartPieSliceIcon, CloudArrowUp, SimCardIcon, UserIcon} from '@phosphor-icons/react'
 
 const profileTabs: Tab[] = [
     {
@@ -16,6 +16,11 @@ const profileTabs: Tab[] = [
         name: 'numbers',
         slug: 'numbers',
         icon: SimCardIcon
+    },
+    {
+        name: 'uploads',
+        slug: 'uploads',
+        icon: CloudArrowUp
     },
 ]
 export {profileTabs}

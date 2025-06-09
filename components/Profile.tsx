@@ -8,7 +8,7 @@ import {resetPersistentId} from '@/utils/resetPersistentId'
 import LineInput from '@/components/shared/LineInput'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
-import {CheckCircle, Pencil, X} from '@phosphor-icons/react'
+import {CheckCircleIcon, PencilIcon, XIcon} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
 import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
@@ -181,7 +181,7 @@ export default function Profile({
                                         type="button"
                                         onClick={handleToggle}
                                         className="flex text-nowrap text-xs mb-2"
-                                        icon={Pencil}
+                                        icon={PencilIcon}
                                     >
                                         {t('edit_profile')}
                                     </Button>
@@ -192,7 +192,7 @@ export default function Profile({
                                     type="submit"
                                     className="flex text-nowrap text-xs sm:mb-2"
                                     disabled={!ableButtonEditProfile}
-                                    icon={CheckCircle}
+                                    icon={CheckCircleIcon}
                                     loading={modeButtonEditProfile}
                                 >
                                     {t('update_profile')}
@@ -201,7 +201,7 @@ export default function Profile({
                                     type="button"
                                     onClick={handleToggle}
                                     className="flex text-nowrap text-xs sm:mb-2"
-                                    icon={X}
+                                    icon={XIcon}
                                 >
                                     {t('dont_edit_profile')}
                                 </Button>

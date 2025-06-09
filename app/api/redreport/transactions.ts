@@ -42,14 +42,6 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
                 return null
             }
 
-            console.log('redGetMoneyTransactionReport: Got', data.data.money_transactions.length, 'transactions')
-
-            // Log a sample transaction to see its structure
-            if (data.data.money_transactions.length > 0) {
-                console.log('redGetMoneyTransactionReport: Sample transaction:', 
-                    JSON.stringify(data.data.money_transactions[0]))
-            }
-
             return data.data.money_transactions
         })
         .catch((err) => {

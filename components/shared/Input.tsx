@@ -2,7 +2,7 @@
 import {Label} from '@/components/ui/label'
 import {Input as TextInput} from '@/components/ui/input'
 import React, {ChangeEvent, FC, SVGProps, useState} from 'react'
-import {Eye, EyeSlash} from '@phosphor-icons/react'
+import {EyeIcon, EyeSlashIcon} from '@phosphor-icons/react'
 
 //const fixedInputClass = 'text-sm px-2 py-1 '
 const fixedErrorClass = `
@@ -84,7 +84,7 @@ export default function Input({
                         className="flex items-center justify-center z-10 text-muted-foreground hover:text-foreground text-sm h-full w-full transition-colors"
                         onClick={switchPass}
                     >
-                        {typeState === 'password' ? <Eye size={20}/> : <EyeSlash size={20}/>}
+                        {typeState === 'password' ? <EyeIcon size={20}/> : <EyeSlashIcon size={20}/>}
                     </button>
                 </div>
             </div>

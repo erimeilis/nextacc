@@ -1,6 +1,6 @@
 'use client'
 import React, {ChangeEvent, useState} from 'react'
-import {Eye, EyeSlash} from '@phosphor-icons/react'
+import {EyeIcon, EyeSlashIcon} from '@phosphor-icons/react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
@@ -71,7 +71,7 @@ export default function LineInput({
                 <div className={'absolute flex border border-transparent right-0 top-0 h-full w-10 ' + displayEye}>
                     <button type="button" tabIndex={-1} aria-hidden="true" className="flex items-center justify-center rounded-tl rounded-bl z-10
                     text-stone-500 dark:text-indigo-200 text-xs h-full w-full" onClick={switchPass}>
-                        {typeState === 'password' ? <Eye/> : <EyeSlash/>}
+                        {typeState === 'password' ? <EyeIcon/> : <EyeSlashIcon/>}
                     </button>
                 </div>
             </div>

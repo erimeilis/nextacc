@@ -25,10 +25,10 @@ export async function addToCart(
         qty: number,
         voice?: NumberDestination,
         sms?: NumberDestination
-    }): Promise<CartItem[] | null> {
+    }): Promise<{ data: CartItem[] | null, error?: { status: number, message: string } }> {
     if (!uid || !number) {
         console.log('addToCart: no uid or number')
-        return []
+        return { data: [] }
     }
     console.log('addToCart: ', uid, number, countryId, areaCode, qty, voice, sms)
     const session = await auth()
@@ -64,15 +64,18 @@ export async function addToCart(
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart' : '/api/cart'), options)
         .then((res: Response) => {
             console.log('addToCart: ', res)
-            if (!res.ok) return null
-            return res.json()
-        })
-        .then(async (data) => {
-            return data.data.cart
+            if (!res.ok) {
+                // Return error information including status code
+                if (res.status === 404) {
+                    return { data: null, error: { status: 404, message: 'number_not_available' } }
+                }
+                return { data: null, error: { status: res.status, message: 'cart_add_error' } }
+            }
+            return res.json().then(data => ({ data: data.data.cart }))
         })
         .catch((err) => {
             console.log('addToCart error: ', err.message)
-            return null
+            return { data: null, error: { status: 500, message: 'cart_add_error' } }
         })
 }
 

@@ -96,11 +96,26 @@
     "profile": "Профіль",
     "transactions": "Транзакції",
     "numbers": "Мої номери",
+    "uploads": "Файли",
     "total_numbers": "Загальна кількість номерів",
     "total_monthly_cost": "Загальна щомісячна вартість",
+    "total_uploads": "Загальна кількість файлів",
+    "total_size": "Загальний розмір",
     "select_all": "Вибрати всі",
     "delete_selected": "Видалити вибрані",
-    "search_numbers": "Пошук номерів"
+    "search_numbers": "Пошук номерів",
+    "search_uploads": "Пошук файлів",
+    "upload_file": "Завантажити файл",
+    "uploading": "Завантаження...",
+    "no_uploads": "У вас ще немає файлів",
+    "no_results": "Результатів не знайдено",
+    "filename": "Ім'я файлу",
+    "type": "Тип",
+    "size": "Розмір",
+    "upload_date": "Дата завантаження",
+    "actions": "Дії",
+    "download": "Завантажити",
+    "delete": "Видалити"
   },
   "profile": {
     "signed_in_as": "Вхід як",
@@ -193,6 +208,7 @@
     "success_title": "Успіх",
     "cart_add_success": "Товар успішно додано до кошика",
     "error_title": "Помилка",
-    "cart_add_error": "Не вдалося додати товар до кошика"
+    "cart_add_error": "Не вдалося додати товар до кошика",
+    "number_not_available": "Номер недоступний"
   }
 }

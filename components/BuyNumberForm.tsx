@@ -139,7 +139,7 @@ export default function BuyNumberForm({
 
                 console.log('Adding to cart:', numberInfo)
                 await getClientInfo()
-                const data = await addToCart({
+                const response = await addToCart({
                     clientInfo: persistentClientInfo,
                     uid: persistentId,
                     number: numberInfo,
@@ -153,8 +153,38 @@ export default function BuyNumberForm({
                         {type: smsTypeState, destination: smsDestinationState} :
                         undefined
                 })
-                if (data) {
-                    updateData(data)
+
+                if (response.error) {
+                    // Handle specific error cases
+                    if (response.error.status === 404) {
+                        // Show error toast for number not available
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('number_not_available'),
+                            onDismiss: () => {
+                                // Open minicart when toast is dismissed
+                                const url = new URL(window.location.href)
+                                url.searchParams.set('cart', 'open')
+                                router.push(url.pathname + url.search)
+                            }
+                        })
+                    } else {
+                        // Show generic error toast
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT(response.error.message),
+                            onDismiss: () => {
+                                // Open minicart when toast is dismissed
+                                const url = new URL(window.location.href)
+                                url.searchParams.set('cart', 'open')
+                                router.push(url.pathname + url.search)
+                            }
+                        })
+                    }
+                } else if (response.data) {
+                    updateData(response.data)
                     // Show success toast
                     toast({
                         variant: 'success',
