@@ -61,7 +61,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
                  }>
         <div className="flex flex-col rounded-none sm:rounded-lg w-full border-none sm:border border-border bg-gradient-to-br from-secondary to-background drop-shadow text-foreground
         dark:border-border dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground overflow-hidden">
-            <nav className="flex flex-row w-full justify-evenly bg-muted dark:bg-muted">
+            <nav className="flex flex-row w-full bg-muted dark:bg-muted overflow-x-auto whitespace-nowrap" style={{ scrollbarWidth: 'thin' }}>
                 {profileTabs.map(tab =>
                     <Tab
                         key={tab.slug}

@@ -1,8 +1,8 @@
 'use client'
 import React, {ChangeEvent, useState} from 'react'
 import {EyeIcon, EyeSlashIcon} from '@phosphor-icons/react'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import {Label} from '@/components/ui/label'
+import {Input} from '@/components/ui/input'
 
 const fixedErrorClass = 'flex items-center w-fit transition-transform duration-500 ' +
     'font-medium tracking-wide text-white text-xs ' +
@@ -51,7 +51,7 @@ export default function LineInput({
         <div className="flex flex-row w-full">
             <Label
                 htmlFor={labelFor}
-                className="flex text-xs sm:text-sm p-2 items-center font-normal min-w-24 w-24 sm:min-w-32 sm:w-32"
+                className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground"
             >
                 {labelText}:
             </Label>

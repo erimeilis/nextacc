@@ -24,15 +24,21 @@ import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {useToast} from '@/hooks/use-toast'
 import {useRouter} from 'next/navigation'
+import {CountryInfo} from '@/types/CountryInfo'
+import {AreaInfo} from '@/types/AreaInfo'
 
 export default function BuyNumberForm({
                                           numberInfo,
                                           countryId,
-                                          areaCode
+                                          areaCode,
+                                          countriesMap,
+                                          areasMap
                                       }: {
     numberInfo: NumberInfo | null
     countryId: number | null
     areaCode: number | null
+    countriesMap: CountryInfo[] | null
+    areasMap: AreaInfo[] | null
 }) {
     const t = useTranslations('offers')
     const d = useTranslations('docs')
@@ -249,6 +255,45 @@ export default function BuyNumberForm({
         return res
     }
 
+    const formatSelectedNumber = (numberInfo: NumberInfo | null) => {
+        if (!numberInfo) return null
+
+        let formattedNumber = numberInfo.did
+
+        // Add country code prefix if available
+        if (!formattedNumber.startsWith('+')) {
+            formattedNumber = `+${formattedNumber}`
+        }
+
+        // Get country name
+        const countryName = countryId ?
+            countriesMap?.find(c => c.id === countryId)?.countryname || '' : ''
+
+        // Get area name
+        const areaName = areaCode ?
+            areasMap?.find(a => a.areaprefix === areaCode)?.areaname || '' : ''
+
+        // Build location string
+        const locationParts = [countryName, areaName].filter(Boolean)
+
+        // Check if area contains '/' to determine layout
+        const shouldBreakLine = areaName && areaName.includes('/')
+
+        return (
+            <>
+                {formattedNumber}
+                {locationParts.length > 0 && (
+                    <>
+                        {shouldBreakLine ? <br/> : ' '}
+                        <span className="ml-2 text-muted-foreground font-light">
+                            {locationParts.join(', ')}
+                        </span>
+                    </>
+                )}
+            </>
+        )
+    }
+
     const [voiceTypeState, setVoiceTypeState] = useState<string>('none')
     const [smsTypeState, setSmsTypeState] = useState<string>('none')
     const [voiceDestinationState, setVoiceDestinationState] = useState<string>('')
@@ -374,6 +419,14 @@ export default function BuyNumberForm({
             method="post"
         >
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
+                {/* Mobile only: Selected number display */}
+                <div className="block lg:hidden">
+                    <div className="flex flex-col items-center p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 shadow-sm">
+                        <div className="text-sm font-bold text-foreground tracking-wider">
+                            {formatSelectedNumber(numberInfo)}
+                        </div>
+                    </div>
+                </div>
                 <div className="w-full space-y-4 sm:space-y-6">
                     <div className="flex flex-row items-center p-2 h-8 bg-gradient-to-r from-secondary/50 to-secondary/30 rounded-lg text-sm font-medium shadow-sm overflow-hidden">
                         <span className="flex items-center">{t('setupfee')}:</span>

@@ -59,6 +59,7 @@ export default function DesktopProfileMenu({
                         {profileTabs.map(tab => (
                             <DropdownMenuItem
                                 key={tab.slug}
+                                className="cursor-pointer transition-all duration-200"
                                 onClick={() => router.push('/' + tab.slug + search)}
                             >
                                 {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-4 w-4'})}
@@ -67,7 +68,7 @@ export default function DesktopProfileMenu({
                         ))}
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator/>
-                    <DropdownMenuItem onClick={() => {
+                    <DropdownMenuItem className="cursor-pointer transition-all duration-200" onClick={() => {
                         resetClientStoreAction()
                         resetCartStoreAction()
                         signOut({redirectTo: '/' + search})

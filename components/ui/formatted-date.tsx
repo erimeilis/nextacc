@@ -35,7 +35,7 @@ export function FormattedDate({
     return (
       <time 
         dateTime={date} 
-        className={cn("text-sm", className)}
+        className={cn(className)}
       >
         {day} <span>{monthYear}</span>
       </time>

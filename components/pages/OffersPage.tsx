@@ -32,22 +32,22 @@ export default function OffersPage() {
     const pathName = usePathname()
     const searchParams = useSearchParams()
 
-    useEffect(() => {
-        if (searchParams && !searchParams.has('type')) {
-            // If no type is in the URL and this is an initial render, set voice as default
-            router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
-        }
-    }, [searchParams, pathName, router])
-
     const t = useTranslations('offers')
-
-    //const [numberInfo, setNumberInfo] = usePersistState<NumberInfo | null>(null, 'numberInfo')
-
     const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[] | null>([])
     const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>([])
     const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
     const {countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers} = useOffersStore()
     const {cart} = useCartStore()
+
+    useEffect(() => {
+        if (searchParams && !searchParams.has('type')) {
+            // If no type is in the URL and this is an initial render, set voice as default
+            router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
+        }
+        if (searchParams && !searchParams.has('area')) {
+            setLocalNumbersMap(null)
+        }
+    }, [searchParams, pathName, router])
 
     const type = searchParams ? searchParams.get('type') : null
     const countryBySlug = (searchParams && searchParams.has('country')) ?
@@ -76,13 +76,34 @@ export default function OffersPage() {
         searchParams.get('number') :
         null
 
-    // Move the handleNumber function above the useEffect that uses it
     const handleNumber = useCallback((number: NumberInfo) => {
-        // Delay URL update to allow the selection to update visually first
-        setTimeout(() => {
-            router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
-        }, 50) // Small delay to ensure a visual update happens first
+        router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
     }, [pathName, router, searchParams])
+
+    const handleArea = useCallback((area: number | string) => {
+        router.push(pathName + '?' + CreateQueryString('area', area, searchParams, ['number']))
+        if (type && country) {
+            const newArea = (searchParams && searchParams.has('area')) ?
+                (!isNaN(+(searchParams.get('area') || '')) ?
+                    Number(searchParams.get('area')) :
+                    (areaBySlug ?
+                        Number(areaBySlug.areaprefix) :
+                        null)) :
+                null
+            if (newArea) {
+                updateNumbers(type!, country, newArea)
+                    .then((fetchedNumbers) => {
+                        setLocalNumbersMap(fetchedNumbers)
+                        // Auto-select the only number if there's just one
+                        if (fetchedNumbers.length === 1 &&
+                            !searchParams?.has('number') &&
+                            fetchedNumbers.at(0) !== undefined) {
+                            handleNumber(fetchedNumbers.at(0)!)
+                        }
+                    })
+            }
+        }
+    }, [areaBySlug, country, handleNumber, pathName, router, searchParams, type, updateNumbers])
 
     useEffect(() => {
         if (type) {
@@ -109,8 +130,11 @@ export default function OffersPage() {
                 if (areasMap[cKey]) {
                     setLocalAreasMap(areasMap[cKey])
                     // Handle auto-selection of area when there's only one option
-                    if (areasMap[cKey]?.length === 1 && !searchParams?.has('area')) {
-                        router.push(pathName + '?' + CreateQueryString('area', areasMap[cKey][0]?.areaprefix, searchParams))
+                    if (areasMap[cKey]?.length === 1 &&
+                        !searchParams?.has('area') &&
+                        areasMap[cKey].at(0) !== undefined
+                    ) {
+                        handleArea(areasMap[cKey].at(0)!.areaprefix)
                     }
                 } else {
                     // Only fetch if not available
@@ -118,8 +142,11 @@ export default function OffersPage() {
                         .then((fetchedAreas) => {
                             setLocalAreasMap(fetchedAreas)
                             // Handle auto-selection of area when there's only one option
-                            if (fetchedAreas.length === 1 && !searchParams?.has('area')) {
-                                router.push(pathName + '?' + CreateQueryString('area', fetchedAreas[0]?.areaprefix, searchParams))
+                            if (fetchedAreas.length === 1 &&
+                                !searchParams?.has('area') &&
+                                fetchedAreas.at(0) !== undefined
+                            ) {
+                                handleArea(fetchedAreas.at(0)!.areaprefix)
                             }
                         })
                 }
@@ -130,8 +157,10 @@ export default function OffersPage() {
                     if (numbersMap[aKey]) {
                         setLocalNumbersMap(numbersMap[aKey])
                         // Auto-select the only number if there's just one
-                        if (numbersMap[aKey].length === 1 && !searchParams?.has('number')) {
-                            handleNumber(numbersMap[aKey][0])
+                        if (numbersMap[aKey].length === 1 &&
+                            !searchParams?.has('number') &&
+                            numbersMap[aKey].at(0) !== undefined) {
+                            handleNumber(numbersMap[aKey].at(0)!)
                         }
                     } else {
                         // Only fetch if not available
@@ -139,15 +168,29 @@ export default function OffersPage() {
                             .then((fetchedNumbers) => {
                                 setLocalNumbersMap(fetchedNumbers)
                                 // Auto-select the only number if there's just one
-                                if (fetchedNumbers.length === 1 && !searchParams?.has('number')) {
-                                    handleNumber(fetchedNumbers[0])
+                                if (fetchedNumbers.length === 1 &&
+                                    !searchParams?.has('number') &&
+                                    fetchedNumbers.at(0) !== undefined) {
+                                    handleNumber(fetchedNumbers.at(0)!)
                                 }
                             })
                     }
+                } else {
+                    // Clear the number list when an area is not selected
+                    setLocalNumbersMap(null)
                 }
+            } else {
+                // Clear both area and number lists when a country is not selected
+                setLocalAreasMap(null)
+                setLocalNumbersMap(null)
             }
+        } else {
+            // Clear all lists when a type is not selected
+            setLocalCountriesMap(null)
+            setLocalAreasMap(null)
+            setLocalNumbersMap(null)
         }
-    }, [area, areasMap, countriesMap, country, handleNumber, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
+    }, [area, areasMap, countriesMap, country, handleArea, handleNumber, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
 
     const countries = localCountriesMap ?
         localCountriesMap.map(country => ({
@@ -155,6 +198,41 @@ export default function OffersPage() {
             name: country.countryname + ' +' + country.countryprefix.toString(),
         })) :
         null
+    const handleCountry = useCallback((country: number | string) => {
+
+        const slug = countries?.find(e => e.id == country)
+        const countryParam = slug ? getSlug(slug.name) : country
+
+        router.push(pathName + '?' + CreateQueryString('country', countryParam, searchParams, ['area', 'number']))
+
+        if (type) {
+            const newCountry = (searchParams && searchParams.has('country')) ?
+                (!isNaN(+(searchParams.get('country') || '')) ?
+                    Number(searchParams.get('country')) :
+                    (countryBySlug ?
+                        Number(countryBySlug.id) :
+                        null)) :
+                null
+            if (newCountry) {
+                updateAreas(type!, newCountry)
+                    .then((fetchedAreas) => {
+                        setLocalAreasMap(fetchedAreas)
+                        // Handle auto-selection of area when there's only one option
+                        if (fetchedAreas.length === 1 &&
+                            !searchParams?.has('area') &&
+                            fetchedAreas.at(0) !== undefined
+                        ) {
+                            handleArea(fetchedAreas.at(0)!.areaprefix)
+                        }
+                    })
+            }
+        }
+    }, [countries, countryBySlug, handleArea, pathName, router, searchParams, type, updateAreas])
+
+    const handleType = useCallback((t: string) => {
+        router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
+    }, [pathName, router, searchParams])
+
     const areas = localAreasMap ?
         localAreasMap.map(area => ({
             id: area.areaprefix,
@@ -186,11 +264,11 @@ export default function OffersPage() {
         if (getNumber && buyNumberFormRef.current) {
             // Use setTimeout to ensure the form is rendered before scrolling
             setTimeout(() => {
-                const yOffset = -10; // 10px offset from the top of the screen
-                const element = buyNumberFormRef.current;
-                if (!element) return; // Early return if element is null
-                const targetY = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                const currentY = window.pageYOffset;
+                const yOffset = -10 // 10px offset from the top of the screen
+                const element = buyNumberFormRef.current
+                if (!element) return // Early return if an element is null
+                const targetY = element.getBoundingClientRect().top + window.pageYOffset + yOffset
+                const currentY = window.pageYOffset
 
                 // Create a gentle bounce effect by first overshooting then settling
                 const createBounceEffect = () => {
@@ -198,130 +276,35 @@ export default function OffersPage() {
                     window.scrollTo({
                         top: targetY - 15, // Reduced overshoot for smoother animation
                         behavior: 'smooth'
-                    });
+                    })
 
                     // Then after a delay, settle at the exact target position with a smooth transition
                     setTimeout(() => {
                         window.scrollTo({
                             top: targetY,
                             behavior: 'smooth'
-                        });
-                    }, 400); // Increased delay for smoother transition
-                };
+                        })
+                    }, 400) // Increased delay for smoother transition
+                }
 
                 // Ensure we're scrolling from top to bottom
                 if (currentY > targetY) {
                     // If we're already below the target, first scroll up to create a "from top" effect
                     // Use smooth scrolling for a more gradual transition
                     window.scrollTo({
-                        top: Math.max(0, targetY - 120), // Reduced distance for smoother effect
+                        top: Math.max(0, targetY - 120), // Reduced distance for a smoother effect
                         behavior: 'smooth' // Changed to smooth for more gradual transition
-                    });
+                    })
 
                     // Increased delay to allow the first scroll to complete more naturally
-                    setTimeout(createBounceEffect, 350);
+                    setTimeout(createBounceEffect, 350)
                 } else {
-                    // Normal case - we're scrolling down with bounce effect
-                    createBounceEffect();
+                    // Normal case - we're scrolling down with a bounce effect
+                    createBounceEffect()
                 }
-            }, 150); // Increased delay to ensure everything is properly rendered
+            }, 150) // Increased delay to ensure everything is properly rendered
         }
-    }, [getNumber]);
-
-    const handleType = (t: string) => {
-        setLocalAreasMap([])
-        // Don't clear the number list immediately to prevent flickering
-        // setLocalNumbersMap(null)
-
-        // Delay URL update to allow the dropdown to update visually first
-        setTimeout(() => {
-            router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
-            // Fetch updated countries in the background
-            updateCountries(t).then((fetchedCountries) => {
-                setLocalCountriesMap(fetchedCountries)
-            })
-        }, 50) // Small delay to ensure a visual update happens first
-    }
-    const handleCountry = (value: number | string) => {
-        // Don't clear the area list immediately to prevent flickering
-        // setLocalAreasMap(null)
-        const slug = countries?.find(e => e.id == value)
-
-        // Delay URL update to allow the dropdown to update visually first
-        setTimeout(() => {
-            router.push(pathName + '?' + CreateQueryString('country', slug ? getSlug(slug.name) : value, searchParams, ['area', 'number']))
-
-            console.log('handleCountry', value, slug)
-            // If type and country are valid, fetch updated areas in the background
-            if (type && value) {
-                const newCountryBySlug = localCountriesMap?.find(e =>
-                    getSlug(e.countryname) == value)
-                const newCountry = !isNaN(+(value || '')) ?
-                    Number(value) :
-                    (newCountryBySlug ?
-                        Number(newCountryBySlug?.id) :
-                        null)
-                if (newCountry) {
-                    // If areas already exist, set them immediately
-                    const cKey: string = `${type}_${newCountry}`
-                    if (areasMap[cKey]) {
-                        setLocalAreasMap(areasMap[cKey]) //todo check but guess we don't need that
-                    }
-                    // Then fetch updated areas in the background
-                    updateAreas(type, newCountry).then((fetchedAreas) => {
-                        setLocalAreasMap(fetchedAreas)
-                    })
-                }
-            }
-        }, 50) // Small delay to ensure a visual update happens first
-    }
-    const handleArea = (value: number | string) => {
-        // Don't clear the number list immediately to prevent flickering
-        // setLocalNumbersMap(null)
-
-        // Delay URL update to allow the dropdown to update visually first
-        setTimeout(() => {
-            router.push(pathName + '?' + CreateQueryString('area', value, searchParams, ['number']))
-
-            // If type, country, and area are valid, fetch updated numbers in the background
-            if (type && country && value) {
-                const newAreaBySlug = localAreasMap?.find(e =>
-                    getSlug(e.areaname) == value)
-                const newArea = !isNaN(+(value || '')) ?
-                    Number(value) :
-                    (areaBySlug ?
-                        Number(newAreaBySlug?.areaprefix) :
-                        null)
-                if (newArea) {
-                    // If numbers already exist, set them immediately
-                    const aKey: string = `${type}_${country}_${newArea}`
-                    if (numbersMap[aKey]) {
-                        setLocalNumbersMap(numbersMap[aKey]) //todo check but guess we don't need that
-                        // Auto-select the only number if there's just one
-                        if (numbersMap[aKey].length === 1 && !searchParams?.has('number')) {
-                            handleNumber(numbersMap[aKey][0])
-                        }
-                    }
-                    // Then fetch updated numbers in the background
-                    updateNumbers(type, country, newArea).then((fetchedNumbers) => {
-                        setLocalNumbersMap(fetchedNumbers)
-                        // Auto-select the only number if there's just one
-                        if (fetchedNumbers.length === 1 && !searchParams?.has('number')) {
-                            handleNumber(fetchedNumbers[0])
-                        }
-                    })
-                }
-            }
-        }, 50) // Small delay to ensure a visual update happens first
-    }
-
-    // Remove this duplicate definition
-    // const handleNumber = useCallback((number: NumberInfo) => {
-    //     // Delay URL update to allow the selection to update visually first
-    //     setTimeout(() => {
-    //         router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
-    //     }, 50) // Small delay to ensure a visual update happens first
-    // }, [pathName, router, searchParams])
+    }, [getNumber])
 
     return (
         <Card id="offers"
@@ -364,6 +347,13 @@ export default function OffersPage() {
             <div
                 ref={buyNumberFormRef}
                 className="flex flex-col px-4 sm:px-6 transition-all duration-500 ease-in-out text-foreground dark:text-foreground overflow-hidden"
+                style={{
+                    display: (searchParams &&
+                        searchParams.has('type') &&
+                        searchParams.has('country') &&
+                        searchParams.has('area') &&
+                        searchParams.has('number')) ? 'block' : 'none'
+                }}
             >
                 <Show when={typeof getNumber !== 'undefined' && getNumber !== null}>
                     <div className="animate-in fade-in duration-700 ease-in-out">
@@ -371,6 +361,8 @@ export default function OffersPage() {
                             numberInfo={getNumber!}
                             countryId={country}
                             areaCode={area}
+                            countriesMap={localCountriesMap}
+                            areasMap={localAreasMap}
                         />
                     </div>
                 </Show>

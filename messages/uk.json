@@ -94,7 +94,7 @@
   },
   "dashboard": {
     "profile": "Профіль",
-    "transactions": "Транзакції",
+    "transactions": "Фінанси",
     "numbers": "Мої номери",
     "uploads": "Файли",
     "total_numbers": "Загальна кількість номерів",
@@ -115,7 +115,22 @@
     "upload_date": "Дата завантаження",
     "actions": "Дії",
     "download": "Завантажити",
-    "delete": "Видалити"
+    "delete": "Видалити",
+    "did": "DID",
+    "name": "Назва",
+    "location": "Місцезнаходження",
+    "setup_fee": "Плата за налаштування",
+    "monthly_fee": "Щомісячна плата",
+    "features": "Функції",
+    "incoming_rate": "Вхідний тариф",
+    "toll_free_rate": "Безкоштовний тариф",
+    "sms_rate": "SMS тариф",
+    "creation_date": "Дата створення",
+    "paid_until": "Оплачено до",
+    "months_paid": "Оплачено місяців",
+    "voice_destination": "Голосове призначення",
+    "sms_destination": "SMS призначення",
+    "documentation": "Документація"
   },
   "profile": {
     "signed_in_as": "Вхід як",
@@ -182,7 +197,7 @@
     "december": "Грудень"
   },
   "transactions": {
-    "title": "Транзакції",
+    "title": "Фінанси",
     "show_filters": "Показати фільтри",
     "hide_filters": "Сховати фільтри",
     "clear_filters": "Очистити фільтри",

@@ -43,7 +43,7 @@ export default function NumberOffersList({
         <Show when={options != null}
               fallback={<Loader height={32}/>}>
             <RadioGroup
-                value={selectedOption || undefined}
+                value={selectedOption ?? ''}
                 name="list-radio"
                 onValueChange={handleOptionChange}
                 className="transition-all duration-500 ease-in-out">

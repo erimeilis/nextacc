@@ -102,7 +102,8 @@ export default function Profile({
         fallback={<Loader height={350}/>}>
         <div id="profile" className="transition duration-300 ease">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 pb-4 border-b border-border dark:border-border drop-shadow-sm">
-                <div className="text-xs sm:text-sm px-2 text-center sm:text-left">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})</div>
+                <div className="text-xs sm:text-sm px-2 text-center sm:text-left">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})
+                </div>
                 <div className="flex flex-row gap-2">
                     <Button
                         onClick={() => {
@@ -147,7 +148,7 @@ export default function Profile({
                                     when={modeEditProfile}
                                     fallback={
                                         <div className="flex flex-row w-full">
-                                            <div className="flex text-xs sm:text-sm p-2 items-center font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">
+                                            <div className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground">
                                                 {t(field.labelText)}:
                                             </div>
                                             <div className="flex-grow p-2 text-xs sm:text-sm text-right sm:text-left">

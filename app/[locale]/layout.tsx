@@ -10,7 +10,7 @@ import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import {Toaster} from '@/components/ui/toaster'
-import {ubuntu} from '@/app/fonts' // Import from the fonts file
+import {ubuntu} from '@/app/fonts' // Import from the font file
 
 // Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/nav/Nav'), {

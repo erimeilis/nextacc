@@ -5,7 +5,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/checkbox'
 import {Button} from '@/components/ui/button'
-import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PencilIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PencilIcon, PhoneIcon, TrashIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/table'
 import {FormattedDate} from '@/components/ui/formatted-date'
@@ -22,10 +22,10 @@ export default function MyNumbersList({
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
 
-    // Filter numbers based on search query
-    const filteredOptions = options?.filter(option => 
-        searchQuery === '' || 
-        option.did.toString().includes(searchQuery) || 
+    // Filter numbers based on a search query
+    const filteredOptions = options?.filter(option =>
+        searchQuery === '' ||
+        option.did.toString().includes(searchQuery) ||
         (option.name && option.name.toLowerCase().includes(searchQuery.toLowerCase()))
     ) || null
 
@@ -104,7 +104,7 @@ export default function MyNumbersList({
                 <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
                     <div className="flex items-center flex-1">
                         <div className="relative w-full sm:max-w-xs">
-                            <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                            <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16}/>
                             <Input
                                 placeholder={t('search_numbers')}
                                 value={searchQuery}
@@ -125,7 +125,7 @@ export default function MyNumbersList({
                                     <Checkbox
                                         id={`checkbox-${option.did}`}
                                         checked={selectedNumbers.includes(option.did)}
-                                        onCheckedChange={(checked) => handleSelectNumber(option.did, checked === true)}
+                                        onCheckedChange={(checked) => handleSelectNumber(option.did, checked)}
                                     />
                                 </div>
 
@@ -144,17 +144,17 @@ export default function MyNumbersList({
 
                                 {/* Action buttons */}
                                 <div className="flex items-center justify-end space-x-1 w-28">
-                                    <Button variant="navIcon" size="icon" onClick={() => handleSettings(option)} title="Settings">
-                                        <PencilIcon className="text-primary" size={14}/>
+                                    <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title="Settings" className="h-7 w-7">
+                                        <PencilIcon size={14}/>
                                     </Button>
-                                    <Button variant="navIcon" size="icon" onClick={() => toggleNumberInfo(option.did)} title="Info">
-                                        <InfoIcon className="text-primary" size={14}/>
+                                    <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title="Info" className="h-7 w-7">
+                                        <InfoIcon size={14}/>
                                     </Button>
-                                    <Button variant="navIcon" size="icon" onClick={() => handleCallStatistics(option)} title="Call Statistics">
-                                        <ChartPieSliceIcon className="text-primary" size={14}/>
+                                    <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title="Call Statistics" className="h-7 w-7">
+                                        <ChartPieSliceIcon size={14}/>
                                     </Button>
-                                    <Button variant="navIcon" size="icon" onClick={() => handleDelete(option)} title="Delete">
-                                        <XIcon className="text-primary" size={14}/>
+                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title="Delete" className="h-7 w-7 text-destructive">
+                                        <TrashIcon size={14}/>
                                     </Button>
                                 </div>
                             </div>
@@ -164,100 +164,105 @@ export default function MyNumbersList({
                                 <div className="pl-10 pr-2 py-1 text-xs sm:text-sm bg-muted/20 border-l-2 border-muted/25 ml-2">
                                     <Table className="w-full [&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                                         <TableBody>
-                                            <TableRow>
-                                                <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">DID</TableCell>
-                                                <TableCell className="text-right sm:text-left">{option.did}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Name</TableCell>
-                                                <TableCell className="text-right sm:text-left">{option.name}</TableCell>
-                                            </TableRow>
-                                            <Show when={!!option.where_did}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Location</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{option.where_did}</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <TableRow>
-                                                <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Setup Fee</TableCell>
-                                                <TableCell className="text-right sm:text-left">${option.setup_rate?.toFixed(2) || '0.00'}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Monthly Fee</TableCell>
-                                                <TableCell className="text-right sm:text-left">${option.fix_rate?.toFixed(2) || '0.00'}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Features</TableCell>
-                                                <TableCell className="text-right sm:text-left flex justify-end sm:justify-start space-x-2">
-                                                    {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
-                                                    {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
-                                                    {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
-                                                </TableCell>
-                                            </TableRow>
-                                            <Show when={!!option.incoming_per_minute}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Incoming Rate</TableCell>
-                                                    <TableCell className="text-right sm:text-left">${option.incoming_per_minute?.toFixed(2)}/min</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.toll_free_rate_in_min}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Toll Free Rate</TableCell>
-                                                    <TableCell className="text-right sm:text-left">${option.toll_free_rate_in_min?.toFixed(2)}/min</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.incoming_rate_sms}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">SMS Rate</TableCell>
-                                                    <TableCell className="text-right sm:text-left">${option.incoming_rate_sms?.toFixed(2)}/msg</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.creation_date}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Creation Date</TableCell>
-                                                    <TableCell className="text-right sm:text-left">
-                                                        <FormattedDate date={option.creation_date} />
-                                                    </TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.paid_till}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Paid Until</TableCell>
-                                                    <TableCell className="text-right sm:text-left">
-                                                        <FormattedDate date={option.paid_till} />
-                                                    </TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.months_paid}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Months Paid</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{option.months_paid}</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.voiceDest}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Voice Destination</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{option.voiceDest}</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.voiceExt && Object.keys(option.voiceExt).length > 0}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Voice Extensions</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{JSON.stringify(option.voiceExt)}</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.smsDest && Object.keys(option.smsDest).length > 0}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">SMS Destination</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{JSON.stringify(option.smsDest)}</TableCell>
-                                                </TableRow>
-                                            </Show>
-                                            <Show when={!!option.docs}>
-                                                <TableRow>
-                                                    <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32">Documentation</TableCell>
-                                                    <TableCell className="text-right sm:text-left">{option.docs}</TableCell>
-                                                </TableRow>
-                                            </Show>
+                                            {[
+                                                { 
+                                                    label: t('did'), 
+                                                    value: option.did,
+                                                    condition: true
+                                                },
+                                                { 
+                                                    label: t('name'), 
+                                                    value: option.name,
+                                                    condition: true
+                                                },
+                                                { 
+                                                    label: t('location'), 
+                                                    value: option.where_did,
+                                                    condition: !!option.where_did
+                                                },
+                                                { 
+                                                    label: t('setup_fee'), 
+                                                    value: `$${option.setup_rate?.toFixed(2) || '0.00'}`,
+                                                    condition: true
+                                                },
+                                                { 
+                                                    label: t('monthly_fee'), 
+                                                    value: `$${option.fix_rate?.toFixed(2) || '0.00'}`,
+                                                    condition: true
+                                                },
+                                                { 
+                                                    label: t('features'), 
+                                                    value: (
+                                                        <div className="flex justify-end sm:justify-start space-x-2">
+                                                            {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
+                                                            {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
+                                                            {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
+                                                        </div>
+                                                    ),
+                                                    condition: true
+                                                },
+                                                { 
+                                                    label: t('incoming_rate'), 
+                                                    value: `$${option.incoming_per_minute?.toFixed(2)}/min`,
+                                                    condition: !!option.incoming_per_minute
+                                                },
+                                                { 
+                                                    label: t('toll_free_rate'), 
+                                                    value: `$${option.toll_free_rate_in_min?.toFixed(2)}/min`,
+                                                    condition: !!option.toll_free_rate_in_min
+                                                },
+                                                { 
+                                                    label: t('sms_rate'), 
+                                                    value: `$${option.incoming_rate_sms?.toFixed(2)}/msg`,
+                                                    condition: !!option.incoming_rate_sms
+                                                },
+                                                { 
+                                                    label: t('creation_date'), 
+                                                    value: <FormattedDate date={option.creation_date}/>,
+                                                    condition: !!option.creation_date
+                                                },
+                                                { 
+                                                    label: t('paid_until'), 
+                                                    value: <FormattedDate date={option.paid_till}/>,
+                                                    condition: !!option.paid_till
+                                                },
+                                                { 
+                                                    label: t('months_paid'), 
+                                                    value: option.months_paid,
+                                                    condition: !!option.months_paid
+                                                },
+                                                { 
+                                                    label: t('voice_destination'), 
+                                                    value: option.voiceDest,
+                                                    condition: !!option.voiceDest
+                                                },
+                                                { 
+                                                    label: t('sms_destination'), 
+                                                    value: option.smsDest && typeof option.smsDest === 'object' ?
+                                                        ['forward_email', 'forward_http', 'forward_telegram', 'forward_slack', 'forward_sms']
+                                                            .map(key => {
+                                                                const smsDest = option.smsDest as Record<string, unknown>
+                                                                const value = smsDest?.[key]
+                                                                return value || null
+                                                            })
+                                                            .filter(Boolean)
+                                                            .join(', ')
+                                                        : '',
+                                                    condition: !!option.smsDest && typeof option.smsDest === 'object'
+                                                },
+                                                { 
+                                                    label: t('documentation'), 
+                                                    value: option.docs,
+                                                    condition: !!option.docs
+                                                }
+                                            ].map((item, index) => (
+                                                item.condition && (
+                                                    <TableRow key={index}>
+                                                        <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
+                                                        <TableCell className="text-right sm:text-left">{item.value}</TableCell>
+                                                    </TableRow>
+                                                )
+                                            ))}
                                         </TableBody>
                                     </Table>
                                 </div>
@@ -280,9 +285,9 @@ export default function MyNumbersList({
                     </div>
 
                     {selectedNumbers.length > 0 && (
-                        <Button 
-                            variant="link" 
-                            size="sm" 
+                        <Button
+                            variant="link"
+                            size="sm"
                             onClick={handleDeleteSelected}
                             className="text-xs text-muted-foreground p-0 h-auto"
                         >

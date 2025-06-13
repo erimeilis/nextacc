@@ -6,7 +6,7 @@ import {fetchWithCache} from '@/utils/fetchCache'
 
 export async function getCountries({type}: { type: string }): Promise<CountryInfo[]> {
     const url = process.env.REDREPORT_URL + '/api/did/countries'
-    const ttl = 4 * 60 * 60 * 1000 // 4 hours
+    const ttl = 60 * 60 * 1000 // 1 hour
 
     try {
         const response = await fetchWithCache<{ data: CountryInfo[] }>(url, {
@@ -32,7 +32,7 @@ export async function getCountries({type}: { type: string }): Promise<CountryInf
 
 export async function getAreas({type, country}: { type: string, country: number }): Promise<AreaInfo[]> {
     const url = process.env.REDREPORT_URL + '/api/did/areas'
-    const ttl = 30 * 60 * 1000 // 30 minutes
+    const ttl = 10 * 60 * 1000 // 10 minutes
 
     try {
         const response = await fetchWithCache<{ data: AreaInfo[] }>(url, {
@@ -58,7 +58,7 @@ export async function getAreas({type, country}: { type: string, country: number 
 
 export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
     const url = process.env.REDREPORT_URL + '/api/did/numbers'
-    const ttl = 5 * 60 * 1000 // 10 minutes
+    const ttl = 2 * 60 * 1000 // 2 minutes
 
     // Define a type based on NumberInfo for the API response
     type NumberResponseRaw = {
@@ -89,7 +89,8 @@ export async function getNumbers({type, country, area}: { type: string, country:
             //console.log('getNumbers: ', numbers)
             return numbers.map(number => ({
                 did: number.did,
-                name: number.did + ' (' + number.where_did + ')',
+                //name: number.did + ' (' + number.where_did + ')',
+                name: number.did,
                 where_did: number.where_did,
                 setup_rate: Number(number.setup_rate),
                 fix_rate: Number(number.fix_rate),

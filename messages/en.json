@@ -95,7 +95,7 @@
   },
   "dashboard": {
     "profile": "Profile",
-    "transactions": "Transactions",
+    "transactions": "Finance",
     "numbers": "My numbers",
     "uploads": "Uploads",
     "total_numbers": "Total Numbers",
@@ -116,7 +116,22 @@
     "upload_date": "Upload Date",
     "actions": "Actions",
     "download": "Download",
-    "delete": "Delete"
+    "delete": "Delete",
+    "did": "DID",
+    "name": "Name",
+    "location": "Location",
+    "setup_fee": "Setup Fee",
+    "monthly_fee": "Monthly Fee",
+    "features": "Features",
+    "incoming_rate": "Incoming Rate",
+    "toll_free_rate": "Toll Free Rate",
+    "sms_rate": "SMS Rate",
+    "creation_date": "Creation Date",
+    "paid_until": "Paid Until",
+    "months_paid": "Months Paid",
+    "voice_destination": "Voice Destination",
+    "sms_destination": "SMS Destination",
+    "documentation": "Documentation"
   },
   "profile": {
     "signed_in_as": "Signed in as",
@@ -183,7 +198,7 @@
     "december": "December"
   },
   "transactions": {
-    "title": "Transactions",
+    "title": "Finance",
     "show_filters": "Show Filters",
     "hide_filters": "Hide Filters",
     "clear_filters": "Clear Filters",

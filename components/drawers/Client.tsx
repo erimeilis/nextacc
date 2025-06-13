@@ -60,10 +60,24 @@ export default function Client({
                             <Button
                                 key={tab.slug}
                                 variant="ghost"
-                                className="w-full justify-start text-left"
+                                className="w-full justify-start text-left cursor-pointer transition-all duration-200"
                                 onClick={() => {
-                                    router.push('/' + tab.slug + search)
+                                    // Create target path without the profile parameter
+                                    let targetSearch = search
+                                    if (search.includes('profile=open')) {
+                                        const url = new URL(window.location.origin + window.location.pathname + search)
+                                        url.searchParams.delete('profile')
+                                        targetSearch = url.search
+                                    }
+                                    const targetPath = '/' + tab.slug + targetSearch
+
+                                    // Close the drawer
                                     handleCloseAction()
+
+                                    // Delay navigation to ensure drawer is closed first
+                                    setTimeout(() => {
+                                        router.push(targetPath)
+                                    }, 100)
                                 }}
                             >
                                 {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-5 w-5'})}
@@ -76,14 +90,29 @@ export default function Client({
                 <DrawerFooter className="px-4 py-6">
                     <Button
                         variant="link"
+                        className="cursor-pointer transition-all duration-200"
                         onClick={() => {
                             resetClientStoreAction()
                             resetCartStoreAction()
+
+                            // Create redirect path without the profile parameter
+                            let targetSearch = search
+                            if (search.includes('profile=open')) {
+                                const url = new URL(window.location.origin + window.location.pathname + search)
+                                url.searchParams.delete('profile')
+                                targetSearch = url.search
+                            }
+
+                            // Close the drawer
                             handleCloseAction()
-                            signOut({redirectTo: '/' + search})
-                                .then(() => {
-                                    resetPersistentId()
-                                })
+
+                            // Delay signOut to ensure drawer is closed first
+                            setTimeout(() => {
+                                signOut({redirectTo: '/' + targetSearch})
+                                    .then(() => {
+                                        resetPersistentId()
+                                    })
+                            }, 100)
                         }}
                     >
                         {lAction('signout')}

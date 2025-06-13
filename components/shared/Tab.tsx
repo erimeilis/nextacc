@@ -1,8 +1,8 @@
 'use client'
 import React, {FC, SVGProps} from 'react'
 
-const fixedTabClass = 'w-full flex items-center justify-center rounded-t-md px-2 py-4 sm:p-4 text-sm sm:text-sm font-medium first:ml-0 focus:outline-none focus:ring-none ' +
-    'border-border dark:border-border '
+const fixedTabClass = 'w-full flex items-center justify-center rounded-t-md px-2 py-4 sm:p-4 text-sm sm:text-sm font-medium first:ml-0 focus:outline-none focus:ring-none cursor-pointer ' +
+    'border-border dark:border-border transition-all duration-200 '
 const commonClass = 'shadow-inner shadow-sm border-b border-r last:border-r-0 border-border ' +
     'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground ' +
     'dark:bg-muted dark:text-muted-foreground dark:border-border dark:hover:bg-accent dark:hover:text-foreground '
@@ -15,6 +15,7 @@ export default function Tab({
                                 className = '',
                                 onClick,
                                 active = false,
+                                isLoading = false,
                                 icon,
                                 children
                             }: {
@@ -22,6 +23,7 @@ export default function Tab({
     className?: string
     onClick?: () => void
     active?: boolean
+    isLoading?: boolean
     icon?: FC<SVGProps<SVGSVGElement>>
     children?: React.ReactNode
 }) {
@@ -31,11 +33,17 @@ export default function Tab({
             className={fixedTabClass + ' ' + className + ' ' + (active ? activeTabClass : commonClass)}
             onClick={onClick}
         >
-            {icon ?
-                <div className="mr-2">
-                    {React.createElement(icon)}
-                </div> :
-                ''}{children}
+            <div className="relative flex items-center justify-center">
+                {isLoading && active && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-t-transparent border-foreground rounded-full animate-spin"></div>
+                    </div>
+                )}
+                <div className={`${isLoading && active ? "opacity-0" : ""} flex items-center`}>
+                    {icon && <span className="mr-2">{React.createElement(icon)}</span>}
+                    {children}
+                </div>
+            </div>
         </button>
     )
 }

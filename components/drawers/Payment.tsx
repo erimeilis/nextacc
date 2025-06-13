@@ -79,17 +79,19 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                 </div>
 
                 <DrawerFooter className="flex-column flex-wrap justify-between items-end px-4 py-8">
-                    <Button
-                        type="button"
-                        style="pillow"
-                        className="font-medium text-lg shadow-sm transition-all hover:shadow-md w-full"
-                        id="topup-balance"
-                        onClick={() => {
-                            alert(`Top up amount: $${recommendedTopup.toFixed(2)}`)
-                        }}
-                    >
-                        {p('topup_now')}
-                    </Button>
+                    <div className="flex justify-start w-full">
+                        <Button
+                            type="button"
+                            style="pillow"
+                            className="font-medium text-lg shadow-sm transition-all hover:shadow-md"
+                            id="topup-balance"
+                            onClick={() => {
+                                alert(`Top up amount: $${recommendedTopup.toFixed(2)}`)
+                            }}
+                        >
+                            {p('topup_now')}
+                        </Button>
+                    </div>
                 </DrawerFooter>
             </div>
         </DrawerContent>
