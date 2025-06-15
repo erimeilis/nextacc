@@ -149,7 +149,13 @@
     "months_paid": "Opłacone miesiące",
     "voice_destination": "Cel głosowy",
     "sms_destination": "Cel SMS",
-    "documentation": "Dokumentacja"
+    "documentation": "Dokumentacja",
+    "not_available": "N/D",
+    "drop_files_here": "Upuść pliki tutaj",
+    "drag_drop_files": "Przeciągnij i upuść pliki",
+    "max_file_size": "Maksymalny rozmiar pliku",
+    "select_files": "Wybierz pliki",
+    "upload_errors": "Błędy przesyłania"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",

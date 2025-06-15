@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
 import {useTranslations} from 'next-intl'
 import {useCartStore} from '@/stores/useCartStore'
@@ -29,7 +29,8 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const recommendedTopup = Math.max(0, cartTotal - balance + 100)
 
     return (
-        <DrawerContent className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+        <DrawerContent
+            className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             {/* Hide the default drawer handle for the left-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {
@@ -80,7 +81,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
 
                 <DrawerFooter className="flex-column flex-wrap justify-between items-end px-4 py-8">
                     <div className="flex justify-start w-full">
-                        <Button
+                        <ActionButton
                             type="button"
                             style="pillow"
                             className="font-medium text-lg shadow-sm transition-all hover:shadow-md"
@@ -90,7 +91,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                             }}
                         >
                             {p('topup_now')}
-                        </Button>
+                        </ActionButton>
                     </div>
                 </DrawerFooter>
             </div>

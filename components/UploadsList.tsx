@@ -5,7 +5,8 @@ import {UploadInfo} from '@/types/UploadInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/checkbox'
 import {Button} from '@/components/ui/button'
-import {CloudArrowUpIcon, DownloadIcon, FileIcon, MagnifyingGlassIcon, TrashIcon} from '@phosphor-icons/react'
+import {DownloadIcon, FileIcon, MagnifyingGlassIcon, TrashIcon} from '@phosphor-icons/react'
+import FileUploader from '@/components/FileUploader'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/table'
 import {FormattedDate} from '@/components/ui/formatted-date'
@@ -90,15 +91,14 @@ export default function UploadsList({
     }
 
     // Handle file upload
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
+    const handleFileUpload = async (files: File[]) => {
+        if (files.length > 0) {
             setIsUploading(true)
             try {
-                await uploadFile(e.target.files[0])
+                // Upload only the first file as the current implementation only supports single file upload
+                await uploadFile(files[0])
             } finally {
                 setIsUploading(false)
-                // Reset the input value so the same file can be uploaded again
-                e.target.value = ''
             }
         }
     }
@@ -139,7 +139,15 @@ export default function UploadsList({
 
                 {/* Header with search and upload */}
                 <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
-                    <div className="flex items-center flex-1">
+                    {/* File uploader - first on mobile, second on desktop */}
+                    <div className="flex items-center gap-2 w-full sm:w-1/2 order-1 sm:order-2">
+                        <FileUploader
+                            onUploadAction={handleFileUpload}
+                            isUploading={isUploading}
+                        />
+                    </div>
+                    {/* Search input - second on mobile, first on desktop */}
+                    <div className="flex items-center flex-1 w-full sm:1/2 order-2 sm:order-1 mt-2 sm:mt-0">
                         <div className="relative w-full sm:max-w-xs">
                             <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16}/>
                             <Input
@@ -148,26 +156,6 @@ export default function UploadsList({
                                 onChange={handleSearchChange}
                                 className="pl-8 h-8 text-sm"
                             />
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <input
-                                type="file"
-                                id="file-upload"
-                                onChange={handleFileUpload}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                disabled={isUploading}
-                            />
-                            <Button
-                                variant="default"
-                                size="sm"
-                                disabled={isUploading}
-                                className="h-8 text-xs sm:text-sm"
-                            >
-                                <CloudArrowUpIcon className="mr-1" size={14}/>
-                                {isUploading ? t('uploading') : t('upload_file')}
-                            </Button>
                         </div>
                     </div>
                 </div>
@@ -220,7 +208,7 @@ export default function UploadsList({
                                     <TableCell className="p-2 text-xs">{getContentTypeFromFilename(upload.filename)}</TableCell>
                                     <TableCell className="p-2 text-xs">{formatFileSize(upload.size)}</TableCell>
                                     <TableCell className="p-2 text-xs">
-                                        {upload.created_at ? <FormattedDate date={upload.created_at}/> : 'N/A'}
+                                        {upload.created_at ? <FormattedDate date={upload.created_at}/> : t('not_available')}
                                     </TableCell>
                                     <TableCell className="p-2 text-right">
                                         <div className="flex justify-end gap-1">

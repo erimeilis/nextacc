@@ -3,7 +3,7 @@ import React, {ChangeEvent, SyntheticEvent, useEffect, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import Input from '@/components/shared/Input'
 import {voiceDestinationsFields} from '@/constants/voiceDestinationFields'
 import {smsDestinationsFields} from '@/constants/smsDestinationFields'
@@ -580,22 +580,22 @@ export default function BuyNumberForm({
                     </div>
 
                     <div className="flex w-full flex-row justify-end gap-3 mt-2">
-                        <Button
+                        <ActionButton
                             type="submit"
                             style="pillow"
                             id="cart"
                             loading={loadingButton === 'cart'}
                         >
                             {t('add_to_cart')}
-                        </Button>
-                        <Button
+                        </ActionButton>
+                        <ActionButton
                             type="submit"
                             style="pillow"
                             id="buy"
                             loading={loadingButton === 'buy'}
                         >
                             {t('buy')}
-                        </Button>
+                        </ActionButton>
                     </div>
                 </div>
             </div>

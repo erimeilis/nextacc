@@ -32,18 +32,18 @@ const pillowButtonClass = `
     shadow-sm hover:shadow
 `
 
-export default function Button({
-                                   id,
-                                   name,
-                                   type = 'button',
-                                   className = '',
-                                   onClick,
-                                   disabled = false,
-                                   style = 'line',
-                                   icon,
-                                   loading = false,
-                                   children
-                               }: {
+export default function ActionButton({
+                                         id,
+                                         name,
+                                         type = 'button',
+                                         className = '',
+                                         onClick,
+                                         disabled = false,
+                                         style = 'line',
+                                         icon,
+                                         loading = false,
+                                         children
+                                     }: {
     id?: string
     name?: string
     type: 'button' | 'submit' | 'reset' | undefined
@@ -61,7 +61,7 @@ export default function Button({
             name={name}
             type={type}
             className={
-                style === 'line' 
+                style === 'line'
                     ? `${fixedLineButtonClass} ${className} ${disabled || loading ? disabledLineButtonClass : ''}`
                     : style === 'pillow'
                         ? `${pillowButtonClass} ${className} ${disabled || loading ? disabledButtonClass : ''}`
@@ -72,13 +72,13 @@ export default function Button({
         >
             <span className="relative flex items-center justify-center">
                 {/* Always render the content to maintain button size */}
-                <span 
-                    className="flex flex-row group-active:[transform:translate3d(0,1px,0)] whitespace-nowrap" 
+                <span
+                    className="flex flex-row group-active:[transform:translate3d(0,1px,0)] whitespace-nowrap"
                     style={{
                         opacity: loading ? 0 : 1,
                     }}
                 >
-                    {icon ? 
+                    {icon ?
                         <div className="mt-0.5 mr-1">
                             {React.createElement(icon)}
                         </div> :
@@ -89,7 +89,7 @@ export default function Button({
                 {/* Loader positioned absolutely over the content when loading */}
                 {loading && (
                     <span className="absolute inset-0 flex items-center justify-center">
-                        <Loader height={24} width={36} radius={3} color="hsl(var(--button-text))" wrapperClass="flex items-center justify-center" />
+                        <Loader height={24} width={36} radius={3} color="hsl(var(--button-text))" wrapperClass="flex items-center justify-center"/>
                     </span>
                 )}
             </span>

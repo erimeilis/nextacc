@@ -1,5 +1,5 @@
 'use client'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import {redSetUserProfile} from '@/app/api/redreport/profile'
 import {signOut} from 'next-auth/react'
 import {useTranslations} from 'next-intl'
@@ -105,7 +105,7 @@ export default function Profile({
                 <div className="text-xs sm:text-sm px-2 text-center sm:text-left">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})
                 </div>
                 <div className="flex flex-row gap-2">
-                    <Button
+                    <ActionButton
                         onClick={() => {
                         }}
                         type="button"
@@ -114,8 +114,8 @@ export default function Profile({
                         {t('balance')}: {userProfile?.currency == 'USD' ?
                         '$' + userProfile?.balance.toFixed(2) :
                         userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
-                    </Button>
-                    <Button
+                    </ActionButton>
+                    <ActionButton
                         onClick={() => {
                             resetClientStore()
                             resetCartStore()
@@ -128,7 +128,7 @@ export default function Profile({
                         className="text-xs sm:text-sm"
                     >
                         {t('signout')}
-                    </Button>
+                    </ActionButton>
                 </div>
             </div>
             <div className="flex items-center justify-between pt-2">
@@ -178,18 +178,18 @@ export default function Profile({
                             when={modeEditProfile}
                             fallback={
                                 <div className="flex flex-row sm:flex-col justify-center sm:justify-end transition duration-600 ease">
-                                    <Button
+                                    <ActionButton
                                         type="button"
                                         onClick={handleToggle}
                                         className="flex text-nowrap text-xs mb-2"
                                         icon={PencilIcon}
                                     >
                                         {t('edit_profile')}
-                                    </Button>
+                                    </ActionButton>
                                 </div>
                             }>
                             <div className="flex flex-row sm:flex-col justify-center sm:justify-end gap-2 sm:gap-0 transition duration-600 ease">
-                                <Button
+                                <ActionButton
                                     type="submit"
                                     className="flex text-nowrap text-xs sm:mb-2"
                                     disabled={!ableButtonEditProfile}
@@ -197,15 +197,15 @@ export default function Profile({
                                     loading={modeButtonEditProfile}
                                 >
                                     {t('update_profile')}
-                                </Button>
-                                <Button
+                                </ActionButton>
+                                <ActionButton
                                     type="button"
                                     onClick={handleToggle}
                                     className="flex text-nowrap text-xs sm:mb-2"
                                     icon={XIcon}
                                 >
                                     {t('dont_edit_profile')}
-                                </Button>
+                                </ActionButton>
                             </div>
                         </Show>
                     </div>

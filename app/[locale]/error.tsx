@@ -1,5 +1,5 @@
 'use client'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import {useTranslations} from 'next-intl'
 import Loader from '@/components/service/Loader'
 import React from 'react'
@@ -20,9 +20,9 @@ export default function Error({
             <div className="flex items-center justify-center w-full px-10">
                 <Loader height={50}/>
             </div>
-            <Button type="button" onClick={() => reset()}>
+            <ActionButton type="button" onClick={() => reset()}>
                 {t('refresh')}
-            </Button>
+            </ActionButton>
         </div>
     )
 }

@@ -149,7 +149,13 @@
     "months_paid": "Оплачено місяців",
     "voice_destination": "Голосове призначення",
     "sms_destination": "SMS призначення",
-    "documentation": "Документація"
+    "documentation": "Документація",
+    "not_available": "Н/Д",
+    "drop_files_here": "Перетягніть файли сюди",
+    "drag_drop_files": "Перетягніть файли",
+    "max_file_size": "Максимальний розмір файлу",
+    "select_files": "Вибрати файли",
+    "upload_errors": "Помилки завантаження"
   },
   "profile": {
     "signed_in_as": "Вхід як",

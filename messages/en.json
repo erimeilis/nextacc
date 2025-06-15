@@ -150,7 +150,13 @@
     "months_paid": "Months Paid",
     "voice_destination": "Voice Destination",
     "sms_destination": "SMS Destination",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "not_available": "N/A",
+    "drop_files_here": "Drop files here",
+    "drag_drop_files": "Drag & drop files",
+    "max_file_size": "Max file size",
+    "select_files": "Select Files",
+    "upload_errors": "Upload errors"
   },
   "profile": {
     "signed_in_as": "Signed in as",

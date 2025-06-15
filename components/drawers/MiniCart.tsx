@@ -1,6 +1,6 @@
 'use client'
 import React, {SyntheticEvent, useState} from 'react'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import {CartItem} from '@/types/CartItem'
 import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
 import {useTranslations} from 'next-intl'
@@ -75,7 +75,8 @@ export default function MiniCart({
     }
 
     return (
-        <DrawerContent className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+        <DrawerContent
+            className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             {/* Hide the default drawer handle for the right-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {
@@ -195,7 +196,7 @@ export default function MiniCart({
                                 </p>
                             )}
                         </div>
-                        <Button
+                        <ActionButton
                             type="button"
                             style="pillow"
                             className="font-medium text-lg shadow-sm transition-all hover:shadow-md"
@@ -210,8 +211,8 @@ export default function MiniCart({
                             }}
                         >
                             {t('buy_now')}
-                        </Button>
-                        <Button
+                        </ActionButton>
+                        <ActionButton
                             type="button"
                             style="line"
                             className="text-xs transition-all"
@@ -220,7 +221,7 @@ export default function MiniCart({
                             onClick={handleRemoveFromCart}
                         >
                             {t('remove_selected')}
-                        </Button>
+                        </ActionButton>
                     </Show>
                 </DrawerFooter>
             </div>

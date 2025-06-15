@@ -1,5 +1,5 @@
 'use client'
-import Button from '@/components/shared/Button'
+import ActionButton from '@/components/shared/ActionButton'
 import Input from '@/components/shared/Input'
 import Toggle from '@/components/shared/Toggle'
 import {forgotFields} from '@/constants/forgotFields'
@@ -206,34 +206,34 @@ export default function Login() {
                             </Label>
                         </div>
                         <div className="text-sm">
-                            <Button
+                            <ActionButton
                                 type="button"
                                 className="font-medium text-blue-800 dark:text-orange-400 hover:text-indigo-600 dark:hover:text-orange-300"
                                 onClick={() => setOpenForgotModal(true)}>{t('forgot_password')}
-                            </Button>
+                            </ActionButton>
                         </div>
                     </div>
                     <div className="flex items-center justify-between">
-                        <Button
+                        <ActionButton
                             type="submit"
                             className="group relative"
                             //onClick={HandleLoginSubmit}
                         >
                             {t('login')}
-                        </Button>
+                        </ActionButton>
                         <div className="flex items-center w-fit transition-transform duration-500
                         font-medium tracking-wide text-white text-xs mt-1 ml-1 px-2 py-0.5
                         bg-red-500 dark:bg-red-600" style={{display: globalError === null ? 'none' : 'block'}}>
                             {globalError ? t(globalError) : ''}
                         </div>
-                        <Button
+                        <ActionButton
                             type="button"
                             onClick={() => signIn('google', {
                                 redirectTo: '/profile/' + search
                             })}
                         >
                             {t('google')}
-                        </Button>
+                        </ActionButton>
                     </div>
                 </form>
                 <form
@@ -265,26 +265,26 @@ export default function Login() {
                         }
                     </div>
                     <div className="flex items-center justify-between">
-                        <Button
+                        <ActionButton
                             type="submit"
                             className="group relative"
                             //onClick={handleSignupSubmit}
                         >
                             {t('signup')}
-                        </Button>
+                        </ActionButton>
                         <div className="flex items-center w-fit transition-transform duration-500
                         font-medium tracking-wide text-white text-xs mt-1 ml-1 px-2 py-0.5
                         bg-red-500 dark:bg-red-600" style={{display: globalError === null ? 'none' : 'block'}}>
                             {globalError ? t(globalError) : ''}
                         </div>
-                        <Button
+                        <ActionButton
                             type="button"
                             onClick={() => signIn('google', {
                                 redirectTo: '/profile/' + search
                             })}
                         >
                             {t('google')}
-                        </Button>
+                        </ActionButton>
                     </div>
                 </form>
             </Card>
@@ -319,13 +319,13 @@ export default function Login() {
                                 />
                             )
                         }
-                        <Button
+                        <ActionButton
                             type="submit"
                             className="group flex m-auto"
                             //onClick={handleForgotSubmit}
                         >
                             {t('restore')}
-                        </Button>
+                        </ActionButton>
                     </form>
                 </Modal.Body>
             </Modal>
@@ -363,13 +363,13 @@ export default function Login() {
                                     />
                                 )
                             }
-                            <Button
+                            <ActionButton
                                 type="submit"
                                 className="group flex m-auto"
                                 //onClick={handleVerifySubmit}
                             >
                                 {t('resend_verify')}
-                            </Button>
+                            </ActionButton>
                         </form>
                     </Modal.Body> :
                     <Modal.Body>
