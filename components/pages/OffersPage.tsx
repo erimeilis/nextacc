@@ -81,7 +81,6 @@ export default function OffersPage() {
     }, [pathName, router, searchParams])
 
     const handleArea = useCallback((area: number | string) => {
-        router.push(pathName + '?' + CreateQueryString('area', area, searchParams, ['number']))
         if (type && country) {
             const newArea = (searchParams && searchParams.has('area')) ?
                 (!isNaN(+(searchParams.get('area') || '')) ?
@@ -103,6 +102,7 @@ export default function OffersPage() {
                     })
             }
         }
+        router.push(pathName + '?' + CreateQueryString('area', area, searchParams, ['number']))
     }, [areaBySlug, country, handleNumber, pathName, router, searchParams, type, updateNumbers])
 
     useEffect(() => {
@@ -199,12 +199,8 @@ export default function OffersPage() {
         })) :
         null
     const handleCountry = useCallback((country: number | string) => {
-
         const slug = countries?.find(e => e.id == country)
         const countryParam = slug ? getSlug(slug.name) : country
-
-        router.push(pathName + '?' + CreateQueryString('country', countryParam, searchParams, ['area', 'number']))
-
         if (type) {
             const newCountry = (searchParams && searchParams.has('country')) ?
                 (!isNaN(+(searchParams.get('country') || '')) ?
@@ -227,11 +223,16 @@ export default function OffersPage() {
                     })
             }
         }
+        router.push(pathName + '?' + CreateQueryString('country', countryParam, searchParams, ['area', 'number']))
     }, [countries, countryBySlug, handleArea, pathName, router, searchParams, type, updateAreas])
 
     const handleType = useCallback((t: string) => {
+        updateCountries(t)
+            .then((fetchedCountries) => {
+                setLocalCountriesMap(fetchedCountries)
+            })
         router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
-    }, [pathName, router, searchParams])
+    }, [pathName, router, searchParams, updateCountries])
 
     const areas = localAreasMap ?
         localAreasMap.map(area => ({

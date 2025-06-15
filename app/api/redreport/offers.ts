@@ -69,7 +69,9 @@ export async function getNumbers({type, country, area}: { type: string, country:
                 ? boolean | undefined
                 : NumberInfo[K]
     } & {
-        docs: unknown;
+        //docs: unknown;
+        docs_personal: unknown
+        docs_business: unknown
     }
 
     try {
@@ -86,7 +88,7 @@ export async function getNumbers({type, country, area}: { type: string, country:
 
         if (response && response.data && response.data.length > 0) {
             const numbers: NumberResponseRaw[] = response.data
-            //console.log('getNumbers: ', numbers)
+            console.log('getNumbers: ', numbers)
             return numbers.map(number => ({
                 did: number.did,
                 //name: number.did + ' (' + number.where_did + ')',
@@ -100,7 +102,9 @@ export async function getNumbers({type, country, area}: { type: string, country:
                 incoming_per_minute: number.incoming_per_minute ? Number(number.incoming_per_minute) : null,
                 toll_free_rate_in_min: number.toll_free_rate_in_min ? Number(number.toll_free_rate_in_min) : null,
                 incoming_rate_sms: number.incoming_rate_sms ? Number(number.incoming_rate_sms) : null,
-                docs: JSON.stringify(number.docs)
+                //docs: number.docs as Record<string, number>,
+                docs_personal: number.docs_personal as string[],
+                docs_business: number.docs_business as string[],
             } as NumberInfo))
         }
     } catch (error) {

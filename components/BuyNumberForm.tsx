@@ -19,7 +19,6 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/c
 import {addToCart} from '@/app/api/redreport/cart'
 import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
-import {slack} from '@/utils/slack'
 import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {useToast} from '@/hooks/use-toast'
@@ -54,7 +53,7 @@ export default function BuyNumberForm({
     const getClientInfo = async () => {
         const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
         const info = await res.json()
-        await slack(info.ip)
+        //await slack(info.ip)
         setPersistentClientInfo(info)
     }
 
@@ -243,16 +242,18 @@ export default function BuyNumberForm({
 
     const discounts = Discounts()
 
-    function GetDocs(numberInfo: NumberInfo | null) {
-        if (!numberInfo) return null
-        let res = ''
-        const docs = JSON.parse(numberInfo.docs as string)
-        for (const key in docs) {
-            if (docs.hasOwnProperty(key) && docs[key] === 1) {
-                res += d(key) + ' '
-            }
-        }
-        return res
+    function GetDocsPersonal(numberInfo: NumberInfo | null) {
+        if (!numberInfo || !numberInfo.docs_personal || !numberInfo.docs_personal.length) return null
+        const docsList = numberInfo.docs_personal.map(key => d(key))
+        console.log(docsList)
+        return docsList.length > 0 ? docsList : null
+    }
+
+    function GetDocsBusiness(numberInfo: NumberInfo | null) {
+        if (!numberInfo || !numberInfo.docs_business || !numberInfo.docs_business.length) return null
+        const docsList = numberInfo.docs_business.map(key => d(key))
+        console.log(docsList)
+        return docsList.length > 0 ? docsList : null
     }
 
     const formatSelectedNumber = (numberInfo: NumberInfo | null) => {
@@ -509,9 +510,25 @@ export default function BuyNumberForm({
                         </div>
                     ) : null}
 
-                    {GetDocs(numberInfo) ? (
-                        <div className="text-sm text-muted-foreground">
-                            {GetDocs(numberInfo)}
+                    {GetDocsPersonal(numberInfo) ? (
+                        <div className="text-sm text-muted-foreground mt-2">
+                            <div className="font-medium">{t('personal_docs')}:</div>
+                            <ul className="list-disc pl-5">
+                                {GetDocsPersonal(numberInfo)?.map((doc, index) => (
+                                    <li key={index}>{doc}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : null}
+
+                    {GetDocsBusiness(numberInfo) ? (
+                        <div className="text-sm text-muted-foreground mt-2">
+                            <div className="font-medium">{t('business_docs')}:</div>
+                            <ul className="list-disc pl-5">
+                                {GetDocsBusiness(numberInfo)?.map((doc, index) => (
+                                    <li key={index}>{doc}</li>
+                                ))}
+                            </ul>
                         </div>
                     ) : null}
                 </div>
@@ -584,4 +601,4 @@ export default function BuyNumberForm({
             </div>
         </form>
     ) : ''
-};
+}

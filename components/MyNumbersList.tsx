@@ -165,33 +165,33 @@ export default function MyNumbersList({
                                     <Table className="w-full [&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                                         <TableBody>
                                             {[
-                                                { 
-                                                    label: t('did'), 
+                                                {
+                                                    label: t('did'),
                                                     value: option.did,
                                                     condition: true
                                                 },
-                                                { 
-                                                    label: t('name'), 
+                                                {
+                                                    label: t('name'),
                                                     value: option.name,
                                                     condition: true
                                                 },
-                                                { 
-                                                    label: t('location'), 
+                                                {
+                                                    label: t('location'),
                                                     value: option.where_did,
                                                     condition: !!option.where_did
                                                 },
-                                                { 
-                                                    label: t('setup_fee'), 
+                                                {
+                                                    label: t('setup_fee'),
                                                     value: `$${option.setup_rate?.toFixed(2) || '0.00'}`,
                                                     condition: true
                                                 },
-                                                { 
-                                                    label: t('monthly_fee'), 
+                                                {
+                                                    label: t('monthly_fee'),
                                                     value: `$${option.fix_rate?.toFixed(2) || '0.00'}`,
                                                     condition: true
                                                 },
-                                                { 
-                                                    label: t('features'), 
+                                                {
+                                                    label: t('features'),
                                                     value: (
                                                         <div className="flex justify-end sm:justify-start space-x-2">
                                                             {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
@@ -201,43 +201,43 @@ export default function MyNumbersList({
                                                     ),
                                                     condition: true
                                                 },
-                                                { 
-                                                    label: t('incoming_rate'), 
+                                                {
+                                                    label: t('incoming_rate'),
                                                     value: `$${option.incoming_per_minute?.toFixed(2)}/min`,
                                                     condition: !!option.incoming_per_minute
                                                 },
-                                                { 
-                                                    label: t('toll_free_rate'), 
+                                                {
+                                                    label: t('toll_free_rate'),
                                                     value: `$${option.toll_free_rate_in_min?.toFixed(2)}/min`,
                                                     condition: !!option.toll_free_rate_in_min
                                                 },
-                                                { 
-                                                    label: t('sms_rate'), 
+                                                {
+                                                    label: t('sms_rate'),
                                                     value: `$${option.incoming_rate_sms?.toFixed(2)}/msg`,
                                                     condition: !!option.incoming_rate_sms
                                                 },
-                                                { 
-                                                    label: t('creation_date'), 
+                                                {
+                                                    label: t('creation_date'),
                                                     value: <FormattedDate date={option.creation_date}/>,
                                                     condition: !!option.creation_date
                                                 },
-                                                { 
-                                                    label: t('paid_until'), 
+                                                {
+                                                    label: t('paid_until'),
                                                     value: <FormattedDate date={option.paid_till}/>,
                                                     condition: !!option.paid_till
                                                 },
-                                                { 
-                                                    label: t('months_paid'), 
+                                                {
+                                                    label: t('months_paid'),
                                                     value: option.months_paid,
                                                     condition: !!option.months_paid
                                                 },
-                                                { 
-                                                    label: t('voice_destination'), 
+                                                {
+                                                    label: t('voice_destination'),
                                                     value: option.voiceDest,
                                                     condition: !!option.voiceDest
                                                 },
-                                                { 
-                                                    label: t('sms_destination'), 
+                                                {
+                                                    label: t('sms_destination'),
                                                     value: option.smsDest && typeof option.smsDest === 'object' ?
                                                         ['forward_email', 'forward_http', 'forward_telegram', 'forward_slack', 'forward_sms']
                                                             .map(key => {
@@ -249,16 +249,11 @@ export default function MyNumbersList({
                                                             .join(', ')
                                                         : '',
                                                     condition: !!option.smsDest && typeof option.smsDest === 'object'
-                                                },
-                                                { 
-                                                    label: t('documentation'), 
-                                                    value: option.docs,
-                                                    condition: !!option.docs
                                                 }
                                             ].map((item, index) => (
                                                 item.condition && (
                                                     <TableRow key={index}>
-                                                        <TableCell className="font-normal min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
+                                                        <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
                                                         <TableCell className="text-right sm:text-left">{item.value}</TableCell>
                                                     </TableRow>
                                                 )

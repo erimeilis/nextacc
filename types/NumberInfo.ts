@@ -10,7 +10,9 @@ export type NumberInfo = {
     incoming_per_minute?: number
     toll_free_rate_in_min?: number
     incoming_rate_sms?: number
-    docs: string
+    //docs: Record<string, number>
+    docs_personal: string[]
+    docs_business: string[]
     creation_date?: string
     paid_till?: string
     months_paid?: number
