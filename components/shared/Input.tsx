@@ -1,6 +1,6 @@
 'use client'
-import {Label} from '@/components/ui/label'
-import {Input as TextInput} from '@/components/ui/input'
+import {Label} from '@/components/ui/Label'
+import {Input as TextInput} from '@/components/ui/Input'
 import React, {ChangeEvent, FC, SVGProps, useState} from 'react'
 import {EyeIcon, EyeSlashIcon} from '@phosphor-icons/react'
 

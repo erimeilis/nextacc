@@ -4,8 +4,8 @@ import {signOut, useSession} from 'next-auth/react'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
-import {Button} from '@/components/ui/button'
-import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
+import {Button} from '@/components/ui/Button'
+import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
 import MobileSwitchers from '@/components/nav/MobileSwitchers'
 
 interface ProfileDrawerContentProps {

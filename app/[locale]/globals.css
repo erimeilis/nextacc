@@ -254,9 +254,100 @@
 .gradient-button {
     background: linear-gradient(to right, hsl(var(--button-from)), hsl(var(--button-to)));
     color: hsl(var(--button-text));
-    transition: filter 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    transform: translateY(0);
+    overflow: hidden;
+}
+
+.gradient-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .gradient-button:hover {
     filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.gradient-button:hover::before,
+.gradient-button:focus::before {
+    width: 200%;
+    height: 200%;
+}
+
+.gradient-button:active {
+    transform: translateY(1px);
+}
+
+.gradient-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+    .dark .gradient-button {
+        box-shadow: 0 0 8px rgba(0, 0, 0, .2),
+        0 2px 4px rgba(0, 0, 0, .8),
+        0 -12px 64px rgba(255, 255, 255, .3),
+        0 4px 12px rgba(255, 255, 255, .1);
+    }
+
+    .dark .gradient-button:hover {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, .2),
+        0 2px 4px rgba(0, 0, 0, .8),
+        0 -12px 48px rgba(255, 255, 255, .3),
+        0 2px 16px rgba(255, 255, 255, .2);
+    }
+
+    .dark .gradient-button:active {
+        box-shadow: 0 0 8px rgba(0, 0, 0, .4),
+        0 1px 4px rgba(0, 0, 0, .8),
+        0 -6px 36px rgba(255, 255, 255, .3),
+        0 2px 8px rgba(255, 255, 255, .2);
+    }
+
+    .dark .gradient-button:focus {
+        box-shadow: 0 0 8px rgba(0, 0, 0, .4),
+        0 1px 4px rgba(0, 0, 0, .8),
+        0 -6px 36px rgba(255, 255, 255, .3),
+        0 2px 8px rgba(255, 255, 255, .2);
+    }
+}
+
+/* Custom Scrollbar Styling */
+/* For WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--primary) / 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--primary) / 0.5);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
 }

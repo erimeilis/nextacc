@@ -3,8 +3,8 @@ import React from 'react'
 import Loader from '@/components/service/Loader'
 import {NumberInfo} from '@/types/NumberInfo'
 import Show from '@/components/service/Show'
-import {Label} from '@/components/ui/label'
-import {Radio, RadioGroup} from '@/components/ui/radio-group'
+import {Label} from '@/components/ui/Label'
+import {Radio, RadioGroup} from '@/components/ui/RadioGroup'
 import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon} from '@phosphor-icons/react'
 
 export default function NumberOffersList({

@@ -9,7 +9,7 @@ import {NextIntlClientProvider} from 'next-intl'
 import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
-import {Toaster} from '@/components/ui/toaster'
+import {Toaster} from '@/components/ui/Toaster'
 import {ubuntu} from '@/app/fonts' // Import from the font file
 
 // Dynamically import a Nav component to reduce the initial bundle size
@@ -82,7 +82,7 @@ export default async function RootLayout(
               `
             }}/>
         </head>
-        <body className={`${ubuntu.className} bg-background text-foreground border-border`}>
+        <body className={`${ubuntu.className} bg-background text-foreground border-border overflow-hidden h-screen`}>
         <ThemeProvider
             attribute="class"
             disableTransitionOnChange={true}
@@ -92,12 +92,14 @@ export default async function RootLayout(
             <AuthProvider>
                 <NextIntlClientProvider messages={messages}>
                     <Nav/>
-                    <main className="flex items-center justify-center px-0 sm:px-2 pt-0 sm:pt-18 pb-14 sm:pb-0">
-                        <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
-                            {offers}
-                            {dashboard}
-                        </div>
-                    </main>
+                    <div className="h-full overflow-y-auto pt-0 pb-16 sm:pt-16 sm:pb-0">
+                        <main className="flex items-center justify-center px-0 sm:px-2 pb-0">
+                            <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
+                                {offers}
+                                {dashboard}
+                            </div>
+                        </main>
+                    </div>
                 </NextIntlClientProvider>
             </AuthProvider>
             <Toaster/>

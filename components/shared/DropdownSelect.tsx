@@ -1,6 +1,6 @@
 'use client'
 import Loader from '@/components/service/Loader'
-import {Label} from '@/components/ui/label'
+import {Label} from '@/components/ui/Label'
 import {useEffect, useRef, useState} from 'react'
 import getSlug from '@/utils/getSlug'
 import {CaretDownIcon, CheckIcon} from '@phosphor-icons/react'

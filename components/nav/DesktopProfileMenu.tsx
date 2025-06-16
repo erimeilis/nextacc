@@ -4,9 +4,9 @@ import {signOut, useSession} from 'next-auth/react'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {Button} from '@/components/ui/button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/Avatar'
+import {Button} from '@/components/ui/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
 import {createHash} from 'crypto'
 
 interface DesktopProfileMenuProps {
@@ -47,7 +47,7 @@ export default function DesktopProfileMenu({
                         </Avatar>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="min-w-[100px] w-fit z-[10000] shadow-2xl shadow-mute dark:shadow-black" align="end" forceMount>
+                <DropdownMenuContent className="min-w-[100px] w-fit z-[10000] shadow-md shadow-mute/50 dark:shadow-black/50" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
                             <p className="text-sm font-medium">{session.data?.user?.name || 'User'}</p>

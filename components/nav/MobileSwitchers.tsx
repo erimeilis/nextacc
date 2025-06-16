@@ -4,7 +4,7 @@ import {useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {usePathname, useSearchParams} from 'next/navigation'
 import {routing} from '@/i18n/routing'
-import {Button} from '@/components/ui/button'
+import {Button} from '@/components/ui/Button'
 import {MoonIcon, PaletteIcon, SunIcon, TranslateIcon} from '@phosphor-icons/react'
 import usePersistState from '@/utils/usePersistState'
 
@@ -76,7 +76,7 @@ export default function MobileSwitchers() {
     }
 
     return (
-        <div className="flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col relative" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center space-x-2">
                 {/* Language Button */}
                 <Button
@@ -113,16 +113,16 @@ export default function MobileSwitchers() {
                 </Button>
             </div>
 
-            {/* Language Accordion */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'language' ? 'max-h-40' : 'max-h-0'}`}>
-                <div className="mt-2 p-2 bg-muted/20 rounded-md">
+            {/* Language Accordion - positioned above on mobile */}
+            <div className={`absolute bottom-full left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out mb-2 ${expandedSection === 'language' ? 'max-h-40' : 'max-h-0'}`}>
+                <div className="p-2 bg-background/95 dark:bg-background/95 shadow-md backdrop-blur-sm rounded-md w-full border border-border">
                     <div className="flex flex-col space-y-1">
                         {routing.locales.map((locale) => (
                             <Button
                                 key={locale}
                                 variant="ghost"
                                 size="sm"
-                                className="flex items-center justify-start gap-2 h-8"
+                                className="flex items-center justify-start gap-2 h-8 w-full"
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     window.location.href = redirectedPathName(locale) + search
@@ -136,16 +136,16 @@ export default function MobileSwitchers() {
                 </div>
             </div>
 
-            {/* Color Theme Accordion */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'colorTheme' ? 'max-h-40' : 'max-h-0'}`}>
-                <div className="mt-2 p-2 bg-muted/20 rounded-md">
+            {/* Color Theme Accordion - positioned above on mobile */}
+            <div className={`absolute bottom-full left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out mb-2 ${expandedSection === 'colorTheme' ? 'max-h-40' : 'max-h-0'}`}>
+                <div className="p-2 bg-background/95 dark:bg-background/95 shadow-md backdrop-blur-sm rounded-md w-full border border-border">
                     <div className="flex flex-col space-y-1">
                         {colorThemes.map((themeOption) => (
                             <Button
                                 key={themeOption.id}
                                 variant="ghost"
                                 size="sm"
-                                className="flex items-center justify-start gap-2 h-8"
+                                className="flex items-center justify-start gap-2 h-8 w-full"
                                 onClick={(e) => handleThemeChange(e, themeOption.id)}
                             >
                                 <div className="relative w-5 h-5">

@@ -28,8 +28,7 @@ const disabledButtonClass = `
 
 const pillowButtonClass = `
     flex w-fit h-fit cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors
-    gradient-button
-    shadow-sm hover:shadow
+    gradient-button drop-shadow hover:drop-shadow-lg focus:drop-shadow-lg 
 `
 
 export default function ActionButton({

@@ -2,8 +2,8 @@
 import {routing} from '@/i18n/routing'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
-import {Button} from '@/components/ui/button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {Button} from '@/components/ui/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
 
 // Map of locale codes to flag emojis
 const localeFlags: Record<string, string> = {
@@ -38,7 +38,7 @@ export default function LocaleSwitcher() {
                     {t('locale')}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-fit z-[10000] shadow-xl shadow-mute dark:shadow-black" align="end" forceMount>
+            <DropdownMenuContent className="w-fit z-[10000] shadow-md shadow-mute/50 dark:shadow-black/50" align="end" forceMount>
                 {routing.locales.map((locale) => (
                     <DropdownMenuItem
                         key={locale}

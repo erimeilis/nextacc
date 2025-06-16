@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import ActionButton from '@/components/shared/ActionButton'
-import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
+import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
 import {useTranslations} from 'next-intl'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
@@ -30,7 +30,10 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
 
     return (
         <DrawerContent
-            className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+            className="w-fit h-[80vh]
+            sm:min-w-[40vw] md:min-w-[20vw]
+            sm:max-w-[80vw]
+            sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             {/* Hide the default drawer handle for the left-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {

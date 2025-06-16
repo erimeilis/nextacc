@@ -2,9 +2,9 @@
 import React, {SyntheticEvent, useState} from 'react'
 import ActionButton from '@/components/shared/ActionButton'
 import {CartItem} from '@/types/CartItem'
-import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/drawer'
+import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
 import {useTranslations} from 'next-intl'
-import {Checkbox} from '@/components/ui/checkbox'
+import {Checkbox} from '@/components/ui/Checkbox'
 import Show from '@/components/service/Show'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
@@ -76,7 +76,10 @@ export default function MiniCart({
 
     return (
         <DrawerContent
-            className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+            className="w-fit h-[80vh]
+            sm:min-w-[40vw] md:min-w-[20vw]
+            sm:max-w-[80vw]
+            sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             {/* Hide the default drawer handle for the right-side drawer on desktop */}
             <style jsx global>{`
                 .max-w-md > div:first-child {

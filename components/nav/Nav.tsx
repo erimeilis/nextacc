@@ -8,7 +8,7 @@ import Image from 'next/image'
 import React, {useEffect, useRef, useState} from 'react'
 import Link from 'next/link'
 import {useRouter, useSearchParams} from 'next/navigation'
-import {ThemeToggle} from '@/components/ui/theme-toggle'
+import {ThemeToggle} from '@/components/nav/ThemeToggle'
 import MobileSwitchers from '@/components/nav/MobileSwitchers'
 import CartButton from '@/components/nav/CartButton'
 import PaymentButton from '@/components/nav/PaymentButton'
@@ -287,7 +287,7 @@ export default function Nav() {
 
     return (
         <nav
-            className="w-full px-3 py-1 mx-auto backdrop fixed bottom-0 sm:fixed sm:bottom-auto sm:top-0 shadow lg:px-6 lg:py-2 z-[9999]"
+            className="w-full px-3 py-1 mx-auto backdrop fixed bottom-0 sm:top-0 sm:bottom-auto shadow lg:px-6 lg:py-2 z-[9999]"
             onClick={closeDrawers}
         >
             <div className="flex flex-wrap items-center justify-between">

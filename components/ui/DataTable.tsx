@@ -4,7 +4,7 @@ import Loader from '../service/Loader'
 import Show from '@/components/service/Show'
 import {CaretDownIcon, CaretLeftIcon, CaretRightIcon, CaretUpIcon} from '@phosphor-icons/react'
 import clsx from 'clsx'
-import {Checkbox} from '@/components/ui/checkbox'
+import {Checkbox} from '@/components/ui/Checkbox'
 import {useTranslations} from 'next-intl'
 
 // Generic types for the DataTable component

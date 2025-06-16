@@ -5,8 +5,8 @@ import {MoonIcon, PaletteIcon, SunIcon} from '@phosphor-icons/react'
 import {useTheme} from 'next-themes'
 import usePersistState from '@/utils/usePersistState'
 
-import {Button} from '@/components/ui/button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
+import {Button} from '@/components/ui/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/DropdownMenu'
 
 const colorThemes = ['equinox', 'reef', 'void']
 
@@ -20,7 +20,7 @@ export function ThemeToggle() {
         setIsMounted(true)
     }, [])
 
-    // Apply color theme when component mounts or colorTheme changes
+    // Apply color theme when the component mounts or colorTheme changes
     React.useEffect(() => {
         if (!isMounted) return
 
@@ -61,7 +61,7 @@ export function ThemeToggle() {
                         <span className="sr-only">Toggle color theme</span>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 z-[10000] shadow-xl shadow-mute dark:shadow-black" align="end" forceMount>
+                <DropdownMenuContent className="w-56 z-[10000] shadow-md shadow-mute/50 dark:shadow-black/50" align="end" forceMount>
                     <DropdownMenuItem onClick={() => handleThemeChange('equinox')} className="flex items-center gap-2">
                         <div className="relative w-5 h-5">
                             <div className="absolute inset-0 rounded-full bg-orange-500"></div>

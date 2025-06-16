@@ -1,8 +1,8 @@
 'use client'
 import React, {ChangeEvent, useState} from 'react'
 import {EyeIcon, EyeSlashIcon} from '@phosphor-icons/react'
-import {Label} from '@/components/ui/label'
-import {Input} from '@/components/ui/input'
+import {Label} from '@/components/ui/Label'
+import {Input} from '@/components/ui/Input'
 
 const fixedErrorClass = 'flex items-center w-fit transition-transform duration-500 ' +
     'font-medium tracking-wide text-white text-xs ' +

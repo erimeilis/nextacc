@@ -1,6 +1,6 @@
 'use client'
-import {Label} from '@/components/ui/label'
-import {ToggleSwitch} from '@/components/ui/switch'
+import {Label} from '@/components/ui/Label'
+import {ToggleSwitch} from '@/components/ui/Switch'
 import React from 'react'
 
 interface ToggleProps {
@@ -11,11 +11,11 @@ interface ToggleProps {
 }
 
 export default function Toggle({
-    leftLabel,
-    rightLabel,
-    checked,
-    onToggle
-}: ToggleProps) {
+                                   leftLabel,
+                                   rightLabel,
+                                   checked,
+                                   onToggle
+                               }: ToggleProps) {
     return (
         <div className="inline-flex items-center gap-2">
             <Label htmlFor="switch-component" className={`text-sm cursor-pointer ${!checked ? 'font-bold' : ''}`}>{leftLabel}</Label>
@@ -25,10 +25,10 @@ export default function Toggle({
                     onChange={(e) => {
                         // With our updated ToggleSwitch component, we can now access e.target.checked
                         if (typeof e === 'object' && e !== null && 'target' in e && e.target && 'checked' in e.target) {
-                            onToggle(e.target.checked as boolean);
+                            onToggle(e.target.checked as boolean)
                         } else {
                             // Fallback to the previous behavior
-                            onToggle(!checked);
+                            onToggle(!checked)
                         }
                     }}
                     checked={checked}

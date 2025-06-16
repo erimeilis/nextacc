@@ -40,7 +40,7 @@ const toastVariants = cva(
     }
 )
 
-// In toast.tsx
+// In Toast.tsx
 const Toast = React.forwardRef<
     React.ElementRef<typeof ToastPrimitives.Root>,
     React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & {

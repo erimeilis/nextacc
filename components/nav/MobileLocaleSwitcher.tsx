@@ -2,8 +2,8 @@
 import {routing} from '@/i18n/routing'
 import {useTranslations} from 'next-intl'
 import {usePathname, useSearchParams} from 'next/navigation'
-import {Button} from '@/components/ui/button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
+import {Button} from '@/components/ui/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
 import {TranslateIcon} from '@phosphor-icons/react'
 import {useState} from 'react'
 

@@ -1,6 +1,6 @@
 'use client'
 import Loader from '@/components/service/Loader'
-import {Label} from '@/components/ui/label'
+import {Label} from '@/components/ui/Label'
 import {useEffect, useRef, useState} from 'react'
 import getSlug from '@/utils/getSlug'
 import {useTranslations} from 'next-intl'
@@ -89,7 +89,7 @@ export default function DropdownSelectGeo({
             window.addEventListener('scroll', updatePosition, true)
             window.addEventListener('resize', updatePosition)
             // Also listen for touchmove events for mobile scrolling
-            window.addEventListener('touchmove', updatePosition, { passive: true })
+            window.addEventListener('touchmove', updatePosition, {passive: true})
 
             return () => {
                 window.removeEventListener('scroll', updatePosition, true)
@@ -136,7 +136,7 @@ export default function DropdownSelectGeo({
     )
 
     return (
-        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{ position: 'relative' }}>
+        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
             <Label
                 htmlFor={selectId}
                 className="pl-1 mb-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
