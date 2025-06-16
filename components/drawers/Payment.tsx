@@ -30,9 +30,9 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
 
     return (
         <DrawerContent
-            className="w-fit h-[80vh]
+            className="w-full h-[80vh]
             sm:min-w-[40vw] md:min-w-[20vw]
-            sm:max-w-[80vw]
+            md:w-fit sm:max-w-[80vw]
             sm:rounded-r-lg sm:border-r sm:border-border/50 sm:fixed sm:left-0 sm:right-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             {/* Hide the default drawer handle for the left-side drawer on desktop */}
             <style jsx global>{`

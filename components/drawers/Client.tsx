@@ -31,7 +31,10 @@ export default function Client({
 
     return (
         <DrawerContent
-            className="w-full h-[80vh] sm:min-w-[20vw] sm:w-fit sm:max-w-[80vw] sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
+            className="w-full h-[80vh]
+            sm:min-w-[40vw] md:min-w-[20vw]
+            md:w-fit sm:max-w-[80vw]
+            sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
             <div className="flex flex-col h-full w-full pb-9 sm:pb-2">
                 <DrawerHeader className="flex flex-row items-center justify-between">
                     <DrawerTitle className="hidden"></DrawerTitle>
