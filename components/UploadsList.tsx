@@ -14,6 +14,7 @@ import {cn} from '@/lib/utils'
 import {Input} from '@/components/ui/Input'
 import {useClientStore} from '@/stores/useClientStore'
 import {formatFileSize} from '@/utils/formatFileSize'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from '@/components/ui/Tooltip'
 
 // Function to get content type from filename extension
 const getContentTypeFromFilename = (filename: string): string => {
@@ -43,6 +44,18 @@ const getContentTypeFromFilename = (filename: string): string => {
     }
 
     return contentTypeMap[extension] || 'application/octet-stream'
+}
+
+// Function to check if a file is an image based on content type
+const isImageFile = (filename: string): boolean => {
+    const contentType = getContentTypeFromFilename(filename)
+    return contentType.startsWith('image/')
+}
+
+// Function to generate a preview URL with size constraints
+const getImagePreviewUrl = (url: string): string => {
+    // Return the original URL as the server might not support query parameters
+    return url
 }
 
 export default function UploadsList({
@@ -115,7 +128,7 @@ export default function UploadsList({
         await deleteUpload(upload.filename)
     }
 
-    // Handle deletes selected button click
+    // Handle deletes the selected button click
     const handleDeleteSelected = async () => {
         // Delete all selected uploads one by one
         for (const filename of selectedUploads) {
@@ -201,7 +214,26 @@ export default function UploadsList({
                                     </TableCell>
                                     <TableCell className="p-2">
                                         <div className="flex items-center">
-                                            <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                            {isImageFile(upload.filename) && upload.url ? (
+                                                <TooltipProvider delayDuration={300}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <span className="inline-block cursor-pointer">
+                                                                <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                                            </span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="right" className="p-0 overflow-hidden">
+                                                            <img
+                                                                src={getImagePreviewUrl(upload.url)}
+                                                                alt={upload.filename}
+                                                                className="max-w-[600px] max-h-[600px] object-contain"
+                                                            />
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            ) : (
+                                                <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                            )}
                                             <span className="text-sm font-medium">{upload.filename}</span>
                                         </div>
                                     </TableCell>
