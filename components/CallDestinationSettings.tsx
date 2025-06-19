@@ -10,10 +10,12 @@ interface CallDestinationSettingsProps {
     numberData: DetailedNumberInfo
     formData: Partial<DetailedNumberInfo>
     onInputChange: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    formErrors: Record<string, string>
 }
 
-export default function CallDestinationSettings({ numberData, formData, onInputChange }: CallDestinationSettingsProps) {
+export default function CallDestinationSettings({ numberData, formData, onInputChange, formErrors }: CallDestinationSettingsProps) {
     const t = useTranslations('number-edit')
+    const errorT = useTranslations('offers')
 
     return (
         <Show when={numberData.call_destination !== undefined}>
@@ -25,7 +27,11 @@ export default function CallDestinationSettings({ numberData, formData, onInputC
                         <Input
                             value={formData.call_destination || ''}
                             onChange={(e) => onInputChange('call_destination', e.target.value)}
+                            className={formErrors.call_destination ? 'border-red-500' : ''}
                         />
+                        {formErrors.call_destination && (
+                            <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.call_destination)}</p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('call_priority')}</label>
@@ -33,14 +39,22 @@ export default function CallDestinationSettings({ numberData, formData, onInputC
                             type="number"
                             value={formData.call_priority || ''}
                             onChange={(e) => onInputChange('call_priority', e.target.value ? parseInt(e.target.value) : null)}
+                            className={formErrors.call_priority ? 'border-red-500' : ''}
                         />
+                        {formErrors.call_priority && (
+                            <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.call_priority)}</p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('follow_droid_caller_id')}</label>
                         <Input
                             value={formData.follow_droid_caller_id || ''}
                             onChange={(e) => onInputChange('follow_droid_caller_id', e.target.value)}
+                            className={formErrors.follow_droid_caller_id ? 'border-red-500' : ''}
                         />
+                        {formErrors.follow_droid_caller_id && (
+                            <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.follow_droid_caller_id)}</p>
+                        )}
                     </div>
                 </div>
 

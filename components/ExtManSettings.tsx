@@ -10,10 +10,12 @@ interface ExtManSettingsProps {
     numberData: DetailedNumberInfo
     formData: Partial<DetailedNumberInfo>
     onInputChange: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    formErrors: Record<string, string>
 }
 
-export default function ExtManSettings({ numberData, formData, onInputChange }: ExtManSettingsProps) {
+export default function ExtManSettings({ numberData, formData, onInputChange, formErrors }: ExtManSettingsProps) {
     const t = useTranslations('number-edit')
+    const errorT = useTranslations('offers')
 
     return (
         <Show when={numberData.ff_num !== undefined || numberData.type_num1 !== undefined}>
@@ -99,7 +101,11 @@ export default function ExtManSettings({ numberData, formData, onInputChange }: 
                             type="email"
                             value={formData.vm_email || ''}
                             onChange={(e) => onInputChange('vm_email', e.target.value)}
+                            className={formErrors.vm_email ? 'border-red-500' : ''}
                         />
+                        {formErrors.vm_email && (
+                            <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.vm_email)}</p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('vm_beep')}</label>

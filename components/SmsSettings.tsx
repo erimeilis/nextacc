@@ -10,10 +10,12 @@ interface SmsSettingsProps {
     numberData: DetailedNumberInfo
     formData: Partial<DetailedNumberInfo>
     onInputChange: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    formErrors: Record<string, string>
 }
 
-export default function SmsSettings({ numberData, formData, onInputChange }: SmsSettingsProps) {
+export default function SmsSettings({ numberData, formData, onInputChange, formErrors }: SmsSettingsProps) {
     const t = useTranslations('number-edit')
+    const errorT = useTranslations('offers')
 
     return (
         <Show when={numberData.sms_activated !== undefined}>
@@ -45,7 +47,11 @@ export default function SmsSettings({ numberData, formData, onInputChange }: Sms
                                 value={formData.forward_email || ''}
                                 onChange={(e) => onInputChange('forward_email', e.target.value)}
                                 disabled={!formData.forward_email_activate}
+                                className={formErrors.forward_email ? 'border-red-500' : ''}
                             />
+                            {formErrors.forward_email && (
+                                <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.forward_email)}</p>
+                            )}
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -63,7 +69,11 @@ export default function SmsSettings({ numberData, formData, onInputChange }: Sms
                                 value={formData.forward_http || ''}
                                 onChange={(e) => onInputChange('forward_http', e.target.value)}
                                 disabled={!formData.forward_http_activate}
+                                className={formErrors.forward_http ? 'border-red-500' : ''}
                             />
+                            {formErrors.forward_http && (
+                                <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.forward_http)}</p>
+                            )}
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -80,7 +90,11 @@ export default function SmsSettings({ numberData, formData, onInputChange }: Sms
                                 value={formData.forward_telegram || ''}
                                 onChange={(e) => onInputChange('forward_telegram', e.target.value)}
                                 disabled={!formData.forward_telegram_activate}
+                                className={formErrors.forward_telegram ? 'border-red-500' : ''}
                             />
+                            {formErrors.forward_telegram && (
+                                <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.forward_telegram)}</p>
+                            )}
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -97,7 +111,11 @@ export default function SmsSettings({ numberData, formData, onInputChange }: Sms
                                 value={formData.forward_slack || ''}
                                 onChange={(e) => onInputChange('forward_slack', e.target.value)}
                                 disabled={!formData.forward_slack_activate}
+                                className={formErrors.forward_slack ? 'border-red-500' : ''}
                             />
+                            {formErrors.forward_slack && (
+                                <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.forward_slack)}</p>
+                            )}
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -114,7 +132,11 @@ export default function SmsSettings({ numberData, formData, onInputChange }: Sms
                                 value={formData.forward_sms || ''}
                                 onChange={(e) => onInputChange('forward_sms', e.target.value)}
                                 disabled={!formData.forward_sms_activate}
+                                className={formErrors.forward_sms ? 'border-red-500' : ''}
                             />
+                            {formErrors.forward_sms && (
+                                <p className="flex items-center w-fit transition-transform duration-300 font-medium tracking-wide text-destructive-foreground text-xs mt-1.5 px-2 py-1 bg-destructive rounded-md">{errorT(formErrors.forward_sms)}</p>
+                            )}
                         </div>
                     </div>
                 </div>

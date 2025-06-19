@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react'
 import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {Button} from '@/components/ui/Button'
-import {ArrowLeftIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
+import {ArrowLeftIcon, CircleNotchIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
 import {redGetNumberDetails, redUpdateNumberDetails} from '@/app/api/redreport/numbers'
 import Loader from '@/components/service/Loader'
 import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
@@ -11,6 +11,11 @@ import ExtManSettings from '../ExtManSettings'
 import SmsSettings from '../SmsSettings'
 import CallDestinationSettings from '../CallDestinationSettings'
 import {useToast} from '@/hooks/use-toast'
+import {schemaNumberEdit} from '@/schemas/numberEdit.schema'
+import {validateFormData, validateInputData} from '@/utils/validation'
+import {schemaEmail} from '@/schemas/email.schema'
+import {schemaPhone} from '@/schemas/phone.schema'
+import {schemaHttps} from '@/schemas/https.schema'
 
 export default function NumberEditPage() {
     const params = useParams()
@@ -18,12 +23,14 @@ export default function NumberEditPage() {
     const searchParams = useSearchParams()
     const number = params?.number as string
     const t = useTranslations('number-edit')
+    const toastT = useTranslations('toast')
     const {toast} = useToast()
 
     const [numberData, setNumberData] = useState<DetailedNumberInfo | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [formData, setFormData] = useState<Partial<DetailedNumberInfo>>({})
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
     // Load number details on component mount
     useEffect(() => {
@@ -53,11 +60,72 @@ export default function NumberEditPage() {
             ...prev,
             [field]: value
         }))
+
+        // Real-time validation for specific fields
+        let validationError = ''
+        if (typeof value === 'string' && value.trim() !== '') {
+            switch (field) {
+                case 'vm_email':
+                case 'forward_email':
+                    const emailResult = validateInputData(schemaEmail, value)
+                    validationError = emailResult.error || ''
+                    break
+                case 'forward_sms':
+                    const phoneResult = validateInputData(schemaPhone, value)
+                    validationError = phoneResult.error || ''
+                    break
+                case 'forward_http':
+                case 'forward_telegram':
+                case 'forward_slack':
+                    const urlResult = validateInputData(schemaHttps, value)
+                    validationError = urlResult.error || ''
+                    break
+            }
+        }
+
+        // Update form errors
+        setFormErrors(prev => {
+            const newErrors = {...prev}
+            if (validationError) {
+                newErrors[field] = validationError
+            } else {
+                delete newErrors[field]
+            }
+            return newErrors
+        })
     }
 
     // Handle form submission
     const handleSave = async () => {
         if (!number || !formData) return
+
+        // Clear previous form errors
+        setFormErrors({})
+
+        // Validate form data
+        const {errors} = validateFormData(schemaNumberEdit, formData)
+
+        // If there are validation errors, display them and stop submission
+        if (errors) {
+            // Convert errors from Record<string, string[] | undefined> to Record<string, string>
+            const formattedErrors: Record<string, string> = {}
+            Object.entries(errors).forEach(([key, value]) => {
+                if (value && Array.isArray(value) && value.length > 0) {
+                    formattedErrors[key] = value[0] // Take the first error message
+                }
+            })
+            setFormErrors(formattedErrors)
+            console.error('Validation errors:', errors)
+
+            // Show error toast for validation
+            toast({
+                variant: 'destructive',
+                title: toastT('validation_error_title'),
+                description: toastT('validation_error_description'),
+            })
+
+            return
+        }
 
         setSaving(true)
         try {
@@ -67,8 +135,9 @@ export default function NumberEditPage() {
 
                 // Show success toast
                 toast({
-                    title: t('save_success'),
-                    description: t('number_updated_successfully'),
+                    variant: 'success',
+                    title: toastT('success_title'),
+                    description: toastT('number_updated_successfully'),
                 })
             }
         } catch (error) {
@@ -76,9 +145,9 @@ export default function NumberEditPage() {
 
             // Show error toast
             toast({
-                title: t('save_error'),
-                description: t('failed_to_save_changes'),
                 variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('failed_to_save_changes'),
             })
         } finally {
             setSaving(false)
@@ -143,7 +212,11 @@ export default function NumberEditPage() {
                         title={saving ? t('saving') : t('save_changes')}
                         className="h-7 w-7"
                     >
-                        <FloppyDiskIcon size={16}/>
+                        {saving ? (
+                            <CircleNotchIcon size={16} className="animate-spin"/>
+                        ) : (
+                            <FloppyDiskIcon size={16}/>
+                        )}
                     </Button>
                 </div>
             </div>
@@ -155,6 +228,7 @@ export default function NumberEditPage() {
                     numberData={numberData}
                     formData={formData}
                     onInputChange={handleInputChange}
+                    formErrors={formErrors}
                 />
 
                 {/* SMS Settings */}
@@ -162,6 +236,7 @@ export default function NumberEditPage() {
                     numberData={numberData}
                     formData={formData}
                     onInputChange={handleInputChange}
+                    formErrors={formErrors}
                 />
 
                 {/* Call Destination Settings */}
@@ -169,6 +244,7 @@ export default function NumberEditPage() {
                     numberData={numberData}
                     formData={formData}
                     onInputChange={handleInputChange}
+                    formErrors={formErrors}
                 />
             </div>
 
@@ -191,7 +267,11 @@ export default function NumberEditPage() {
                     title={saving ? t('saving') : t('save_changes')}
                     className="h-7 w-7"
                 >
-                    <FloppyDiskIcon size={16}/>
+                    {saving ? (
+                        <CircleNotchIcon size={16} className="animate-spin"/>
+                    ) : (
+                        <FloppyDiskIcon size={16}/>
+                    )}
                 </Button>
             </div>
         </>

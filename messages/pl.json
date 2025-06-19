@@ -63,6 +63,8 @@
     "invalid_telegram_username": "Nieprawidłowa nazwa użytkownika Telegram",
     "invalid_sip": "Nieprawidłowy SIP",
     "invalid_url": "Nieprawidłowy URL",
+    "invalid_time": "Nieprawidłowa wartość czasu",
+    "invalid_number": "Nieprawidłowy numer",
     "pay_for": "Zapłać za:",
     "month": "{count, plural, one {miesiąc} few {miesiące} many {miesiący} other {miesiąca}}",
     "select_qty": "Ilość",
