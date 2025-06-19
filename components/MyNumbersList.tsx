@@ -1,5 +1,6 @@
 'use client'
 import React, {useState} from 'react'
+import {useRouter, useSearchParams} from 'next/navigation'
 import Show from '@/components/service/Show'
 import {NumberInfo} from '@/types/NumberInfo'
 import Loader from '@/components/service/Loader'
@@ -17,6 +18,8 @@ export default function MyNumbersList({
     options: NumberInfo[] | null
 }) {
     const t = useTranslations('dashboard')
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
@@ -65,8 +68,10 @@ export default function MyNumbersList({
 
     // Handle settings button click
     const handleSettings = (number: NumberInfo) => {
-        // This would open a dialog with number settings
-        console.log('Open settings for', number.did)
+        // Navigate to number edit page with current search params
+        const currentParams = new URLSearchParams(searchParams?.toString())
+        const editUrl = `/numbers/${number.did}/?${currentParams.toString()}`
+        router.push(editUrl)
     }
 
     // Handle call statistics button click

@@ -9,7 +9,7 @@ export default function TransactionsPage() {
     const {getTransactions, updateTransactions} = useClientStore()
     const transactions = getTransactions()
 
-    // Set data from store immediately if available
+    // Set data from the store immediately if available
     useEffect(() => {
         if (transactions) {
             console.log('Setting transactions from store:', transactions.length, 'items')
