@@ -8,7 +8,7 @@ import {redGetUserProfile} from '@/app/api/redreport/profile'
 import {getClientInfo} from '@/app/api/other/ipinfo'
 import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
 import {redGetMyNumbers} from '@/app/api/redreport/numbers'
-import {redGetMyUploads, redUploadFile, redDeleteUpload} from '@/app/api/redreport/uploads'
+import {redGetMyUploads, redUploadFile, redDeleteUpload, redRenameFile} from '@/app/api/redreport/uploads'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -27,6 +27,7 @@ interface ClientStore {
     updateUploads: () => Promise<UploadInfo[] | null>
     uploadFile: (file: File) => Promise<boolean>
     deleteUpload: (fileId: string) => Promise<boolean>
+    renameFile: (filename: string, name: string) => Promise<boolean>
     reset: () => void
     isUserLoggedIn: () => boolean // Add this new method
     ensureUserLoggedIn: () => boolean
@@ -216,6 +217,17 @@ export const useClientStore = create<ClientStore>()(
                         ...state,
                         uploads: state.uploads?.filter(upload => upload.filename !== fileId) || null,
                     }))
+                }
+
+                return success
+            },
+
+            renameFile: async (filename: string, name: string): Promise<boolean> => {
+                const success = await redRenameFile(filename, name)
+
+                if (success) {
+                    // Refresh the upload list to get updated data
+                    await get().updateUploads()
                 }
 
                 return success

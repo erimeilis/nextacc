@@ -5,15 +5,16 @@ import {cn} from '@/lib/utils'
 
 const Checkbox = React.forwardRef<
     HTMLInputElement,
-    React.InputHTMLAttributes<HTMLInputElement> & { onCheckedChange?: (checked: boolean) => void }
->(({className, onCheckedChange, ...props}, ref) => {
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+    onCheckedChange?: (checked: boolean) => void
+    variant?: 'default' | 'sm'
+}
+>(({className, onCheckedChange, variant = 'default', ...props}, ref) => {
     // We don't need to track checked state internally, we'll use the props directly
     // This ensures the component always reflects the current props.checked value
     const checked = props.checked || false
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('Checkbox handleChange called with:', e.target.checked)
-
         // Call the onCheckedChange prop with the checked state if it exists
         onCheckedChange?.(e.target.checked)
 
@@ -34,11 +35,25 @@ const Checkbox = React.forwardRef<
             onCheckedChange?.(!checked)
 
             // Also trigger the onChange event on the input element
-            const event = new Event('change', { bubbles: true })
-            Object.defineProperty(event, 'target', { value: { checked: !checked } })
+            const event = new Event('change', {bubbles: true})
+            Object.defineProperty(event, 'target', {value: {checked: !checked}})
             inputRef.current.dispatchEvent(event)
         }
     }
+
+    // Size-based dimensions
+    const sizeClasses = {
+        default: {
+            container: 'h-4 w-4',
+            icon: 'h-3 w-3'
+        },
+        sm: {
+            container: 'h-3 w-3',
+            icon: 'h-2 w-2'
+        }
+    } as const
+
+    const currentSize = sizeClasses[variant]
 
     return (
         <div className="relative flex items-center">
@@ -64,7 +79,8 @@ const Checkbox = React.forwardRef<
             <div
                 onClick={handleCustomCheckboxClick}
                 className={cn(
-                    'h-4 w-4 rounded-full border border-primary flex items-center justify-center cursor-pointer',
+                    currentSize.container,
+                    'rounded-full border border-primary flex items-center justify-center cursor-pointer',
                     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     props.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
                     checked ? 'bg-primary border-primary' : 'bg-transparent',
@@ -73,7 +89,8 @@ const Checkbox = React.forwardRef<
             >
                 <CheckIcon
                     className={cn(
-                        'h-3 w-3 text-primary-foreground transition-opacity duration-200',
+                        currentSize.icon,
+                        'text-primary-foreground transition-opacity duration-200',
                         checked ? 'opacity-100' : 'opacity-0'
                     )}
                 />

@@ -86,3 +86,33 @@ export async function redDeleteUpload(fileId: string): Promise<boolean> {
             return false
         })
 }
+
+export async function redRenameFile(filename: string, name: string): Promise<boolean> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return false
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        method: 'PATCH',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        },
+        body: JSON.stringify({
+            filename: filename,
+            name: name
+        })
+    }
+
+    return fetch(url.toString(), options)
+        .then((res: Response) => {
+            return res.ok
+        })
+        .catch((err) => {
+            console.log('redRenameFile error: ', err.message)
+            return false
+        })
+}

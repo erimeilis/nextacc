@@ -23,7 +23,10 @@ export default function LineInput({
                                       customClass,
                                       error = '',
                                       size = 'md',
-                                      disabled = false
+                                      disabled = false,
+                                      onKeyDown,
+                                      onBlur,
+                                      autoFocus = false
                                   }: {
     handleAction?: (event: ChangeEvent<HTMLInputElement>) => void
     value: string
@@ -36,8 +39,11 @@ export default function LineInput({
     placeholder?: string
     customClass?: string
     error?: string
-    size?: 'sm' | 'md' | 'lg'
+    size?: 'xs' | 'sm' | 'md' | 'lg'
     disabled?: boolean
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
+    autoFocus?: boolean
 }) {
     const displayErr = error === '' ? 'invisible' : 'visible'
     const displayEye = type === 'password' ? 'visible' : 'invisible'
@@ -47,14 +53,18 @@ export default function LineInput({
         setTypeState(typeState === 'password' ? 'text' : 'password')
     }
 
+    const hasLabel = labelText && labelText.trim() !== ''
+
     return (
         <div className="flex flex-row w-full">
-            <Label
-                htmlFor={labelFor}
-                className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground"
-            >
-                {labelText}:
-            </Label>
+            {hasLabel && (
+                <Label
+                    htmlFor={labelFor}
+                    className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground"
+                >
+                    {labelText}:
+                </Label>
+            )}
             <div className="relative flex-grow flex items-end">
                 <Input
                     onChange={handleAction}
@@ -62,11 +72,14 @@ export default function LineInput({
                     id={id}
                     name={name}
                     type={typeState}
-                    className={`bg-transparent border-0 border-b border-input rounded-none py-0 mb-0 text-right sm:text-left ${customClass} ${size === 'sm' ? 'h-8 text-sm' : size === 'lg' ? 'h-12 text-lg' : 'h-10'}`}
+                    className={`bg-transparent border-0 border-b border-input rounded-none py-0 mb-0 ${hasLabel ? 'text-right sm:text-left' : 'text-left'} ${customClass} ${size === 'xs' ? 'text-xs' : size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-lg' : ''}`}
                     placeholder={placeholder}
                     required={isRequired}
                     disabled={disabled}
                     readOnly={disabled}
+                    onKeyDown={onKeyDown}
+                    onBlur={onBlur}
+                    autoFocus={autoFocus}
                 />
                 <div className={'absolute flex border border-transparent right-0 top-0 h-full w-10 ' + displayEye}>
                     <button type="button" tabIndex={-1} aria-hidden="true" className="flex items-center justify-center rounded-tl rounded-bl z-10

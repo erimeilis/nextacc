@@ -154,6 +154,7 @@ export default function MoneyTransactionsList({
             component: (
                 <Checkbox
                     id="reseller-filter"
+                    variant="sm"
                 />
             ),
             applyFilter: (item, filterValue) => {

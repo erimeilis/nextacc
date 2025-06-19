@@ -49,7 +49,22 @@ export default function OffersPage() {
         if (searchParams && !searchParams.has('area')) {
             setLocalNumbersMap(null)
         }
-    }, [searchParams, pathName, router])
+        if (searchParams &&
+            searchParams.has('number') &&
+            localNumbersMap &&
+            (
+                !localNumbersMap.some(numberInfo => numberInfo.did === searchParams.get('number')) ||
+                cart.some(cartItem => {
+                    // Check if cartItem.did is numeric
+                    const isNumeric = /^\d+$/.test(cartItem.did)
+                    // If it's numeric and matches the current number's did, return true (this item is in the cart)
+                    return isNumeric && cartItem.did === searchParams.get('number')
+                }))
+        ) {
+            // If the number is not in the localNumbersMap (not available), redirect to a path without a number
+            router.push(pathName + '?' + CreateQueryString('', '', searchParams, ['number']))
+        }
+    }, [searchParams, pathName, router, localNumbersMap, cart])
 
     const type = searchParams ? searchParams.get('type') : null
     const countryBySlug = (searchParams && searchParams.has('country')) ?

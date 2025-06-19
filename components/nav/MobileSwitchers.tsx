@@ -8,7 +8,11 @@ import {Button} from '@/components/ui/Button'
 import {MoonIcon, PaletteIcon, SunIcon, TranslateIcon} from '@phosphor-icons/react'
 import usePersistState from '@/utils/usePersistState'
 
-export default function MobileSwitchers() {
+interface MobileSwitchersProps {
+    dropDirection?: 'up' | 'down'
+}
+
+export default function MobileSwitchers({ dropDirection = 'up' }: MobileSwitchersProps) {
     const t = useTranslations('common')
     const pathName = usePathname()
     const searchParams = useSearchParams()
@@ -113,8 +117,8 @@ export default function MobileSwitchers() {
                 </Button>
             </div>
 
-            {/* Language Accordion - positioned above on mobile */}
-            <div className={`absolute bottom-full left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out mb-2 ${expandedSection === 'language' ? 'max-h-40' : 'max-h-0'}`}>
+            {/* Language Accordion - positioned based on dropDirection */}
+            <div className={`absolute ${dropDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'language' ? 'max-h-40' : 'max-h-0'}`}>
                 <div className="p-2 bg-background/95 dark:bg-background/95 shadow-md backdrop-blur-sm rounded-md w-full border border-border">
                     <div className="flex flex-col space-y-1">
                         {routing.locales.map((locale) => (
@@ -136,8 +140,8 @@ export default function MobileSwitchers() {
                 </div>
             </div>
 
-            {/* Color Theme Accordion - positioned above on mobile */}
-            <div className={`absolute bottom-full left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out mb-2 ${expandedSection === 'colorTheme' ? 'max-h-40' : 'max-h-0'}`}>
+            {/* Color Theme Accordion - positioned based on dropDirection */}
+            <div className={`absolute ${dropDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out ${expandedSection === 'colorTheme' ? 'max-h-40' : 'max-h-0'}`}>
                 <div className="p-2 bg-background/95 dark:bg-background/95 shadow-md backdrop-blur-sm rounded-md w-full border border-border">
                     <div className="flex flex-col space-y-1">
                         {colorThemes.map((themeOption) => (

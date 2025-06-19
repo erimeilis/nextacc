@@ -8,13 +8,14 @@ import {resetPersistentId} from '@/utils/resetPersistentId'
 import LineInput from '@/components/shared/LineInput'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
-import {CheckCircleIcon, PencilIcon, XIcon} from '@phosphor-icons/react'
+import {CheckCircleIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
 import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
 import {profileFields} from '@/constants/profileFields'
 import Show from '@/components/service/Show'
 import {useSearchParams} from 'next/navigation'
+import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 
 const profileFieldsState: { [index: string]: string } = {}
 profileFields.forEach((field: InputField) => profileFieldsState[field.id] = '')
@@ -139,39 +140,42 @@ export default function Profile({
                     method="post"
                 >
                     <div className="flex flex-col w-full">
-                        {profileFields.map((field, i) =>
-                            <div
-                                key={field.id}
-                                className={(i % 2 != 0 ? 'bg-secondary/50 dark:bg-secondary/40' : '')}
-                            >
-                                <Show
-                                    when={modeEditProfile}
-                                    fallback={
-                                        <div className="flex flex-row w-full">
-                                            <div className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground">
-                                                {t(field.labelText)}:
-                                            </div>
-                                            <div className="flex-grow p-2 text-xs sm:text-sm text-right sm:text-left">
-                                                {profileState[field.id]}
-                                            </div>
-                                        </div>}
-                                >
-                                    <LineInput
-                                        handleAction={handleProfileChange}
-                                        value={profileState[field.id]}
-                                        labelText={t(field.labelText)}
-                                        labelFor={field.labelFor}
-                                        id={field.id}
-                                        name={field.name}
-                                        type={field.type}
-                                        isRequired={field.isRequired}
-                                        placeholder={t(field.placeholder)}
-                                        size="sm"
-                                        customClass=""
-                                    />
-                                </Show>
-                            </div>
-                        )}
+                        <Table striped className="[&_td]:py-2 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
+                            <TableBody>
+                                {profileFields.map((field) =>
+                                    <TableRow key={field.id}>
+                                        <Show
+                                            when={modeEditProfile}
+                                            fallback={
+                                                <>
+                                                    <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">
+                                                        {t(field.labelText)}:
+                                                    </TableCell>
+                                                    <TableCell className="text-right sm:text-left">
+                                                        {profileState[field.id]}
+                                                    </TableCell>
+                                                </>
+                                            }
+                                        >
+                                            <TableCell colSpan={2} className="p-0">
+                                                <LineInput
+                                                    handleAction={handleProfileChange}
+                                                    value={profileState[field.id]}
+                                                    labelText={t(field.labelText)}
+                                                    labelFor={field.labelFor}
+                                                    id={field.id}
+                                                    name={field.name}
+                                                    type={field.type}
+                                                    isRequired={field.isRequired}
+                                                    placeholder={t(field.placeholder)}
+                                                    size="xs"
+                                                />
+                                            </TableCell>
+                                        </Show>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </div>
                     <div className="flex flex-row sm:flex-col justify-center sm:justify-end mt-4 sm:mt-0 sm:min-w-36">
                         <Show
@@ -182,7 +186,7 @@ export default function Profile({
                                         type="button"
                                         onClick={handleToggle}
                                         className="flex text-nowrap text-xs mb-2"
-                                        icon={PencilIcon}
+                                        icon={PenNibIcon}
                                     >
                                         {t('edit_profile')}
                                     </ActionButton>

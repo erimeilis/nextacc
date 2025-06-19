@@ -12,8 +12,8 @@ const Table = React.forwardRef<
         <table
             ref={ref}
             className={cn(
-                'w-full caption-bottom text-sm',
-                striped && 'table-striped',
+                'w-full caption-bottom text-sm [&_tbody_tr]:hover:bg-muted/50 [&_tbody_tr]:transition-colors',
+                striped && '[&_tbody_tr:nth-child(odd)]:bg-white [&_tbody_tr:nth-child(even)]:bg-muted/30 dark:[&_tbody_tr:nth-child(odd)]:bg-card dark:[&_tbody_tr:nth-child(even)]:bg-muted/20',
                 className
             )}
             {...props}
@@ -58,15 +58,12 @@ TableFooter.displayName = 'TableFooter'
 
 const TableRow = React.forwardRef<
     HTMLTableRowElement,
-    React.HTMLAttributes<HTMLTableRowElement> & {
-    striped?: boolean
-}
->(({className, striped, ...props}, ref) => (
+    React.HTMLAttributes<HTMLTableRowElement>
+>(({className, ...props}, ref) => (
     <tr
         ref={ref}
         className={cn(
-            'border-b border-border/25 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
-            striped && 'odd:bg-white even:bg-muted/50 dark:odd:bg-card dark:even:bg-muted/50',
+            'border-b border-border/25 transition-colors data-[state=selected]:bg-muted',
             className
         )}
         {...props}

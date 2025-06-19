@@ -61,21 +61,27 @@ export default function Layout({children}: { children: React.ReactNode }) {
                  }>
         <div className="flex flex-col rounded-none sm:rounded-lg w-full border-none sm:border border-border bg-gradient-to-br from-secondary to-background drop-shadow text-foreground
         dark:border-border dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground overflow-hidden">
-            <nav className="flex flex-row w-full bg-muted dark:bg-muted overflow-x-auto whitespace-nowrap" style={{ scrollbarWidth: 'thin' }}>
+            <nav className="flex flex-row w-full bg-muted dark:bg-muted overflow-x-auto whitespace-nowrap" style={{scrollbarWidth: 'thin'}}>
                 {profileTabs.map(tab =>
                     <Tab
                         key={tab.slug}
                         type="button"
                         onClick={() => {
-                            // Update active tab state immediately
+                            // Don't allow clicking on the already active tab
+                            if (activeTab === tab.slug) {
+                                return
+                            }
+                            // Update the active tab state immediately
                             setActiveTab(tab.slug)
-                            // Set loading state to true
+                            // Set the loading state to true
                             setIsLoading(true)
                             // Then initiate route change
                             router.push('/' + tab.slug + search)
                         }}
                         active={activeTab === tab.slug}
+                        isLoading={isLoading && activeTab === tab.slug}
                         icon={tab.icon}
+                        iconSize="h-4 w-4"
                     >
                         {t(tab.name)}
                     </Tab>

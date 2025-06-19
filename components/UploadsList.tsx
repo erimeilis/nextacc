@@ -5,7 +5,7 @@ import {UploadInfo} from '@/types/UploadInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {DownloadIcon, FileIcon, MagnifyingGlassIcon, TrashIcon} from '@phosphor-icons/react'
+import {CircleNotchIcon, DownloadIcon, FileIcon, MagnifyingGlassIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
 import FileUploader from '@/components/FileUploader'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
@@ -15,6 +15,7 @@ import {Input} from '@/components/ui/Input'
 import {useClientStore} from '@/stores/useClientStore'
 import {formatFileSize} from '@/utils/formatFileSize'
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from '@/components/ui/Tooltip'
+import LineInput from '@/components/shared/LineInput'
 
 // Function to get content type from filename extension
 const getContentTypeFromFilename = (filename: string): string => {
@@ -67,14 +68,18 @@ export default function UploadsList({
     const [selectedUploads, setSelectedUploads] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
     const [isUploading, setIsUploading] = useState<boolean>(false)
-    const {uploadFile, deleteUpload} = useClientStore()
+    const [editingFile, setEditingFile] = useState<string | null>(null)
+    const [editingName, setEditingName] = useState<string>('')
+    const [savingFile, setSavingFile] = useState<string | null>(null)
+    const {uploadFile, deleteUpload, renameFile} = useClientStore()
 
     // Filter uploads based on a search query
     const filteredOptions = options?.filter(option => {
         const contentType = getContentTypeFromFilename(option.filename)
         return searchQuery === '' ||
             option.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            contentType.toLowerCase().includes(searchQuery.toLowerCase())
+            contentType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (option.name && option.name.toLowerCase().includes(searchQuery.toLowerCase()))
     }) || null
 
     // Calculate totals
@@ -138,6 +143,45 @@ export default function UploadsList({
         setSelectedUploads([])
     }
 
+    // Handle edit button click
+    const handleEditStart = (upload: UploadInfo) => {
+        setEditingFile(upload.filename)
+        setEditingName(upload.name || upload.filename)
+    }
+
+    // Handle edit cancel
+    const handleEditCancel = () => {
+        setEditingFile(null)
+        setEditingName('')
+    }
+
+    // Handle edit save
+    const handleEditSave = async (filename: string) => {
+        if (editingName.trim()) {
+            setSavingFile(filename)
+            const success = await renameFile(filename, editingName.trim())
+            setSavingFile(null)
+            if (success) {
+                setEditingFile(null)
+                setEditingName('')
+            }
+        }
+    }
+
+    // Handle edit input change
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditingName(e.target.value)
+    }
+
+    // Handle edit input key press
+    const handleEditKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, filename: string) => {
+        if (e.key === 'Enter') {
+            handleEditSave(filename).then()
+        } else if (e.key === 'Escape') {
+            handleEditCancel()
+        }
+    }
+
     return (
         <Show when={options !== null}
               fallback={options?.length === 0 ?
@@ -175,22 +219,25 @@ export default function UploadsList({
 
                 {/* Table */}
                 <div className="overflow-x-auto">
-                    <Table>
+                    <Table striped className="[&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                         <TableBody>
                             {/* Header row */}
                             <TableRow className="bg-muted/30 hover:bg-muted/30">
                                 <TableCell className="w-10 p-2"></TableCell>
                                 <TableCell className="font-medium text-xs p-2">{t('filename')}</TableCell>
-                                <TableCell className="font-medium text-xs p-2">{t('type')}</TableCell>
-                                <TableCell className="font-medium text-xs p-2">{t('size')}</TableCell>
-                                <TableCell className="font-medium text-xs p-2">{t('upload_date')}</TableCell>
+                                <TableCell className="font-medium text-xs p-2 hidden sm:table-cell">{t('type')}</TableCell>
+                                <TableCell className="font-medium text-xs p-2 hidden sm:table-cell">{t('size')}</TableCell>
+                                <TableCell className="font-medium text-xs p-2 hidden sm:table-cell">{t('upload_date')}</TableCell>
                                 <TableCell className="font-medium text-xs p-2 text-right">{t('actions')}</TableCell>
                             </TableRow>
 
                             {/* No results row */}
                             {filteredOptions?.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    <TableCell colSpan={3} className="h-24 text-center sm:hidden">
+                                        {t('no_results')}
+                                    </TableCell>
+                                    <TableCell colSpan={6} className="h-24 text-center hidden sm:table-cell">
                                         {t('no_results')}
                                     </TableCell>
                                 </TableRow>
@@ -201,49 +248,84 @@ export default function UploadsList({
                                 <TableRow
                                     key={`${upload.filename}-${index}`}
                                     className={cn(
-                                        'hover:bg-muted/50 transition-colors',
                                         selectedUploads.includes(upload.filename) && 'bg-muted/30'
                                     )}
                                 >
-                                    <TableCell className="w-10 p-2">
+                                    <TableCell className="p-2">
                                         <Checkbox
                                             checked={selectedUploads.includes(upload.filename)}
                                             onCheckedChange={(checked) => handleSelectUpload(upload.filename, checked)}
                                             aria-label={`Select ${upload.filename}`}
+                                            variant="sm"
                                         />
                                     </TableCell>
                                     <TableCell className="p-2">
                                         <div className="flex items-center">
-                                            {isImageFile(upload.filename) && upload.url ? (
-                                                <TooltipProvider delayDuration={300}>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <span className="inline-block cursor-pointer">
-                                                                <FileIcon className="mr-2 text-muted-foreground" size={16}/>
-                                                            </span>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="right" className="p-0 overflow-hidden">
-                                                            <img
-                                                                src={getImagePreviewUrl(upload.url)}
-                                                                alt={upload.filename}
-                                                                className="max-w-[600px] max-h-[600px] object-contain"
-                                                            />
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
+                                            {/* File icon with preview - hidden on mobile */}
+                                            <div className="hidden sm:block">
+                                                {isImageFile(upload.filename) && upload.url ? (
+                                                    <TooltipProvider delayDuration={300}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span className="inline-block cursor-pointer">
+                                                                    <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                                                </span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="right" className="p-0 overflow-hidden">
+                                                                <img
+                                                                    src={getImagePreviewUrl(upload.url)}
+                                                                    alt={upload.filename}
+                                                                    className="max-w-[600px] max-h-[600px] object-contain"
+                                                                />
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                ) : (
+                                                    <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                                )}
+                                            </div>
+                                            {editingFile === upload.filename ? (
+                                                <LineInput
+                                                    value={editingName}
+                                                    handleAction={handleEditInputChange}
+                                                    onKeyDown={(e) => handleEditKeyPress(e, upload.filename)}
+                                                    onBlur={() => handleEditSave(upload.filename)}
+                                                    size="xs"
+                                                    autoFocus
+                                                    id={upload.filename}
+                                                    name={upload.filename}
+                                                    type="text"/>
                                             ) : (
-                                                <FileIcon className="mr-2 text-muted-foreground" size={16}/>
+                                                <span
+                                                    className="cursor-pointer hover:text-primary transition-colors"
+                                                    onClick={() => handleEditStart(upload)}
+                                                >
+                                                    {upload.name && upload.name.trim() ? upload.name : upload.filename}
+                                                </span>
                                             )}
-                                            <span className="text-sm font-medium">{upload.filename}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-2 text-xs">{getContentTypeFromFilename(upload.filename)}</TableCell>
-                                    <TableCell className="p-2 text-xs">{formatFileSize(upload.size)}</TableCell>
-                                    <TableCell className="p-2 text-xs">
+                                    <TableCell className="p-2 text-xs hidden sm:table-cell">{getContentTypeFromFilename(upload.filename)}</TableCell>
+                                    <TableCell className="p-2 text-xs hidden sm:table-cell">{formatFileSize(upload.size)}</TableCell>
+                                    <TableCell className="p-2 text-xs hidden sm:table-cell">
                                         {upload.created_at ? <FormattedDate date={upload.created_at}/> : t('not_available')}
                                     </TableCell>
                                     <TableCell className="p-2 text-right">
                                         <div className="flex justify-end gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleEditStart(upload)}
+                                                className="h-7 w-7 hidden sm:inline-flex"
+                                                title={t('edit')}
+                                                disabled={savingFile === upload.filename}
+                                            >
+                                                {savingFile === upload.filename ? (
+                                                    <CircleNotchIcon size={16} className="animate-spin"/>
+                                                ) : (
+                                                    <PenNibIcon size={16}/>
+                                                )}
+                                            </Button>
                                             {upload.url && (
                                                 <Button
                                                     variant="ghost"
@@ -252,7 +334,7 @@ export default function UploadsList({
                                                     className="h-7 w-7"
                                                     title={t('download')}
                                                 >
-                                                    <DownloadIcon size={14}/>
+                                                    <DownloadIcon size={16}/>
                                                 </Button>
                                             )}
                                             <Button
@@ -262,7 +344,7 @@ export default function UploadsList({
                                                 className="h-7 w-7 text-destructive"
                                                 title={t('delete')}
                                             >
-                                                <TrashIcon size={14}/>
+                                                <XIcon size={16}/>
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -279,6 +361,7 @@ export default function UploadsList({
                             id="select-all"
                             checked={selectedUploads.length === (filteredOptions?.length || 0) && (filteredOptions?.length || 0) > 0}
                             onCheckedChange={(checked) => handleSelectAll(checked)}
+                            variant="sm"
                         />
                         <label htmlFor="select-all" className="ml-2 text-xs text-muted-foreground">
                             {t('select_all')}

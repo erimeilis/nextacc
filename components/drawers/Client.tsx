@@ -55,7 +55,7 @@ export default function Client({
                             <p className="text-lg font-medium">{session.data?.user?.name || 'User'}</p>
                             <p className="text-sm text-muted-foreground">{session.data?.user?.email || ''}</p>
                         </div>
-                        <MobileSwitchers/>
+                        <MobileSwitchers dropDirection="down"/>
                     </div>
 
                     <div className="space-y-2">
@@ -83,7 +83,7 @@ export default function Client({
                                     }, 100)
                                 }}
                             >
-                                {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-5 w-5'})}
+                                {tab.icon && React.createElement(tab.icon, {className: 'mr-2 h-4 w-4'})}
                                 <span>{tAction(tab.name)}</span>
                             </Button>
                         ))}

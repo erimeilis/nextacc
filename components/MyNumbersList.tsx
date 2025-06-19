@@ -5,11 +5,10 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PencilIcon, PhoneIcon, TrashIcon} from '@phosphor-icons/react'
+import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {FormattedDate} from '@/components/ui/FormattedDate'
-import {cn} from '@/lib/utils'
 import {Input} from '@/components/ui/Input'
 
 export default function MyNumbersList({
@@ -82,7 +81,7 @@ export default function MyNumbersList({
         console.log('Delete number', number.did)
     }
 
-    // Handle delete selected button click
+    // Handle deletes the selected button click
     const handleDeleteSelected = () => {
         // This would delete all selected numbers
         console.log('Delete selected numbers', selectedNumbers)
@@ -116,155 +115,171 @@ export default function MyNumbersList({
                 </div>
 
                 {/* Number list */}
-                {
-                    filteredOptions?.map((option, i) => (
-                        <div key={option.did.toString()} className="mb-1">
-                            <div className={cn('flex flex-row items-center w-full text-xs sm:text-sm py-0.5 px-2 gap-2', i % 2 != 0 ? 'bg-secondary/50 dark:bg-secondary/40' : '')}>
-                                {/* Checkbox */}
-                                <div className="flex items-center w-8">
-                                    <Checkbox
-                                        id={`checkbox-${option.did}`}
-                                        checked={selectedNumbers.includes(option.did)}
-                                        onCheckedChange={(checked) => handleSelectNumber(option.did, checked)}
-                                    />
-                                </div>
+                <div className="overflow-x-auto">
+                    <Table striped className="[&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
+                        <TableBody>
+                            {filteredOptions?.map((option) => (
+                                <React.Fragment key={option.did.toString()}>
+                                    <TableRow>
+                                        {/* Checkbox */}
+                                        <TableCell className="w-8">
+                                            <Checkbox
+                                                id={`checkbox-${option.did}`}
+                                                checked={selectedNumbers.includes(option.did)}
+                                                onCheckedChange={(checked) => handleSelectNumber(option.did, checked)}
+                                                variant="sm"
+                                            />
+                                        </TableCell>
 
-                                {/* Number and name */}
-                                <div className="flex flex-col flex-1">
-                                    <div>{option.did.toString()}</div>
-                                    <div className="text-xs text-muted-foreground">{option.name}</div>
-                                </div>
+                                        {/* Number and name */}
+                                        <TableCell className="flex-1">
+                                            <div className="flex flex-col">
+                                                <div>{option.did.toString()}</div>
+                                                <div className="text-xs text-muted-foreground">{option.name}</div>
+                                            </div>
+                                        </TableCell>
 
-                                {/* Feature icons */}
-                                <div className="flex items-center justify-center space-x-2 w-20">
-                                    {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
-                                    {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
-                                    {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
-                                </div>
+                                        {/* Feature icons */}
+                                        <TableCell className="w-20">
+                                            <div className="flex items-center justify-center space-x-2">
+                                                {option.voice && <PhoneIcon weight="fill" className="text-primary" size={16}/>}
+                                                {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={16}/>}
+                                                {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={16}/>}
+                                            </div>
+                                        </TableCell>
 
-                                {/* Action buttons */}
-                                <div className="flex items-center justify-end space-x-1 w-28">
-                                    <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title="Settings" className="h-7 w-7">
-                                        <PencilIcon size={14}/>
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title="Info" className="h-7 w-7">
-                                        <InfoIcon size={14}/>
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title="Call Statistics" className="h-7 w-7">
-                                        <ChartPieSliceIcon size={14}/>
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title="Delete" className="h-7 w-7 text-destructive">
-                                        <TrashIcon size={14}/>
-                                    </Button>
-                                </div>
-                            </div>
+                                        {/* Action buttons */}
+                                        <TableCell className="w-28">
+                                            <div className="flex items-center justify-end space-x-1">
+                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title="Settings" className="h-7 w-7">
+                                                    <PenNibIcon size={16}/>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title="Info" className="h-7 w-7">
+                                                    <InfoIcon size={16}/>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title="Call Statistics" className="h-7 w-7">
+                                                    <ChartPieSliceIcon size={16}/>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title="Delete" className="h-7 w-7 text-destructive">
+                                                    <XIcon size={16}/>
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
 
-                            {/* Expanded info section */}
-                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedNumbers.includes(option.did) ? 'max-h-96' : 'max-h-0'}`}>
-                                <div className="pl-10 pr-2 py-1 text-xs sm:text-sm bg-muted/20 border-l-2 border-muted/25 ml-2">
-                                    <Table className="w-full [&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
-                                        <TableBody>
-                                            {[
-                                                {
-                                                    label: t('did'),
-                                                    value: option.did,
-                                                    condition: true
-                                                },
-                                                {
-                                                    label: t('name'),
-                                                    value: option.name,
-                                                    condition: true
-                                                },
-                                                {
-                                                    label: t('location'),
-                                                    value: option.where_did,
-                                                    condition: !!option.where_did
-                                                },
-                                                {
-                                                    label: t('setup_fee'),
-                                                    value: `$${option.setup_rate?.toFixed(2) || '0.00'}`,
-                                                    condition: true
-                                                },
-                                                {
-                                                    label: t('monthly_fee'),
-                                                    value: `$${option.fix_rate?.toFixed(2) || '0.00'}`,
-                                                    condition: true
-                                                },
-                                                {
-                                                    label: t('features'),
-                                                    value: (
-                                                        <div className="flex justify-end sm:justify-start space-x-2">
-                                                            {option.voice && <PhoneIcon weight="fill" className="text-primary" size={14}/>}
-                                                            {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={14}/>}
-                                                            {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={14}/>}
-                                                        </div>
-                                                    ),
-                                                    condition: true
-                                                },
-                                                {
-                                                    label: t('incoming_rate'),
-                                                    value: `$${option.incoming_per_minute?.toFixed(2)}/min`,
-                                                    condition: !!option.incoming_per_minute
-                                                },
-                                                {
-                                                    label: t('toll_free_rate'),
-                                                    value: `$${option.toll_free_rate_in_min?.toFixed(2)}/min`,
-                                                    condition: !!option.toll_free_rate_in_min
-                                                },
-                                                {
-                                                    label: t('sms_rate'),
-                                                    value: `$${option.incoming_rate_sms?.toFixed(2)}/msg`,
-                                                    condition: !!option.incoming_rate_sms
-                                                },
-                                                {
-                                                    label: t('creation_date'),
-                                                    value: <FormattedDate date={option.creation_date}/>,
-                                                    condition: !!option.creation_date
-                                                },
-                                                {
-                                                    label: t('paid_until'),
-                                                    value: <FormattedDate date={option.paid_till}/>,
-                                                    condition: !!option.paid_till
-                                                },
-                                                {
-                                                    label: t('months_paid'),
-                                                    value: option.months_paid,
-                                                    condition: !!option.months_paid
-                                                },
-                                                {
-                                                    label: t('voice_destination'),
-                                                    value: option.voiceDest,
-                                                    condition: !!option.voiceDest
-                                                },
-                                                {
-                                                    label: t('sms_destination'),
-                                                    value: option.smsDest && typeof option.smsDest === 'object' ?
-                                                        ['forward_email', 'forward_http', 'forward_telegram', 'forward_slack', 'forward_sms']
-                                                            .map(key => {
-                                                                const smsDest = option.smsDest as Record<string, unknown>
-                                                                const value = smsDest?.[key]
-                                                                return value || null
-                                                            })
-                                                            .filter(Boolean)
-                                                            .join(', ')
-                                                        : '',
-                                                    condition: !!option.smsDest && typeof option.smsDest === 'object'
-                                                }
-                                            ].map((item, index) => (
-                                                item.condition && (
-                                                    <TableRow key={index}>
-                                                        <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
-                                                        <TableCell className="text-right sm:text-left">{item.value}</TableCell>
-                                                    </TableRow>
-                                                )
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                }
+                                    {/* Expanded info section */}
+                                    {expandedNumbers.includes(option.did) && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="p-0">
+                                                <div className="pl-10 pr-2 py-1 text-xs sm:text-sm bg-muted/20 border-l-2 border-muted/25 ml-2">
+                                                    <Table className="w-full [&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
+                                                        <TableBody>
+                                                            {[
+                                                                {
+                                                                    label: t('did'),
+                                                                    value: option.did,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('name'),
+                                                                    value: option.name,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('location'),
+                                                                    value: option.where_did,
+                                                                    condition: !!option.where_did
+                                                                },
+                                                                {
+                                                                    label: t('setup_fee'),
+                                                                    value: `$${option.setup_rate?.toFixed(2) || '0.00'}`,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('monthly_fee'),
+                                                                    value: `$${option.fix_rate?.toFixed(2) || '0.00'}`,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('features'),
+                                                                    value: (
+                                                                        <div className="flex justify-end sm:justify-start space-x-2">
+                                                                            {option.voice && <PhoneIcon weight="fill" className="text-primary" size={16}/>}
+                                                                            {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={16}/>}
+                                                                            {option.toll_free && <HeadsetIcon weight="fill" className="text-primary" size={16}/>}
+                                                                        </div>
+                                                                    ),
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('incoming_rate'),
+                                                                    value: `$${option.incoming_per_minute?.toFixed(2)}/min`,
+                                                                    condition: !!option.incoming_per_minute
+                                                                },
+                                                                {
+                                                                    label: t('toll_free_rate'),
+                                                                    value: `$${option.toll_free_rate_in_min?.toFixed(2)}/min`,
+                                                                    condition: !!option.toll_free_rate_in_min
+                                                                },
+                                                                {
+                                                                    label: t('sms_rate'),
+                                                                    value: `$${option.incoming_rate_sms?.toFixed(2)}/msg`,
+                                                                    condition: !!option.incoming_rate_sms
+                                                                },
+                                                                {
+                                                                    label: t('creation_date'),
+                                                                    value: <FormattedDate date={option.creation_date}/>,
+                                                                    condition: !!option.creation_date
+                                                                },
+                                                                {
+                                                                    label: t('paid_until'),
+                                                                    value: <FormattedDate date={option.paid_till}/>,
+                                                                    condition: !!option.paid_till
+                                                                },
+                                                                {
+                                                                    label: t('months_paid'),
+                                                                    value: option.months_paid,
+                                                                    condition: !!option.months_paid
+                                                                },
+                                                                {
+                                                                    label: t('voice_destination'),
+                                                                    value: option.voiceDest,
+                                                                    condition: !!option.voiceDest
+                                                                },
+                                                                {
+                                                                    label: t('sms_destination'),
+                                                                    value: option.smsDest && typeof option.smsDest === 'object' ?
+                                                                        ['forward_email', 'forward_http', 'forward_telegram', 'forward_slack', 'forward_sms']
+                                                                            .map(key => {
+                                                                                const smsDest = option.smsDest as Record<string, unknown>
+                                                                                const value = smsDest?.[key]
+                                                                                return value || null
+                                                                            })
+                                                                            .filter(Boolean)
+                                                                            .join(', ')
+                                                                        : '',
+                                                                    condition: !!option.smsDest && typeof option.smsDest === 'object'
+                                                                }
+                                                            ].map((item, index) => (
+                                                                item.condition && (
+                                                                    <TableRow key={index}>
+                                                                        <TableCell
+                                                                            className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
+                                                                        <TableCell className="text-right sm:text-left">{item.value}</TableCell>
+                                                                    </TableRow>
+                                                                )
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
 
                 {/* Footer with select all and delete selected */}
                 <div className="flex flex-col sm:flex-row items-center justify-between p-2 border-t border-border mt-2 gap-2">
@@ -273,6 +288,7 @@ export default function MyNumbersList({
                             id="select-all"
                             checked={selectedNumbers.length === (filteredOptions?.length || 0) && (filteredOptions?.length || 0) > 0}
                             onCheckedChange={(checked) => handleSelectAll(checked)}
+                            variant="sm"
                         />
                         <label htmlFor="select-all" className="ml-2 text-xs text-muted-foreground">
                             {t('select_all')}

@@ -6,6 +6,7 @@ import {CaretDownIcon, CaretLeftIcon, CaretRightIcon, CaretUpIcon} from '@phosph
 import clsx from 'clsx'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {useTranslations} from 'next-intl'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/Table'
 
 // Generic types for the DataTable component
 export type SortDirection = 'asc' | 'desc' | null
@@ -307,64 +308,62 @@ export default function DataTable<T extends object, F extends Record<string, unk
 
                 {/* Table */}
                 <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                        <thead>
-                        <tr className="bg-muted/50 dark:bg-muted/40">
-                            {columns.map((column, index) => (
-                                <th
-                                    key={index}
-                                    className={`p-3 text-${column.align || 'left'} font-medium ${textSize}`}
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => column.sortable !== false && handleSort(column.key)}
-                                        className={clsx(
-                                            'flex items-center gap-1',
-                                            column.align === 'center' && 'justify-center mx-auto',
-                                            column.align === 'right' && 'justify-end ml-auto',
-                                            column.sortable !== false && 'hover:text-primary'
-                                        )}
-                                        disabled={column.sortable === false}
+                    <Table striped className={`[&_td]:p-3 [&_th]:p-3 [&_td]:${textSize} [&_th]:${textSize}`}>
+                        <TableHeader>
+                            <TableRow className="bg-muted/50 dark:bg-muted/40 hover:bg-muted/50 dark:hover:bg-muted/40">
+                                {columns.map((column, index) => (
+                                    <TableHead
+                                        key={index}
+                                        className={`text-${column.align || 'left'} font-medium`}
                                     >
-                                        {column.header}
-                                        {renderSortIcon(column.key, column.sortable)}
-                                    </button>
-                                </th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
+                                        <button
+                                            type="button"
+                                            onClick={() => column.sortable !== false && handleSort(column.key)}
+                                            className={clsx(
+                                                'flex items-center gap-1',
+                                                column.align === 'center' && 'justify-center mx-auto',
+                                                column.align === 'right' && 'justify-end ml-auto',
+                                                column.sortable !== false && 'hover:text-primary'
+                                            )}
+                                            disabled={column.sortable === false}
+                                        >
+                                            {column.header}
+                                            {renderSortIcon(column.key, column.sortable)}
+                                        </button>
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                         {paginatedData.length > 0 ? (
                             paginatedData.map((item, i) => (
-                                <tr
+                                <TableRow
                                     key={i}
                                     className={clsx(
-                                        textSize,
-                                        i % 2 !== 0 ? 'bg-muted/30 dark:bg-muted/20' : '',
-                                        onRowClick && 'cursor-pointer hover:bg-muted/50',
+                                        onRowClick && 'cursor-pointer',
                                         rowClassName && rowClassName(item)
                                     )}
                                     onClick={() => onRowClick && onRowClick(item)}
                                 >
                                     {columns.map((column, j) => (
-                                        <td
+                                        <TableCell
                                             key={j}
-                                            className={`p-3 ${column.align === 'center' ? 'text-center' : ''} ${column.align === 'right' ? 'text-right' : ''}`}
+                                            className={`${column.align === 'center' ? 'text-center' : ''} ${column.align === 'right' ? 'text-right' : ''}`}
                                         >
                                             {column.cell(item)}
-                                        </td>
+                                        </TableCell>
                                     ))}
-                                </tr>
+                                </TableRow>
                             ))
                         ) : (
-                            <tr>
-                                <td colSpan={columns.length} className={`p-3 text-center ${textSize} text-muted-foreground`}>
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
                                     {emptyMessage}
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         )}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </div>
 
                 {/* Pagination */}

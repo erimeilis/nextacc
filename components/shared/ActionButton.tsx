@@ -47,7 +47,7 @@ export default function ActionButton({
     name?: string
     type: 'button' | 'submit' | 'reset' | undefined
     className?: string
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
     disabled?: boolean
     style?: string
     icon?: FC<SVGProps<SVGSVGElement>>

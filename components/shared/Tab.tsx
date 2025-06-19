@@ -17,6 +17,7 @@ export default function Tab({
                                 active = false,
                                 isLoading = false,
                                 icon,
+                                iconSize = 'h-4 w-4',
                                 children
                             }: {
     type: 'button' | 'submit' | 'reset' | undefined
@@ -25,13 +26,23 @@ export default function Tab({
     active?: boolean
     isLoading?: boolean
     icon?: FC<SVGProps<SVGSVGElement>>
+    iconSize?: string
     children?: React.ReactNode
 }) {
+    // Disable clicking when active tab is loading (showing skeleton)
+    const isClickDisabled = active && isLoading
+
+    const handleClick = () => {
+        if (!isClickDisabled && onClick) {
+            onClick()
+        }
+    }
+
     return (
         <button
             type={type}
-            className={fixedTabClass + ' ' + className + ' ' + (active ? activeTabClass : commonClass)}
-            onClick={onClick}
+            className={fixedTabClass + ' ' + className + ' ' + (active ? activeTabClass : commonClass) + (isClickDisabled ? ' cursor-not-allowed opacity-75' : '')}
+            onClick={handleClick}
         >
             <div className="relative flex items-center justify-center">
                 {isLoading && active && (
@@ -40,7 +51,7 @@ export default function Tab({
                     </div>
                 )}
                 <div className={`${isLoading && active ? "opacity-0" : ""} flex items-center`}>
-                    {icon && <span className="mr-2">{React.createElement(icon)}</span>}
+                    {icon && <span className="mr-2">{React.createElement(icon, {className: iconSize})}</span>}
                     {children}
                 </div>
             </div>

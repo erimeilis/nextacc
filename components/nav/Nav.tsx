@@ -198,7 +198,7 @@ export default function Nav() {
     const [displayBalance, setDisplayBalance] = useState<number>(0)
     const [isClient, setIsClient] = useState<boolean>(false)
     const [isAnimating, setIsAnimating] = useState<boolean>(false)
-    const {getBalance, fetchData, reset: resetClientStore} = useClientStore()
+    const {getBalance, updateProfile, reset: resetClientStore} = useClientStore()
     const balance = getBalance()
     const {reset: resetCartStore} = useCartStore()
     const animationRef = useRef<NodeJS.Timeout | null>(null)
@@ -209,15 +209,14 @@ export default function Nav() {
         setIsClient(true)
 
         // Fetch profile data on component mount
-        fetchData().then()
-
+        updateProfile().then()
         return () => {
             // Clean up animation timeout on unmounting
             if (animationRef.current) {
                 clearTimeout(animationRef.current)
             }
         }
-    }, [fetchData])
+    }, [updateProfile])
 
     // Handle balance updates and animation
     useEffect(() => {

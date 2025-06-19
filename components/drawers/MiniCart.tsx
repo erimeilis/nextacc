@@ -109,7 +109,7 @@ export default function MiniCart({
                                     <div className="bg-muted rounded-md p-2">
                                         <div className="grid grid-cols-[auto_1fr_auto] gap-3 text-sm">
                                             {/* Checkbox in its own column, vertically centered */}
-                                            <div className="flex items-center justify-center p-2">
+                                            <div className="flex items-center justify-center p-2" onClick={(e) => e.stopPropagation()}>
                                                 <Checkbox
                                                     id={`checkbox-${item.id}`}
                                                     checked={selectedItems.includes(item.id)}
@@ -163,14 +163,17 @@ export default function MiniCart({
                                             </div>
 
                                             {/* Delete button */}
-                                            <div className="flex items-center justify-center p-1">
+                                            <div className="flex items-center justify-center p-1" onClick={(e) => e.stopPropagation()}>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleRemoveSingleItem(item.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleRemoveSingleItem(item.id).then()
+                                                    }}
                                                     className="flex items-center justify-center w-4 h-4 rounded-full bg-transparent text-red-700 hover:text-red-600 transition-all duration-300"
                                                     aria-label="Remove item"
                                                 >
-                                                    <XIcon size={14} weight="bold"/>
+                                                    <XIcon size={16} weight="bold"/>
                                                 </button>
                                             </div>
                                         </div>
@@ -204,7 +207,8 @@ export default function MiniCart({
                             style="pillow"
                             className="font-medium text-lg shadow-sm transition-all hover:shadow-md"
                             id="buy-from-cart"
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation()
                                 // Show alert with selected numbers
                                 if (selectedItems.length > 0) {
                                     alert(`Selected numbers:\n${selectedItems.join('\n')}`)
@@ -221,7 +225,10 @@ export default function MiniCart({
                             className="text-xs transition-all"
                             id="remove"
                             loading={loadingButton === 'remove'}
-                            onClick={handleRemoveFromCart}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleRemoveFromCart().then()
+                            }}
                         >
                             {t('remove_selected')}
                         </ActionButton>
