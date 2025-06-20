@@ -1,13 +1,14 @@
 'use client'
 import UploadsList from '@/components/UploadsList'
 import {UploadInfo} from '@/types/UploadInfo'
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 
 export default function UploadsPage() {
     const [localUploads, setLocalUploads] = useState<UploadInfo[] | null>([])
     const {getUploads, updateUploads} = useClientStore()
     const uploads = getUploads()
+    const backgroundFetchDone = useRef(false)
 
     // Set data from the store immediately if available
     useEffect(() => {
@@ -19,6 +20,17 @@ export default function UploadsPage() {
     // Fetch data in the background if not available
     useEffect(() => {
         if (!uploads) {
+            updateUploads()
+                .then((fetchedUploads) => {
+                    setLocalUploads(fetchedUploads)
+                })
+        }
+    }, [uploads, updateUploads])
+
+    // Fetch data in the background even when it exists, but only once per-page visit
+    useEffect(() => {
+        if (uploads && !backgroundFetchDone.current) {
+            backgroundFetchDone.current = true
             updateUploads()
                 .then((fetchedUploads) => {
                     setLocalUploads(fetchedUploads)

@@ -37,7 +37,7 @@ export default function Login() {
 
     const t = useTranslations('login')
     const c = useTranslations('common')
-    const { fetchData } = useClientStore()
+    const {fetchData} = useClientStore()
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
@@ -88,8 +88,8 @@ export default function Login() {
                     setOpenWarningVerifyModal(true)
                 }
             } else if (data && !data.error) {
-                // Fetch user data in background after successful login
-                fetchData().catch(console.error)
+                // Fetch user data in the background after successful login
+                fetchData().then()
             }
         }
     }

@@ -12,10 +12,8 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/transactions')
     url.searchParams.append('site_id', process.env.SITE_ID || '')
-    url.searchParams.append('from', moment().subtract(360, 'days').toISOString())
-    url.searchParams.append('to', moment().toISOString())
-
-    console.log('redGetMoneyTransactionReport: Fetching from URL:', url.toString())
+    url.searchParams.append('from', moment().subtract(360, 'days').format('YYYY-MM-DD'))
+    url.searchParams.append('to', moment().format('YYYY-MM-DD'))
 
     const options: RequestInit = {
         cache: 'reload',
@@ -30,7 +28,6 @@ export async function redGetMoneyTransactionReport(): Promise<MoneyTransaction[]
         .then((res: Response) => {
             console.log('redGetMoneyTransactionReport: Response status:', res.status)
             if (!res.ok) {
-                console.log('redGetMoneyTransactionReport: Response not OK')
                 return null
             }
             return res.json()

@@ -22,12 +22,10 @@ export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
 
     return fetch(url.toString(), options)
         .then((res: Response) => {
-            console.log('redGetMyNumbers: ', res.body)
             if (!res.ok) return null
             return res.json()
         })
         .then(async (data) => {
-            console.log('redGetMyNumbers: ', data.data)
             return data.data.dids
         })
         .catch((err) => {

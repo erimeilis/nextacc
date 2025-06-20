@@ -94,7 +94,9 @@ export default function OffersPage() {
         null
 
     const handleNumber = useCallback((number: NumberInfo) => {
-        router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams))
+        router.push(pathName + '?' + CreateQueryString('number', number.did, searchParams), {
+            scroll: false  // This prevents the automatic scroll behavior
+        })
     }, [pathName, router, searchParams])
 
     const handleArea = useCallback((area: number | string) => {
@@ -274,12 +276,16 @@ export default function OffersPage() {
         (numbers?.find(e => e.did == number) ?? null) :
         null
 
-
-    // Effect to handle number selection and scrolling
     useEffect(() => {
-        buyForm.current?.scrollIntoView({
-            behavior: 'smooth'
-        })
+        if (getNumber && buyForm.current) {
+            // Small delay to ensure the form is fully rendered
+            setTimeout(() => {
+                buyForm.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                })
+            }, 100)
+        }
     }, [getNumber])
 
     return (
