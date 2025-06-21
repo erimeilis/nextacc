@@ -65,6 +65,7 @@
     "invalid_url": "Nieprawidłowy URL",
     "invalid_time": "Nieprawidłowa wartość czasu",
     "invalid_number": "Nieprawidłowy numer",
+    "Invalid input": "Nieprawidłowe dane wejściowe",
     "pay_for": "Zapłać za:",
     "month": "{count, plural, one {miesiąc} few {miesiące} many {miesiący} other {miesiąca}}",
     "select_qty": "Ilość",

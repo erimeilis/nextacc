@@ -14,16 +14,15 @@ export const schemaNumberEdit = z.object({
     f_num2: z.string().optional().or(z.literal('')),
     f_time1: z.number().min(0, {message: 'invalid_time'}).optional().nullable(),
     f_time2: z.number().min(0, {message: 'invalid_time'}).optional().nullable(),
-    vm: z.number().min(0, {message: 'invalid_number'}).optional().nullable(),
-    vm_file: z.string().optional().or(z.literal('')),
-    vm_email: z.string().optional().or(z.literal(''))
-        .refine((val) => !val || schemaEmail.safeParse(val).success, {
-            message: 'invalid_email'
-        }),
-    vm_beep: z.string().optional().or(z.literal('')),
-    hello_file: z.string().optional().or(z.literal('')),
-    folow_droid_id: z.string().optional().or(z.literal('')),
-    
+    //vm: z.number().min(0, {message: 'invalid_number'}).optional().nullable(),
+    //vm_file: z.string().optional().or(z.literal('')),
+    //vm_email: z.string().optional().or(z.literal(''))
+    //    .refine((val) => !val || schemaEmail.safeParse(val).success, {
+    //        message: 'invalid_email'
+    //    }),
+    //vm_beep: z.string().optional().or(z.literal('')),
+    //hello_file: z.string().optional().or(z.literal('')),
+
     // SMS Settings
     forward_email: z.string().optional().or(z.literal(''))
         .refine((val) => !val || schemaEmail.safeParse(val).success, {
@@ -45,27 +44,22 @@ export const schemaNumberEdit = z.object({
         .refine((val) => !val || schemaPhone.safeParse(val).success, {
             message: 'invalid_phone'
         }),
-    
-    // Call Destination Settings
-    call_destination: z.string().optional().or(z.literal('')),
-    call_priority: z.number().min(0, {message: 'invalid_number'}).optional().nullable(),
-    follow_droid_caller_id: z.string().optional().or(z.literal('')),
-    
+
     // Boolean fields (checkboxes) - these don't need validation
-    hello_enable: z.union([z.string(), z.boolean()]).optional(),
-    show_real_caller_id: z.union([z.string(), z.boolean()]).optional(),
-    call_to_all_device: z.union([z.string(), z.boolean()]).optional(),
-    use_user_pbx: z.union([z.string(), z.boolean()]).optional(),
-    extend_user_pbx: z.union([z.string(), z.boolean()]).optional(),
+    //hello_enable: z.union([z.string(), z.boolean()]).optional(),
+    //show_real_caller_id: z.union([z.string(), z.boolean()]).optional(),
+    //call_to_all_device: z.union([z.string(), z.boolean()]).optional(),
+    //use_user_pbx: z.union([z.string(), z.boolean()]).optional(),
+    //extend_user_pbx: z.union([z.string(), z.boolean()]).optional(),
     sms_activated: z.boolean().optional(),
     forward_email_activate: z.boolean().optional(),
     forward_http_activate: z.boolean().optional(),
     forward_telegram_activate: z.boolean().optional(),
     forward_slack_activate: z.boolean().optional(),
     forward_sms_activate: z.boolean().optional(),
-    call_activated: z.boolean().optional(),
-    voip_call: z.boolean().optional(),
-    call_show_real_caller_id: z.boolean().optional(),
-})
+    //call_activated: z.boolean().optional(),
+    //voip_call: z.boolean().optional(),
+    //call_show_real_caller_id: z.boolean().optional(),
+}).passthrough() // Allow unknown fields to pass through for debugging
 
 export type NumberEditFormData = z.infer<typeof schemaNumberEdit>

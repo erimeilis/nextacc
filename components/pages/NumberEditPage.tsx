@@ -9,13 +9,14 @@ import Loader from '@/components/service/Loader'
 import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
 import ExtManSettings from '../ExtManSettings'
 import SmsSettings from '../SmsSettings'
-import CallDestinationSettings from '../CallDestinationSettings'
 import {useToast} from '@/hooks/use-toast'
 import {schemaNumberEdit} from '@/schemas/numberEdit.schema'
 import {validateFormData, validateInputData} from '@/utils/validation'
 import {schemaEmail} from '@/schemas/email.schema'
 import {schemaPhone} from '@/schemas/phone.schema'
 import {schemaHttps} from '@/schemas/https.schema'
+import {schemaTelegram} from '@/schemas/telegram.schema'
+import {schemaSip} from '@/schemas/sip.schema'
 
 export default function NumberEditPage() {
     const params = useParams()
@@ -63,7 +64,7 @@ export default function NumberEditPage() {
 
         // Real-time validation for specific fields
         let validationError = ''
-        if (typeof value === 'string' && value.trim() !== '') {
+        if (typeof value === 'string' && (value.trim() !== '' || field === 'f_num1' || field === 'f_num2')) {
             switch (field) {
                 case 'vm_email':
                 case 'forward_email':
@@ -79,6 +80,81 @@ export default function NumberEditPage() {
                 case 'forward_slack':
                     const urlResult = validateInputData(schemaHttps, value)
                     validationError = urlResult.error || ''
+                    break
+                case 'f_num1':
+                case 'f_num2':
+                    // Only validate if value is not empty
+                    if (value.trim() !== '') {
+                        // Get the corresponding type field for validation
+                        const typeField = field === 'f_num1' ? 'type_num1' : 'type_num2'
+                        // Check both formData and numberData for the type to ensure validation works from start
+                        const currentType = formData[typeField] || numberData?.[typeField] || ''
+
+                        // Map legacy type values to current values
+                        const mapLegacyTypeValue = (typeValue: string): string => {
+                            switch (typeValue) {
+                                case 'skype':
+                                    return 'voiceTelegram'
+                                case 'phone':
+                                    return 'voicePhone'
+                                case 'sip':
+                                    return 'voiceSip'
+                                default:
+                                    return typeValue
+                            }
+                        }
+
+                        const mappedType = mapLegacyTypeValue(currentType)
+
+                        // Validate based on type
+                        switch (mappedType) {
+                            case 'voicePhone': {
+                                const phoneValidation = validateInputData(schemaPhone, value)
+                                validationError = phoneValidation.error || ''
+                                break
+                            }
+                            case 'voiceTelegram': {
+                                if (/^\d/.test(value)) {
+                                    const phoneValidation = validateInputData(schemaPhone, value)
+                                    validationError = phoneValidation.error || ''
+                                } else {
+                                    const telegramValidation = validateInputData(schemaTelegram, value)
+                                    validationError = telegramValidation.error || ''
+                                }
+                                break
+                            }
+                            case 'voiceSip': {
+                                const sipValue = 'sip/' + value.toLowerCase().replace(/^sips?[:\/]/, '')
+                                const sipValidation = validateInputData(schemaSip, sipValue)
+                                validationError = sipValidation.error || ''
+                                break
+                            }
+                            default: {
+                                // Intelligently determine validation type based on input value
+                                // This ensures appropriate validation when no specific type is selected
+                                if (/^\d/.test(value)) {
+                                    // Value starts with digit - likely a phone number
+                                    const phoneValidation = validateInputData(schemaPhone, value)
+                                    validationError = phoneValidation.error || ''
+                                } else if (value.includes('@') || /^[a-zA-Z]/.test(value)) {
+                                    // Value contains @ or starts with letter - likely a Telegram username
+                                    const telegramValidation = validateInputData(schemaTelegram, value)
+                                    validationError = telegramValidation.error || ''
+                                } else if (value.toLowerCase().includes('sip')) {
+                                    // Value contains 'sip' - likely a SIP address
+                                    const sipValue = 'sip/' + value.toLowerCase().replace(/^sips?[:\/]/, '')
+                                    const sipValidation = validateInputData(schemaSip, sipValue)
+                                    validationError = sipValidation.error || ''
+                                } else {
+                                    // Default to phone validation for other cases
+                                    const phoneValidation = validateInputData(schemaPhone, value)
+                                    validationError = phoneValidation.error || ''
+                                }
+                                break
+                            }
+                        }
+                    }
+                    // If value is empty, validationError remains empty string, which will clear any existing errors
                     break
             }
         }
@@ -97,16 +173,39 @@ export default function NumberEditPage() {
 
     // Handle form submission
     const handleSave = async () => {
-        if (!number || !formData) return
+        console.log('[DEBUG_LOG] handleSave function called!')
+        console.log('[DEBUG_LOG] number:', number)
+        console.log('[DEBUG_LOG] formData exists:', !!formData)
+        console.log('[DEBUG_LOG] formData:', formData)
+
+        if (!number || !formData) {
+            console.log('[DEBUG_LOG] Early return triggered - number or formData missing')
+            console.log('[DEBUG_LOG] number missing:', !number)
+            console.log('[DEBUG_LOG] formData missing:', !formData)
+            return
+        }
 
         // Clear previous form errors
-        setFormErrors({})
+        //setFormErrors({})
+
+        // Debug: Log form data being submitted
+        console.log('[DEBUG_LOG] Form data being submitted:', JSON.stringify(formData, null, 2))
+        console.log('[DEBUG_LOG] Form data keys:', Object.keys(formData))
 
         // Validate form data
         const {errors} = validateFormData(schemaNumberEdit, formData)
 
+        // Debug: Log validation result
+        console.log('[DEBUG_LOG] Validation result - errors:', errors)
+        console.log('[DEBUG_LOG] Errors type:', typeof errors)
+        console.log('[DEBUG_LOG] Errors is null:', errors === null)
+        console.log('[DEBUG_LOG] Errors is undefined:', errors === undefined)
+        console.log('[DEBUG_LOG] Errors keys length:', errors ? Object.keys(errors).length : 'N/A')
+        console.log('[DEBUG_LOG] Condition check - errors exists:', !!errors)
+        console.log('[DEBUG_LOG] Condition check - has keys:', errors ? Object.keys(errors).length > 0 : false)
+
         // If there are validation errors, display them and stop submission
-        if (errors) {
+        if (errors && Object.keys(errors).length > 0) {
             // Convert errors from Record<string, string[] | undefined> to Record<string, string>
             const formattedErrors: Record<string, string> = {}
             Object.entries(errors).forEach(([key, value]) => {
@@ -115,7 +214,8 @@ export default function NumberEditPage() {
                 }
             })
             setFormErrors(formattedErrors)
-            console.error('Validation errors:', errors)
+            console.error('[DEBUG_LOG] Detailed validation errors:', errors)
+            console.error('[DEBUG_LOG] Formatted errors for UI:', formattedErrors)
 
             // Show error toast for validation
             toast({
@@ -127,11 +227,15 @@ export default function NumberEditPage() {
             return
         }
 
+        console.log('[DEBUG_LOG] Validation passed, proceeding to save...')
         setSaving(true)
         try {
+            console.log('[DEBUG_LOG] Calling API to update number details...')
             const updatedData = await redUpdateNumberDetails(number, formData)
+            console.log('[DEBUG_LOG] API response received:', updatedData)
             if (updatedData) {
                 setNumberData(updatedData)
+                console.log('[DEBUG_LOG] Save successful, showing success toast')
 
                 // Show success toast
                 toast({
@@ -139,9 +243,11 @@ export default function NumberEditPage() {
                     title: toastT('success_title'),
                     description: toastT('number_updated_successfully'),
                 })
+            } else {
+                console.log('[DEBUG_LOG] API returned no data')
             }
         } catch (error) {
-            console.error('Failed to save number details:', error)
+            console.error('[DEBUG_LOG] Failed to save number details:', error)
 
             // Show error toast
             toast({
@@ -180,12 +286,19 @@ export default function NumberEditPage() {
     }
 
     return (
-        <>
+        <form
+            id="editNumberForm"
+            name="editNumberForm"
+            className="mt-8 space-y-8 transition-all duration-500 ease-in-out"
+            onSubmit={handleSave}
+            method="post"
+        >
             {/* Header */}
             <div className="flex items-center justify-between text-sm mb-4">
                 <div className="flex items-center space-x-4">
                     <Button
                         variant="ghost"
+                        type="button"
                         size="icon"
                         onClick={handleBack}
                         className="h-7 w-7"
@@ -197,6 +310,7 @@ export default function NumberEditPage() {
                 <div className="flex space-x-2">
                     <Button
                         variant="ghost"
+                        type="button"
                         size="icon"
                         onClick={handleBack}
                         title={t('cancel')}
@@ -207,7 +321,7 @@ export default function NumberEditPage() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={handleSave}
+                        type="submit"
                         disabled={saving}
                         title={saving ? t('saving') : t('save_changes')}
                         className="h-7 w-7"
@@ -227,7 +341,7 @@ export default function NumberEditPage() {
                 <ExtManSettings
                     numberData={numberData}
                     formData={formData}
-                    onInputChange={handleInputChange}
+                    onInputChangeAction={handleInputChange}
                     formErrors={formErrors}
                 />
 
@@ -235,23 +349,17 @@ export default function NumberEditPage() {
                 <SmsSettings
                     numberData={numberData}
                     formData={formData}
-                    onInputChange={handleInputChange}
+                    onInputChangeAction={handleInputChange}
                     formErrors={formErrors}
                 />
 
-                {/* Call Destination Settings */}
-                <CallDestinationSettings
-                    numberData={numberData}
-                    formData={formData}
-                    onInputChange={handleInputChange}
-                    formErrors={formErrors}
-                />
             </div>
 
             {/* Save Button (bottom) */}
             <div className="flex justify-end space-x-2 pt-4">
                 <Button
                     variant="ghost"
+                    type="button"
                     size="icon"
                     onClick={handleBack}
                     title={t('cancel')}
@@ -261,8 +369,8 @@ export default function NumberEditPage() {
                 </Button>
                 <Button
                     variant="ghost"
+                    type="submit"
                     size="icon"
-                    onClick={handleSave}
                     disabled={saving}
                     title={saving ? t('saving') : t('save_changes')}
                     className="h-7 w-7"
@@ -274,6 +382,6 @@ export default function NumberEditPage() {
                     )}
                 </Button>
             </div>
-        </>
+        </form>
     )
 }

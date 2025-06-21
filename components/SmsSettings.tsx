@@ -9,11 +9,17 @@ import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
 interface SmsSettingsProps {
     numberData: DetailedNumberInfo
     formData: Partial<DetailedNumberInfo>
-    onInputChange: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    onInputChangeAction: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
     formErrors: Record<string, string>
 }
 
-export default function SmsSettings({ numberData, formData, onInputChange, formErrors }: SmsSettingsProps) {
+export default function SmsSettings({
+                                        numberData,
+                                        formData,
+                                        onInputChangeAction,
+                                        formErrors
+                                    }:
+                                    SmsSettingsProps) {
     const t = useTranslations('number-edit')
     const errorT = useTranslations('offers')
 
@@ -26,7 +32,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                         <Checkbox
                             id="sms_activated"
                             checked={formData.sms_activated || false}
-                            onCheckedChange={(checked) => onInputChange('sms_activated', checked)}
+                            onCheckedChange={(checked) => onInputChangeAction('sms_activated', checked)}
                         />
                         <label htmlFor="sms_activated" className="text-sm font-medium">{t('sms_activated')}</label>
                     </div>
@@ -36,7 +42,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Checkbox
                                 id="forward_email_activate"
                                 checked={formData.forward_email_activate || false}
-                                onCheckedChange={(checked) => onInputChange('forward_email_activate', checked)}
+                                onCheckedChange={(checked) => onInputChangeAction('forward_email_activate', checked)}
                             />
                             <label htmlFor="forward_email_activate" className="text-sm font-medium">{t('forward_email')}</label>
                         </div>
@@ -45,7 +51,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                                 type="email"
                                 placeholder={t('email_address_placeholder')}
                                 value={formData.forward_email || ''}
-                                onChange={(e) => onInputChange('forward_email', e.target.value)}
+                                onChange={(e) => onInputChangeAction('forward_email', e.target.value)}
                                 disabled={!formData.forward_email_activate}
                                 className={formErrors.forward_email ? 'border-red-500' : ''}
                             />
@@ -58,7 +64,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Checkbox
                                 id="forward_http_activate"
                                 checked={formData.forward_http_activate || false}
-                                onCheckedChange={(checked) => onInputChange('forward_http_activate', checked)}
+                                onCheckedChange={(checked) => onInputChangeAction('forward_http_activate', checked)}
                             />
                             <label htmlFor="forward_http_activate" className="text-sm font-medium">{t('forward_http')}</label>
                         </div>
@@ -67,7 +73,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                                 type="url"
                                 placeholder={t('http_url_placeholder')}
                                 value={formData.forward_http || ''}
-                                onChange={(e) => onInputChange('forward_http', e.target.value)}
+                                onChange={(e) => onInputChangeAction('forward_http', e.target.value)}
                                 disabled={!formData.forward_http_activate}
                                 className={formErrors.forward_http ? 'border-red-500' : ''}
                             />
@@ -80,7 +86,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Checkbox
                                 id="forward_telegram_activate"
                                 checked={formData.forward_telegram_activate || false}
-                                onCheckedChange={(checked) => onInputChange('forward_telegram_activate', checked)}
+                                onCheckedChange={(checked) => onInputChangeAction('forward_telegram_activate', checked)}
                             />
                             <label htmlFor="forward_telegram_activate" className="text-sm font-medium">{t('forward_telegram')}</label>
                         </div>
@@ -88,7 +94,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Input
                                 placeholder={t('telegram_id_placeholder')}
                                 value={formData.forward_telegram || ''}
-                                onChange={(e) => onInputChange('forward_telegram', e.target.value)}
+                                onChange={(e) => onInputChangeAction('forward_telegram', e.target.value)}
                                 disabled={!formData.forward_telegram_activate}
                                 className={formErrors.forward_telegram ? 'border-red-500' : ''}
                             />
@@ -101,7 +107,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Checkbox
                                 id="forward_slack_activate"
                                 checked={formData.forward_slack_activate || false}
-                                onCheckedChange={(checked) => onInputChange('forward_slack_activate', checked)}
+                                onCheckedChange={(checked) => onInputChangeAction('forward_slack_activate', checked)}
                             />
                             <label htmlFor="forward_slack_activate" className="text-sm font-medium">{t('forward_slack')}</label>
                         </div>
@@ -109,7 +115,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Input
                                 placeholder={t('slack_webhook_placeholder')}
                                 value={formData.forward_slack || ''}
-                                onChange={(e) => onInputChange('forward_slack', e.target.value)}
+                                onChange={(e) => onInputChangeAction('forward_slack', e.target.value)}
                                 disabled={!formData.forward_slack_activate}
                                 className={formErrors.forward_slack ? 'border-red-500' : ''}
                             />
@@ -122,7 +128,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Checkbox
                                 id="forward_sms_activate"
                                 checked={formData.forward_sms_activate || false}
-                                onCheckedChange={(checked) => onInputChange('forward_sms_activate', checked)}
+                                onCheckedChange={(checked) => onInputChangeAction('forward_sms_activate', checked)}
                             />
                             <label htmlFor="forward_sms_activate" className="text-sm font-medium">{t('forward_sms')}</label>
                         </div>
@@ -130,7 +136,7 @@ export default function SmsSettings({ numberData, formData, onInputChange, formE
                             <Input
                                 placeholder={t('phone_number_placeholder')}
                                 value={formData.forward_sms || ''}
-                                onChange={(e) => onInputChange('forward_sms', e.target.value)}
+                                onChange={(e) => onInputChangeAction('forward_sms', e.target.value)}
                                 disabled={!formData.forward_sms_activate}
                                 className={formErrors.forward_sms ? 'border-red-500' : ''}
                             />

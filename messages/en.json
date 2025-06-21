@@ -66,6 +66,7 @@
     "invalid_email": "Invalid email address",
     "invalid_time": "Invalid time value",
     "invalid_number": "Invalid number",
+    "Invalid input": "Invalid input",
     "pay_for": "Pay for:",
     "month": "{count, plural, one {month} other {months}}",
     "select_qty": "Qty",

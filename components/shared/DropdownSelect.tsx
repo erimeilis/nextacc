@@ -152,7 +152,7 @@ export default function DropdownSelect({
     )
 
     return (
-        <div className={'min-w-[120px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
+        <div className={'min-w-[120px] relative ' + customClass + (disabled ? ' bg-transparent' : '')} ref={dropdownRef} style={{position: 'relative'}}>
             <Label
                 htmlFor={selectId}
                 className="pl-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
@@ -169,7 +169,7 @@ export default function DropdownSelect({
                 focus:outline-none hover:drop-shadow-md focus:drop-shadow-md cursor-pointer text-sm h-full w-full border-none
                 text-foreground disabled:text-muted-foreground disabled:bg-muted border-muted border-b
                 dark:text-foreground dark:disabled:text-muted-foreground dark:disabled:bg-muted animate-in fade-in zoom-in-95 
-                hover:scale-[1.01] active:scale-[0.99] {\`your-existing-classes ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+                hover:scale-[1.01] active:scale-[0.99] {\`your-existing-classes ${disabled ? 'bg-transparent opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
                 disabled={data.length === 0 || loading || disabled}
             >
                 <span className="truncate">
