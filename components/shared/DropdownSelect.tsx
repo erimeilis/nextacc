@@ -13,7 +13,8 @@ export default function DropdownSelect({
                                            onSelectAction,
                                            selectedOption,
                                            loading = false,
-                                           customClass = ''
+                                           customClass = '',
+                                           disabled = false
                                        }: {
     selectId: string
     selectTitle: string
@@ -22,6 +23,8 @@ export default function DropdownSelect({
     selectedOption?: string | null
     loading?: boolean
     customClass?: string
+    disabled?: boolean
+
 }) {
     const [localSelectedOption, setLocalSelectedOption] = useState<string | null>(selectedOption || null)
     const [isOpen, setIsOpen] = useState(false)
@@ -60,7 +63,7 @@ export default function DropdownSelect({
         const updatePosition = () => {
             if (buttonRef.current) {
                 const rect = buttonRef.current.getBoundingClientRect()
-                const isMobile = window.innerWidth < 768 // Check if device is mobile
+                const isMobile = window.innerWidth < 768 // Check if a device is mobile
                 const isQtyDropdown = selectId.toLowerCase().includes('qty') || selectId.toLowerCase().includes('quantity')
 
                 // For portal positioning with fixed position, we need viewport-relative coordinates
@@ -107,37 +110,40 @@ export default function DropdownSelect({
     }, [isOpen])
 
     const toggleDropdown = () => {
-        const newIsOpen = !isOpen
-        setIsOpen(newIsOpen)
+        if (!disabled) {
 
-        // If opening the dropdown, update position immediately
-        if (newIsOpen && buttonRef.current) {
-            const rect = buttonRef.current.getBoundingClientRect()
-            const isMobile = window.innerWidth < 768 // Check if device is mobile
-            const isQtyDropdown = selectId.toLowerCase().includes('qty') || selectId.toLowerCase().includes('quantity')
+            const newIsOpen = !isOpen
+            setIsOpen(newIsOpen)
 
-            // Use a more aggressive offset for quantity dropdowns on mobile
-            const offset = isQtyDropdown && isMobile ? -20 : -5
+            // If opening the dropdown, update position immediately
+            if (newIsOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect()
+                const isMobile = window.innerWidth < 768 // Check if device is mobile
+                const isQtyDropdown = selectId.toLowerCase().includes('qty') || selectId.toLowerCase().includes('quantity')
 
-            setDropdownPosition({
-                top: rect.bottom + window.scrollY + offset,
-                left: rect.left + window.scrollX,
-                width: rect.width
-            })
+                // Use a more aggressive offset for quantity dropdowns on mobile
+                const offset = isQtyDropdown && isMobile ? -20 : -5
+
+                setDropdownPosition({
+                    top: rect.bottom + window.scrollY + offset,
+                    left: rect.left + window.scrollX,
+                    width: rect.width
+                })
+            }
         }
     }
 
     const handleOptionSelect = (id: string) => {
-        console.log('handleOptionSelect called with id:', id)
-        // Update local state immediately
-        setLocalSelectedOption(id)
-        setIsOpen(false)
+        if (!disabled) {
+            // Update local state immediately
+            setLocalSelectedOption(id)
+            setIsOpen(false)
 
-        // Delay calling the parent's handler to allow the UI to update first
-        setTimeout(() => {
-            console.log('Calling onSelectAction with id:', id)
-            onSelectAction(id)
-        }, 0)
+            // Delay calling the parent's handler to allow the UI to update first
+            setTimeout(() => {
+                onSelectAction(id)
+            }, 0)
+        }
     }
 
     const selectedItem = data.find(item =>
@@ -146,7 +152,7 @@ export default function DropdownSelect({
     )
 
     return (
-        <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
+        <div className={'min-w-[120px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
             <Label
                 htmlFor={selectId}
                 className="pl-1 text-xs sm:text-sm tracking-wide text-muted-foreground dark:text-muted-foreground hidden">
@@ -159,12 +165,12 @@ export default function DropdownSelect({
                 type="button"
                 id={selectId}
                 onClick={toggleDropdown}
-                className="flex items-center justify-between rounded-md pl-1 pr-3 py-2 transition-all duration-300 ease-in-out
+                className={`flex items-center justify-between rounded-md pl-1 pr-3 py-2 transition-all duration-300 ease-in-out
                 focus:outline-none hover:drop-shadow-md focus:drop-shadow-md cursor-pointer text-sm h-full w-full border-none
                 text-foreground disabled:text-muted-foreground disabled:bg-muted border-muted border-b
-                dark:text-foreground dark:disabled:text-muted-foreground dark:disabled:bg-muted
-                animate-in fade-in zoom-in-95 hover:scale-[1.01] active:scale-[0.99]"
-                disabled={data.length === 0 || loading}
+                dark:text-foreground dark:disabled:text-muted-foreground dark:disabled:bg-muted animate-in fade-in zoom-in-95 
+                hover:scale-[1.01] active:scale-[0.99] {\`your-existing-classes ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
+                disabled={data.length === 0 || loading || disabled}
             >
                 <span className="truncate">
                     {selectedItem ? selectedItem.name : selectTitle}

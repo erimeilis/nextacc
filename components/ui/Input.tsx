@@ -2,10 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  hideLabel?: boolean
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, hideLabel, ...props }, ref) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     return (
       <input
         type={type}

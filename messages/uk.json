@@ -284,6 +284,7 @@
     "hello_file": "Файл привітання",
     "follow_droid_id": "Ідентифікатор Follow Droid",
     "hello_enable": "Увімкнути привітання",
+    "forwarding_enabled": "Переадресація увімкнена",
     "call_to_all_device": "Дзвонити на всі пристрої",
     "use_user_pbx": "Використовувати PBX користувача",
     "extend_user_pbx": "Розширити PBX користувача",

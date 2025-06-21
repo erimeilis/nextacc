@@ -289,6 +289,7 @@
     "hello_file": "Hello File",
     "follow_droid_id": "Follow Droid ID",
     "hello_enable": "Hello Enable",
+    "forwarding_enabled": "Forwarding Enabled",
     "call_to_all_device": "Call to All Device",
     "use_user_pbx": "Use User PBX",
     "extend_user_pbx": "Extend User PBX",
