@@ -58,7 +58,6 @@ export async function redGetNumberDetails(number: string): Promise<DetailedNumbe
             return res.json()
         })
         .then(async (data) => {
-            console.log('redGetNumberDetails: ', data.data)
             return data.data
         })
         .catch((err) => {
@@ -72,12 +71,10 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + `/api/kc/numbers/${number}`)
-    console.log('redUpdateNumberDetails: ', url.toString())
     const requestBody = {
         ...data,
         site_id: process.env.SITE_ID || ''
     }
-    console.log('redUpdateNumberDetails: ', JSON.stringify(requestBody))
 
     const options: RequestInit = {
         cache: 'no-store',
@@ -97,7 +94,6 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
             return res.json()
         })
         .then(async (data) => {
-            console.log('redUpdateNumberDetails: ', data.data)
             return data.data
         })
         .catch((err) => {

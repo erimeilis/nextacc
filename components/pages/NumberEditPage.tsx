@@ -83,7 +83,7 @@ export default function NumberEditPage() {
                     break
                 case 'f_num1':
                 case 'f_num2':
-                    // Only validate if value is not empty
+                    // Only validate if the value is not empty
                     if (value.trim() !== '') {
                         // Get the corresponding type field for validation
                         const typeField = field === 'f_num1' ? 'type_num1' : 'type_num2'
@@ -105,7 +105,6 @@ export default function NumberEditPage() {
                         }
 
                         const mappedType = mapLegacyTypeValue(currentType)
-
                         // Validate based on type
                         switch (mappedType) {
                             case 'voicePhone': {
@@ -130,14 +129,14 @@ export default function NumberEditPage() {
                                 break
                             }
                             default: {
-                                // Intelligently determine validation type based on input value
+                                // Intelligently determine a validation type based on input value
                                 // This ensures appropriate validation when no specific type is selected
                                 if (/^\d/.test(value)) {
-                                    // Value starts with digit - likely a phone number
+                                    // Value starts with a digit - likely a phone number
                                     const phoneValidation = validateInputData(schemaPhone, value)
                                     validationError = phoneValidation.error || ''
                                 } else if (value.includes('@') || /^[a-zA-Z]/.test(value)) {
-                                    // Value contains @ or starts with letter - likely a Telegram username
+                                    // Value contains @ or starts with a letter - likely a Telegram username
                                     const telegramValidation = validateInputData(schemaTelegram, value)
                                     validationError = telegramValidation.error || ''
                                 } else if (value.toLowerCase().includes('sip')) {
@@ -154,7 +153,7 @@ export default function NumberEditPage() {
                             }
                         }
                     }
-                    // If value is empty, validationError remains empty string, which will clear any existing errors
+                    // If value is empty, validationError remains an empty string, which will clear any existing errors
                     break
             }
         }
@@ -172,37 +171,25 @@ export default function NumberEditPage() {
     }
 
     // Handle form submission
-    const handleSave = async () => {
-        console.log('[DEBUG_LOG] handleSave function called!')
-        console.log('[DEBUG_LOG] number:', number)
-        console.log('[DEBUG_LOG] formData exists:', !!formData)
-        console.log('[DEBUG_LOG] formData:', formData)
-
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault(); // Prevent page reload
         if (!number || !formData) {
-            console.log('[DEBUG_LOG] Early return triggered - number or formData missing')
-            console.log('[DEBUG_LOG] number missing:', !number)
-            console.log('[DEBUG_LOG] formData missing:', !formData)
             return
         }
 
-        // Clear previous form errors
-        //setFormErrors({})
+        // Use formData directly for submission
+        const dataToSubmit = {...formData}
 
-        // Debug: Log form data being submitted
-        console.log('[DEBUG_LOG] Form data being submitted:', JSON.stringify(formData, null, 2))
-        console.log('[DEBUG_LOG] Form data keys:', Object.keys(formData))
+        // Special case for forward_type2
+        if (dataToSubmit.forward_type2 === 'no') {
+            // If forward_type2 is set to "no", update multiple fields at once
+            dataToSubmit.type_num2 = 'none'
+            dataToSubmit.f_num2 = ''
+            dataToSubmit.f_time2 = 60
+        }
 
         // Validate form data
-        const {errors} = validateFormData(schemaNumberEdit, formData)
-
-        // Debug: Log validation result
-        console.log('[DEBUG_LOG] Validation result - errors:', errors)
-        console.log('[DEBUG_LOG] Errors type:', typeof errors)
-        console.log('[DEBUG_LOG] Errors is null:', errors === null)
-        console.log('[DEBUG_LOG] Errors is undefined:', errors === undefined)
-        console.log('[DEBUG_LOG] Errors keys length:', errors ? Object.keys(errors).length : 'N/A')
-        console.log('[DEBUG_LOG] Condition check - errors exists:', !!errors)
-        console.log('[DEBUG_LOG] Condition check - has keys:', errors ? Object.keys(errors).length > 0 : false)
+        const {errors} = validateFormData(schemaNumberEdit, dataToSubmit)
 
         // If there are validation errors, display them and stop submission
         if (errors && Object.keys(errors).length > 0) {
@@ -214,8 +201,6 @@ export default function NumberEditPage() {
                 }
             })
             setFormErrors(formattedErrors)
-            console.error('[DEBUG_LOG] Detailed validation errors:', errors)
-            console.error('[DEBUG_LOG] Formatted errors for UI:', formattedErrors)
 
             // Show error toast for validation
             toast({
@@ -231,7 +216,7 @@ export default function NumberEditPage() {
         setSaving(true)
         try {
             console.log('[DEBUG_LOG] Calling API to update number details...')
-            const updatedData = await redUpdateNumberDetails(number, formData)
+            const updatedData = await redUpdateNumberDetails(number, dataToSubmit)
             console.log('[DEBUG_LOG] API response received:', updatedData)
             if (updatedData) {
                 setNumberData(updatedData)
@@ -289,7 +274,7 @@ export default function NumberEditPage() {
         <form
             id="editNumberForm"
             name="editNumberForm"
-            className="mt-8 space-y-8 transition-all duration-500 ease-in-out"
+            className="mt-4 space-y-2 transition-all duration-500 ease-in-out"
             onSubmit={handleSave}
             method="post"
         >
@@ -305,7 +290,7 @@ export default function NumberEditPage() {
                     >
                         <ArrowLeftIcon size={16}/>
                     </Button>
-                    <h1 className="text-lg font-bold">{t('edit_number')} {number}</h1>
+                    <h1 className="text-md font-light">{t('edit_number')} {number}</h1>
                 </div>
                 <div className="flex space-x-2">
                     <Button

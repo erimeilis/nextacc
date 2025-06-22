@@ -14,12 +14,12 @@ export const schemaNumberEdit = z.object({
     f_num2: z.string().optional().or(z.literal('')),
     f_time1: z.number().min(0, {message: 'invalid_time'}).optional().nullable(),
     f_time2: z.number().min(0, {message: 'invalid_time'}).optional().nullable(),
-    //vm: z.number().min(0, {message: 'invalid_number'}).optional().nullable(),
-    //vm_file: z.string().optional().or(z.literal('')),
-    //vm_email: z.string().optional().or(z.literal(''))
-    //    .refine((val) => !val || schemaEmail.safeParse(val).success, {
-    //        message: 'invalid_email'
-    //    }),
+    vm: z.number().min(0, {message: 'invalid_number'}).optional().nullable(),
+    vm_file: z.string().optional().or(z.literal('')),
+    vm_email: z.string().optional().or(z.literal(''))
+        .refine((val) => !val || schemaEmail.safeParse(val).success, {
+            message: 'invalid_email'
+        }),
     //vm_beep: z.string().optional().or(z.literal('')),
     //hello_file: z.string().optional().or(z.literal('')),
 
@@ -46,7 +46,7 @@ export const schemaNumberEdit = z.object({
         }),
 
     // Boolean fields (checkboxes) - these don't need validation
-    //hello_enable: z.union([z.string(), z.boolean()]).optional(),
+    hello_enable: z.union([z.string(), z.boolean()]).optional(),
     //show_real_caller_id: z.union([z.string(), z.boolean()]).optional(),
     //call_to_all_device: z.union([z.string(), z.boolean()]).optional(),
     //use_user_pbx: z.union([z.string(), z.boolean()]).optional(),
