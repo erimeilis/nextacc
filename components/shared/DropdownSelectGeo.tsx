@@ -13,7 +13,9 @@ export default function DropdownSelectGeo({
                                               onSelectAction,
                                               selectedOption,
                                               //loading = false,
-                                              customClass = ''
+                                              customClass = '',
+                                              showFlags = false,
+                                              geoData
                                           }: {
     selectId: string
     selectTitle: string
@@ -22,6 +24,8 @@ export default function DropdownSelectGeo({
     selectedOption?: number | string | null
     //loading?: boolean
     customClass?: string
+    showFlags?: boolean
+    geoData?: { id: number, geo: string }[] | null
 }) {
     const t = useTranslations('common')
     const [localSelectedOption, setLocalSelectedOption] = useState<number | string | null>(selectedOption || null)
@@ -135,6 +139,15 @@ export default function DropdownSelectGeo({
         (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
     )
 
+    // Function to get country code for an item
+    const getCountryCode = (itemId: number | string): string | undefined => {
+        if (!showFlags || !geoData) return undefined
+
+        // Find the matching country in geoData
+        const country = geoData.find(c => c.id === Number(itemId))
+        return country?.geo
+    }
+
     return (
         <div className={'min-w-[200px] relative ' + customClass} ref={dropdownRef} style={{position: 'relative'}}>
             <Label
@@ -156,7 +169,14 @@ export default function DropdownSelectGeo({
                 animate-in fade-in zoom-in-95 hover:scale-[1.01] active:scale-[0.99]"
                 disabled={!data || data.length === 0}
             >
-                <span className="truncate">
+                <span className="truncate flex items-center">
+                    {selectedItem && showFlags && getCountryCode(selectedItem.id) && (
+                        <img 
+                            src={`https://flagcdn.com/w20/${getCountryCode(selectedItem.id)?.toLowerCase()}.png`}
+                            alt={`${selectedItem.name} flag`}
+                            className="mr-2 h-3 w-5 inline-block"
+                        />
+                    )}
                     {selectedItem ? selectedItem.name : selectTitle}
                 </span>
                 <CaretDownIcon
@@ -219,7 +239,16 @@ export default function DropdownSelectGeo({
                                             isSelected ? 'bg-accent/50 dark:bg-accent/50' : ''
                                         }`}
                                     >
-                                        <span className={`text-sm ${isSelected ? 'font-bold' : ''}`}>{item.name}</span>
+                                        <span className={`text-sm ${isSelected ? 'font-bold' : ''} flex items-center`}>
+                                            {showFlags && getCountryCode(item.id) && (
+                                                <img 
+                                                    src={`https://flagcdn.com/w20/${getCountryCode(item.id)?.toLowerCase()}.png`}
+                                                    alt={`${item.name} flag`}
+                                                    className="mr-2 h-3 w-5 inline-block"
+                                                />
+                                            )}
+                                            {item.name}
+                                        </span>
                                         {isSelected && <CheckIcon className="h-4 w-4 text-foreground"/>}
                                     </div>
                                 )

@@ -52,6 +52,7 @@ export type DataTableProps<T, F> = {
     onRowClick?: (item: T) => void
     rowClassName?: (item: T) => string
     textSize?: 'text-xs' | 'text-sm' | 'text-base'
+    renderExtraFilterButtons?: () => React.ReactNode
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 10
@@ -87,6 +88,7 @@ export default function DataTable<T extends object, F extends Record<string, unk
         onRowClick,
         rowClassName,
         textSize = 'text-xs',
+        renderExtraFilterButtons,
     } = props
 
     const [sortConfig, setSortConfig] = useState<SortConfig<T>>(initialSort)
@@ -296,13 +298,16 @@ export default function DataTable<T extends object, F extends Record<string, unk
                                 </div>
                             ))}
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setFilterValues({} as F)}
-                            className="px-3 py-1 text-xs rounded-md bg-muted hover:bg-muted/80"
-                        >
-                            {tr('clear_filters')}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setFilterValues({} as F)}
+                                className="px-3 py-1 text-xs rounded-md bg-muted hover:bg-muted/80"
+                            >
+                                {tr('clear_filters')}
+                            </button>
+                            {renderExtraFilterButtons && renderExtraFilterButtons()}
+                        </div>
                     </div>
                 )}
 

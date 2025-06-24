@@ -301,6 +301,8 @@ export default function OffersPage() {
                     onSelectAction={handleCountry}
                     selectedOption={country}
                     customClass="w-full"
+                    showFlags={true}
+                    geoData={localCountriesMap}
                 />
                 <DropdownSelectGeo
                     selectId="area"

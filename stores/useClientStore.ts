@@ -232,6 +232,7 @@ export const useClientStore = create<ClientStore>()(
 
                 return success
             },
+
         }),
         {
             name: 'client-storage',
