@@ -23,7 +23,7 @@ export const Slider = ({
     return (
         <div className="space-y-2">
             <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">{label}</label>
+                <label className={`text-sm font-medium ${disabled ? "text-muted-foreground" : ""}`}>{label}</label>
                 <span className="text-sm text-muted-foreground">{value}sec</span>
             </div>
             <input
@@ -35,9 +35,15 @@ export const Slider = ({
                 onChange={(e) => onChangeAction(parseInt(e.target.value))}
                 disabled={disabled}
                 style={{
-                    background: `linear-gradient(to right, hsl(var(--button-to)), hsl(var(--button-from)) ${(value - min) / (max - min) * 100}%, hsl(var(--muted)) ${(value - min) / (max - min) * 100}%)`
+                    background: disabled 
+                        ? `linear-gradient(to right, hsl(var(--muted)), hsl(var(--muted)) ${(value - min) / (max - min) * 100}%, hsl(var(--muted)) ${(value - min) / (max - min) * 100}%)`
+                        : `linear-gradient(to right, hsl(var(--button-to)), hsl(var(--button-from)) ${(value - min) / (max - min) * 100}%, hsl(var(--muted)) ${(value - min) / (max - min) * 100}%)`
                 }}
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-[hsl(var(--button-from))] [&::-webkit-slider-thumb]:to-[hsl(var(--button-to))] [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-gradient-to-r [&::-moz-range-thumb]:from-[hsl(var(--button-from))] [&::-moz-range-thumb]:to-[hsl(var(--button-to))]"
+                className={`w-full h-2 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full ${
+                    disabled 
+                    ? "[&::-webkit-slider-thumb]:bg-[hsl(var(--muted))] [&::-moz-range-thumb]:bg-[hsl(var(--muted))]" 
+                    : "[&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-[hsl(var(--button-from))] [&::-webkit-slider-thumb]:to-[hsl(var(--button-to))] [&::-moz-range-thumb]:bg-gradient-to-r [&::-moz-range-thumb]:from-[hsl(var(--button-from))] [&::-moz-range-thumb]:to-[hsl(var(--button-to))]"
+                }`}
             />
         </div>
     )

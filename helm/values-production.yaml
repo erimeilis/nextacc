@@ -32,7 +32,7 @@ env:
   - name: SITE_ID
     value: 23
   - name: REDREPORT_URL
-    value: https://redreport.telecomax.com
+    value: https://redreport.freeje.org
   - name: NEXTAUTH_URL
     value: https://nextacc.telecomax.net
   - name: GOOGLE_CLIENT_ID

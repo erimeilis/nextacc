@@ -20,8 +20,12 @@ export async function redGetMyUploads(): Promise<UploadInfo[] | null> {
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return null
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redGetMyUploads error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {
@@ -52,8 +56,13 @@ export async function redUploadFile(file: File): Promise<boolean> {
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            return res.ok
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redUploadFile error response: ', errorData)
+                return false
+            }
+            return true
         })
         .catch((err) => {
             console.log('redUploadFile error: ', err.message)
@@ -78,8 +87,13 @@ export async function redDeleteUpload(fileId: string): Promise<boolean> {
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            return res.ok
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redDeleteUpload error response: ', errorData)
+                return false
+            }
+            return true
         })
         .catch((err) => {
             console.log('redDeleteUpload error: ', err.message)
@@ -108,8 +122,13 @@ export async function redRenameFile(filename: string, name: string): Promise<boo
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            return res.ok
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redRenameFile error response: ', errorData)
+                return false
+            }
+            return true
         })
         .catch((err) => {
             console.log('redRenameFile error: ', err.message)

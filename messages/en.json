@@ -5,7 +5,9 @@
   "common": {
     "locale": "en",
     "refresh": "Refresh page",
-    "search": "Search..."
+    "search": "Search...",
+    "yes": "Yes",
+    "no": "No"
   },
   "login": {
     "email": "Email address",
@@ -172,6 +174,9 @@
     "country": "Country",
     "address": "Address",
     "phone": "Phone",
+    "low_balance_notification": "Low balance notification",
+    "low_balance_edge": "Low balance threshold",
+    "subscribe_news": "Subscribe to news",
     "update_profile": "Update profile",
     "edit_profile": "Edit profile",
     "dont_edit_profile": "Cancel",
@@ -268,6 +273,10 @@
     "cancel": "Cancel",
     "saving": "Saving...",
     "save_changes": "Save Changes",
+    "basic_settings": "Basic Settings",
+    "name": "Name",
+    "name_placeholder": "Enter name for this number",
+    "autorenew": "Auto-renew",
     "call_destination_settings": "Call Destination Settings",
     "call_destination": "Call Destination",
     "call_priority": "Call Priority",
@@ -293,7 +302,9 @@
     "hello_file": "Hello File",
     "follow_droid_id": "Follow Droid ID",
     "hello_enable": "Voice greeting",
-    "forwarding_enabled": "Forwarding Enabled",
+    "forwarding_enabled": "Enable forwarding",
+    "forwarding_enabled_hint": "Enable call forwarding",
+    "forwarding_or_greeting_required": "Either voice greeting or forwarding must be enabled",
     "call_to_all_device": "Call to All Device",
     "use_user_pbx": "Use User PBX",
     "extend_user_pbx": "Extend User PBX",

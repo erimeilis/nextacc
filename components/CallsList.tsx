@@ -1,7 +1,6 @@
 'use client'
 import React, {useEffect, useMemo, useState} from 'react'
 import {useTranslations} from 'next-intl'
-import {Input} from '@/components/ui/Input'
 import DateRangePicker from '@/components/ui/DateRangePicker'
 import {FormattedDate} from '@/components/ui/FormattedDate'
 import {CallStatistics} from '@/types/Statistics'
@@ -15,7 +14,6 @@ import {useToast} from '@/hooks/use-toast'
 // Define the filter type for Call Statistics
 type CallStatisticsFilter = {
     dateRange: { start: Date | null, end: Date | null } | null
-    did: string
 }
 
 interface CallsListProps {
@@ -185,28 +183,12 @@ export default function CallsList({did}: CallsListProps) {
 
                 return true
             }
-        },
-        {
-            key: 'did',
-            label: t('virtual_number'),
-            component: (
-                <Input
-                    type="text"
-                    placeholder={t('enter_virtual_number')}
-                    className="h-8 text-xs"
-                />
-            ),
-            applyFilter: (item, filterValue) => {
-                if (!filterValue || typeof filterValue !== 'string') return true
-                return item.virtual_number.toLowerCase().includes(filterValue.toLowerCase())
-            }
         }
     ]
 
     // Initial filter values
     const initialFilterValues: CallStatisticsFilter = {
-        dateRange: initialDateRange,
-        did: ''
+        dateRange: initialDateRange
     }
 
     // Add a custom filter for the send to email button
@@ -215,7 +197,7 @@ export default function CallsList({did}: CallsListProps) {
         {
             key: 'dateRange' as keyof CallStatisticsFilter,
             label: '',
-            component: <></>,
+            component: <div></div>,
             applyFilter: () => true,
             renderWithClearButton: true
         }

@@ -1,5 +1,6 @@
-import {Buildings, Copyright, DeviceMobile, FlagBanner, UserFocus} from '@phosphor-icons/react'
+import {BuildingsIcon, CheckIcon, CircleIcon, CopyrightIcon, DeviceMobileIcon, FlagBannerIcon, UserFocusIcon, WalletIcon} from '@phosphor-icons/react'
 import {InputField} from '@/types/InputField'
+import {getCountries} from '@/utils/getCountries'
 
 const profileFields: InputField[] = [
     {
@@ -11,7 +12,7 @@ const profileFields: InputField[] = [
         autoComplete: 'firstname',
         isRequired: false,
         placeholder: 'firstname',
-        icon: UserFocus,
+        icon: UserFocusIcon,
     },
     {
         labelText: 'lastname',
@@ -22,7 +23,7 @@ const profileFields: InputField[] = [
         autoComplete: 'lastname',
         isRequired: false,
         placeholder: 'lastname',
-        icon: UserFocus,
+        icon: UserFocusIcon,
     },
     {
         labelText: 'company',
@@ -33,7 +34,7 @@ const profileFields: InputField[] = [
         autoComplete: 'company',
         isRequired: false,
         placeholder: 'company',
-        icon: Copyright,
+        icon: CopyrightIcon,
     },
     {
         labelText: 'country',
@@ -44,7 +45,9 @@ const profileFields: InputField[] = [
         autoComplete: 'country',
         isRequired: false,
         placeholder: 'country',
-        icon: FlagBanner,
+        icon: FlagBannerIcon,
+        isDropdown: true,
+        dropdownData: getCountries(),
     },
     {
         labelText: 'address',
@@ -55,7 +58,7 @@ const profileFields: InputField[] = [
         autoComplete: 'address',
         isRequired: false,
         placeholder: 'address',
-        icon: Buildings,
+        icon: BuildingsIcon,
     },
     {
         labelText: 'phone',
@@ -66,7 +69,40 @@ const profileFields: InputField[] = [
         autoComplete: 'phone',
         isRequired: false,
         placeholder: 'phone',
-        icon: DeviceMobile,
+        icon: DeviceMobileIcon,
+    },
+    {
+        labelText: 'low_balance_notification',
+        labelFor: 'profileLowBalanceNotification',
+        id: 'profileLowBalanceNotification',
+        name: 'profileLowBalanceNotification',
+        type: 'checkbox',
+        autoComplete: 'low_balance_notification',
+        isRequired: false,
+        placeholder: 'low_balance_notification',
+        icon: CheckIcon,
+    },
+    {
+        labelText: 'low_balance_edge',
+        labelFor: 'profileLowBalanceEdge',
+        id: 'profileLowBalanceEdge',
+        name: 'profileLowBalanceEdge',
+        type: 'number',
+        autoComplete: 'low_balance_edge',
+        isRequired: false,
+        placeholder: 'low_balance_edge',
+        icon: WalletIcon,
+    },
+    {
+        labelText: 'subscribe_news',
+        labelFor: 'profileSubscribeNews',
+        id: 'profileSubscribeNews',
+        name: 'profileSubscribeNews',
+        type: 'checkbox',
+        autoComplete: 'subscribe_news',
+        isRequired: false,
+        placeholder: 'subscribe_news',
+        icon: CircleIcon,
     },
 
 ]

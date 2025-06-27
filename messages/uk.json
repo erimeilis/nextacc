@@ -5,7 +5,9 @@
   "common": {
     "locale": "uk",
     "refresh": "Відновити сторінку",
-    "search": "Пошук..."
+    "search": "Пошук...",
+    "yes": "Так",
+    "no": "Ні"
   },
   "login": {
     "email": "Електронна адреса",
@@ -171,6 +173,9 @@
     "country": "Країна",
     "address": "Адреса",
     "phone": "Телефон",
+    "low_balance_notification": "Сповіщення про низький баланс",
+    "low_balance_edge": "Поріг низького балансу",
+    "subscribe_news": "Підписатися на новини",
     "update_profile": "Оновити профіль",
     "edit_profile": "Редагувати профіль",
     "dont_edit_profile": "Скасувати",
@@ -254,7 +259,11 @@
     "cart_add_success": "Товар успішно додано до кошика",
     "error_title": "Помилка",
     "cart_add_error": "Не вдалося додати товар до кошика",
-    "number_not_available": "Номер недоступний"
+    "number_not_available": "Номер недоступний",
+    "save_success": "Зміни успішно збережено",
+    "number_updated_successfully": "Налаштування номера було оновлено",
+    "save_error": "Не вдалося зберегти зміни",
+    "failed_to_save_changes": "Неможливо зберегти зміни. Будь ласка, спробуйте ще раз."
   },
   "number-edit": {
     "number_not_found": "Номер не знайдено",
@@ -263,6 +272,10 @@
     "cancel": "Скасувати",
     "saving": "Збереження...",
     "save_changes": "Зберегти зміни",
+    "basic_settings": "Основні налаштування",
+    "name": "Назва",
+    "name_placeholder": "Введіть назву для цього номера",
+    "autorenew": "Автопродовження",
     "call_destination_settings": "Налаштування переадресації дзвінків",
     "call_destination": "Призначення дзвінка",
     "call_priority": "Пріоритет дзвінка",
@@ -288,7 +301,9 @@
     "hello_file": "Файл привітання",
     "follow_droid_id": "Ідентифікатор Follow Droid",
     "hello_enable": "Голосове привітання",
-    "forwarding_enabled": "Переадресація увімкнена",
+    "forwarding_enabled": "Увімкнути переадресацію",
+    "forwarding_enabled_hint": "Увімкнути переадресацію дзвінків",
+    "forwarding_or_greeting_required": "Голосове привітання або переадресація повинні бути увімкнені",
     "call_to_all_device": "Дзвонити на всі пристрої",
     "use_user_pbx": "Використовувати PBX користувача",
     "extend_user_pbx": "Розширити PBX користувача",

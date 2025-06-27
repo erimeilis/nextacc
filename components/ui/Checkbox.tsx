@@ -8,8 +8,9 @@ const Checkbox = React.forwardRef<
     Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
     onCheckedChange?: (checked: boolean) => void
     variant?: 'default' | 'sm'
+    customClass?: string
 }
->(({className, onCheckedChange, variant = 'default', ...props}, ref) => {
+>(({className, onCheckedChange, variant = 'default', customClass, ...props}, ref) => {
     // We don't need to track checked state internally, we'll use the props directly
     // This ensures the component always reflects the current props.checked value
     const checked = props.checked || false
@@ -27,17 +28,40 @@ const Checkbox = React.forwardRef<
 
     // Function to handle clicks on the custom checkbox
     const handleCustomCheckboxClick = () => {
-        console.log('handleCustomCheckboxClick called, current checked state:', checked)
         if (inputRef.current && !props.disabled) {
-            console.log('Clicking input element')
-            // Instead of clicking the input element, directly call the onCheckedChange prop
-            // This should ensure the event is always triggered
-            onCheckedChange?.(!checked)
+            // Toggle the checked state
+            const newChecked = !checked
 
-            // Also trigger the onChange event on the input element
-            const event = new Event('change', {bubbles: true})
-            Object.defineProperty(event, 'target', {value: {checked: !checked}})
-            inputRef.current.dispatchEvent(event)
+            // Call the onCheckedChange prop with the new checked state
+            onCheckedChange?.(newChecked)
+
+            // If there's an onChange handler, create a synthetic event and call it
+            if (props.onChange && inputRef.current) {
+                // Update the input's checked state
+                inputRef.current.checked = newChecked
+
+                // Create a synthetic change event that matches React's expected type
+                const nativeEvent = new Event('change', { bubbles: true });
+                // Create a React change event with the input as target
+                const syntheticEvent = {
+                    nativeEvent,
+                    currentTarget: inputRef.current,
+                    target: inputRef.current,
+                    bubbles: nativeEvent.bubbles,
+                    cancelable: nativeEvent.cancelable,
+                    defaultPrevented: nativeEvent.defaultPrevented,
+                    preventDefault: nativeEvent.preventDefault,
+                    isDefaultPrevented: () => false,
+                    stopPropagation: () => {},
+                    isPropagationStopped: () => false,
+                    persist: () => {},
+                    timeStamp: Date.now(),
+                    type: 'change'
+                } as React.ChangeEvent<HTMLInputElement>;
+
+                // Call the onChange handler with the synthetic event
+                props.onChange(syntheticEvent)
+            }
         }
     }
 
@@ -56,7 +80,7 @@ const Checkbox = React.forwardRef<
     const currentSize = sizeClasses[variant]
 
     return (
-        <div className="relative flex items-center">
+        <div className={cn("relative flex items-center", customClass)}>
             <input
                 type="checkbox"
                 className={cn(

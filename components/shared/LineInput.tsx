@@ -60,7 +60,7 @@ export default function LineInput({
             {hasLabel && (
                 <Label
                     htmlFor={labelFor}
-                    className="flex text-xs sm:text-sm p-2 items-center font-light min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground"
+                    className="flex text-xs sm:text-sm p-2 items-center font-light min-w-32 w-48 sm:min-w-48 sm:w-64 text-muted-foreground"
                 >
                     {labelText}:
                 </Label>

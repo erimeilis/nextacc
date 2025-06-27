@@ -5,19 +5,18 @@ import {NumberInfo} from '@/types/NumberInfo'
 import {fetchWithCache} from '@/utils/fetchCache'
 
 export async function getCountries({type}: { type: string }): Promise<CountryInfo[]> {
-    const url = process.env.REDREPORT_URL + '/api/did/countries'
-    const ttl = 60 * 60 * 1000 // 1 hour
+    const url = new URL(process.env.REDREPORT_URL + '/api/did/countries')
+    url.searchParams.append('type', type)
+    //const ttl = 60 * 60 * 1000 // 1 hour
 
     try {
-        const response = await fetchWithCache<{ data: CountryInfo[] }>(url, {
-            method: 'POST',
+        const response = await fetchWithCache<{ data: CountryInfo[] }>(url.toString(), {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
-            body: 'type=' + type,
-            ttl: ttl
+            //ttl: ttl
         })
 
         if (response && response.data && response.data.length > 0) {
@@ -31,19 +30,19 @@ export async function getCountries({type}: { type: string }): Promise<CountryInf
 }
 
 export async function getAreas({type, country}: { type: string, country: number }): Promise<AreaInfo[]> {
-    const url = process.env.REDREPORT_URL + '/api/did/areas'
-    const ttl = 10 * 60 * 1000 // 10 minutes
+    const url = new URL(process.env.REDREPORT_URL + '/api/did/areas')
+    url.searchParams.append('type', type)
+    url.searchParams.append('country_id', country.toString())
+    //const ttl = 10 * 60 * 1000 // 10 minutes
 
     try {
-        const response = await fetchWithCache<{ data: AreaInfo[] }>(url, {
-            method: 'POST',
+        const response = await fetchWithCache<{ data: AreaInfo[] }>(url.toString(), {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
-            body: 'type=' + type + '&country_id=' + country,
-            ttl: ttl
+            //ttl: ttl
         })
 
         if (response && response.data && response.data.length > 0) {
@@ -57,8 +56,11 @@ export async function getAreas({type, country}: { type: string, country: number 
 }
 
 export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
-    const url = process.env.REDREPORT_URL + '/api/did/numbers'
-    const ttl = 2 * 60 * 1000 // 2 minutes
+    const url = new URL(process.env.REDREPORT_URL + '/api/did/numbers')
+    url.searchParams.append('type', type)
+    url.searchParams.append('country_id', country.toString())
+    url.searchParams.append('area_prefix', area.toString())
+    //const ttl = 2 * 60 * 1000 // 2 minutes
 
     // Define a type based on NumberInfo for the API response
     type NumberResponseRaw = {
@@ -75,15 +77,13 @@ export async function getNumbers({type, country, area}: { type: string, country:
     }
 
     try {
-        const response = await fetchWithCache<{ data: NumberResponseRaw[] }>(url, {
-            method: 'POST',
+        const response = await fetchWithCache<{ data: NumberResponseRaw[] }>(url.toString(), {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
-            body: 'type=' + type + '&country_id=' + country + '&area_prefix=' + area,
-            ttl: ttl
+            //ttl: ttl
         })
 
         if (response && response.data && response.data.length > 0) {
@@ -116,7 +116,8 @@ export async function getNumbers({type, country, area}: { type: string, country:
 
 export async function getDiscounts() {
     const url = process.env.REDREPORT_URL + '/api/did/discounts'
-    const ttl = 30 * 24 * 60 * 60 * 1000 // 30 days
+
+    //const ttl = 30 * 24 * 60 * 60 * 1000 // 30 days
 
     interface DiscountResponse {
         months: number;
@@ -127,11 +128,10 @@ export async function getDiscounts() {
         const response = await fetchWithCache<{ data: DiscountResponse[] }>(url, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 //'Authorization': 'Bearer ' + process.env.REDREPORT_TOKEN,
             },
-            ttl: ttl
+            //ttl: ttl
         })
 
         if (response && response.data && response.data.length > 0) {

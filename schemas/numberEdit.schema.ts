@@ -5,6 +5,9 @@ import {schemaHttps} from './https.schema'
 
 // Schema for number edit form validation
 export const schemaNumberEdit = z.object({
+    // Basic Settings
+    name: z.string().or(z.literal('')),
+    autorenew: z.boolean(),
     // ExtMan Settings - Voice Settings
     ff_num: z.string().optional().or(z.literal('')),
     type_num1: z.string().optional().or(z.literal('')),
@@ -47,6 +50,7 @@ export const schemaNumberEdit = z.object({
 
     // Boolean fields (checkboxes) - these don't need validation
     hello_enable: z.union([z.string(), z.boolean()]).optional(),
+    forwarding_disabled: z.boolean().optional(),
     //show_real_caller_id: z.union([z.string(), z.boolean()]).optional(),
     //call_to_all_device: z.union([z.string(), z.boolean()]).optional(),
     //use_user_pbx: z.union([z.string(), z.boolean()]).optional(),

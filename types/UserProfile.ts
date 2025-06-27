@@ -8,8 +8,8 @@ export type UserProfile = {
     company: string
     address: string
     country: string
-    notification_balance: boolean
-    news_subscribe: boolean
+    low_balance_notification: boolean
+    low_balance_edge: number
+    subscribe_news: boolean
     balance: number
-    currency: string
 }

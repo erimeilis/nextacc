@@ -17,12 +17,12 @@ export default function StatisticsPage() {
     const [statisticsType, setStatisticsType] = useState<'calls' | 'sms'>('calls')
 
     // Get numbers from client store
-    const { getNumbers } = useClientStore()
+    const {getNumbers} = useClientStore()
     const numbers = getNumbers()
 
     // Handle number selection
     const handleNumberSelect = (value: string) => {
-        if (value === "all") {
+        if (value === 'all') {
             router.push('/statistics')
         } else {
             router.push(`/statistics/${value}`)
@@ -31,7 +31,7 @@ export default function StatisticsPage() {
 
     return (
         <>
-            <div className="flex flex-row items-center justify-between -mb-8">
+            <div className="flex flex-row items-center justify-between mb-4">
                 <div className="flex items-center space-x-2 text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
                         <PhoneIcon size={16} className={`inline-block ${statisticsType === 'calls' ? 'text-primary' : 'text-muted-foreground'}`}/>
@@ -46,16 +46,16 @@ export default function StatisticsPage() {
                         <span className={statisticsType === 'sms' ? 'font-medium' : 'text-muted-foreground'}>{t('sms')}</span>
                     </div>
                 </div>
-                <div className="w-64">
+                <div className="w-max">
                     <DropdownSelect
                         selectId="statistics-number-select"
                         selectTitle={t('select_number')}
                         data={[
-                            { id: "all", name: t('show_all') },
-                            ...(numbers?.map(number => ({ id: number.did, name: number.did })) || [])
+                            {id: 'all', name: t('show_all')},
+                            ...(numbers?.map(number => ({id: number.did, name: number.did})) || [])
                         ]}
                         onSelectAction={handleNumberSelect}
-                        customClass="h-8 text-xs"
+                        customClass="text-xs w-max"
                     />
                 </div>
             </div>

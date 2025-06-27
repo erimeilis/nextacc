@@ -26,8 +26,12 @@ export async function getCallStatistics(from?: string, to?: string, did?: string
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return []
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('getCallStatistics error response: ', errorData)
+                return []
+            }
             return res.json()
         })
         .then(data => {
@@ -62,8 +66,13 @@ export async function sendCallStatistics(from?: string, to?: string, did?: strin
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            return res.ok
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('sendCallStatistics error response: ', errorData)
+                return false
+            }
+            return true
         })
         .catch(err => {
             console.error('sendCallStatistics error:', err.message)
@@ -94,8 +103,12 @@ export async function getSmsStatistics(from?: string, to?: string, did?: string)
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return []
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('getSmsStatistics error response: ', errorData)
+                return []
+            }
             return res.json()
         })
         .then(data => {
@@ -130,8 +143,13 @@ export async function sendSmsStatistics(from?: string, to?: string, did?: string
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            return res.ok
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('sendSmsStatistics error response: ', errorData)
+                return false
+            }
+            return true
         })
         .catch(err => {
             console.error('sendSmsStatistics error:', err.message)

@@ -192,7 +192,7 @@ export default function SmsList({did}: SmsListProps) {
         {
             key: 'dateRange' as keyof SmsStatisticsFilter,
             label: '',
-            component: <></>,
+            component: <div></div>,
             applyFilter: () => true,
             renderWithClearButton: true
         }

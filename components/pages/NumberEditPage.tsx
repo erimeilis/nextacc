@@ -3,7 +3,9 @@ import React, {useEffect, useState} from 'react'
 import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {Button} from '@/components/ui/Button'
-import {ArrowLeftIcon, CircleNotchIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
+import {Input} from '@/components/ui/Input'
+import {Checkbox} from '@/components/ui/Checkbox'
+import {ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
 import {redGetNumberDetails, redUpdateNumberDetails} from '@/app/api/redreport/numbers'
 import Loader from '@/components/service/Loader'
 import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
@@ -172,20 +174,57 @@ export default function NumberEditPage() {
 
     // Handle form submission
     const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent page reload
+        e.preventDefault() // Prevent page reload
         if (!number || !formData) {
             return
         }
 
-        // Use formData directly for submission
-        const dataToSubmit = {...formData}
+        // Use formData directly for submission and ensure required fields are not undefined
+        const dataToSubmit = {
+            ...formData,
+            // Ensure name is never undefined - use empty string as fallback
+            name: formData.name ?? numberData?.name ?? '',
+            // Ensure autorenew is never undefined - use false as fallback
+            autorenew: formData.autorenew ?? numberData?.autorenew ?? false
+        }
 
+        // Special case for forwarding_disabled
+        if (dataToSubmit.forwarding_disabled) {
+            // If forwarding is disabled, clear all forwarding fields
+            dataToSubmit.type_num1 = 'none'
+            dataToSubmit.f_num1 = ''
+            dataToSubmit.type_num2 = 'none'
+            dataToSubmit.f_num2 = ''
+            dataToSubmit.f_time1 = 0
+            dataToSubmit.f_time2 = 0
+            dataToSubmit.forward_type2 = 'no'
+        }
         // Special case for forward_type2
-        if (dataToSubmit.forward_type2 === 'no') {
+        else if (dataToSubmit.forward_type2 === 'no') {
             // If forward_type2 is set to "no", update multiple fields at once
             dataToSubmit.type_num2 = 'none'
             dataToSubmit.f_num2 = ''
             dataToSubmit.f_time2 = 60
+        }
+
+        // Custom validation: either voice greeting or forwarding must be enabled
+        const isHelloEnabled = Boolean(dataToSubmit.hello_enable)
+        const isForwardingEnabled = !dataToSubmit.forwarding_disabled
+
+        if (!isHelloEnabled && !isForwardingEnabled) {
+            // If neither voice greeting nor forwarding is enabled, show an error
+            const formattedErrors: Record<string, string> = {}
+            formattedErrors['hello_enable'] = 'forwarding_or_greeting_required'
+            setFormErrors(formattedErrors)
+
+            // Show error toast for validation
+            toast({
+                variant: 'destructive',
+                title: toastT('validation_error_title'),
+                description: t('forwarding_or_greeting_required'),
+            })
+
+            return
         }
 
         // Validate form data
@@ -322,6 +361,39 @@ export default function NumberEditPage() {
 
             {/* Form */}
             <div className="space-y-6">
+                {/* Basic Number Settings */}
+                <div className="bg-card p-4 rounded-lg">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-4 gap-6">
+                        <div className="sm:col-span-4">
+                            <h2 className="w-full text-muted-foreground text-sm font-light text-right mb-2 flex justify-end items-center">
+                                <FadersHorizontalIcon className="h-4 w-4 mr-2"/>
+                                {t('basic_settings')}
+                            </h2>
+                        </div>
+                        <div className="sm:col-span-3">
+                            <Input
+                                id="name"
+                                value={formData.name !== undefined ? formData.name : numberData.name || ''}
+                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                placeholder={t('name_placeholder')}
+                                className="mt-1"
+                            />
+                        </div>
+                        <div className="sm:col-span-1">
+                            <div className="flex flex-row items-center space-x-2 h-full">
+                                <Checkbox
+                                    id="autorenew"
+                                    checked={formData.autorenew !== undefined ? formData.autorenew : numberData.autorenew}
+                                    onCheckedChange={(checked) => handleInputChange('autorenew', checked)}
+                                />
+                                <label htmlFor="autorenew" className="text-sm">
+                                    {t('autorenew')}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* ExtMan Settings (for voice/toll-free numbers) */}
                 <ExtManSettings
                     numberData={numberData}

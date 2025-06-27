@@ -24,13 +24,23 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
         }
     }
     return fetch(url.toString(), options)
-        .then((res: Response) => {
+        .then(async (res: Response) => {
             console.log('redGetUserProfile: ', res.status)
-            if (!res.ok) return null
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redGetUserProfile error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then((data) => {
-            return data.data
+            console.log('redGetUserProfile: ', data);
+            console.log('Profile data details:', {
+                low_balance_notification: data.data?.low_balance_notification,
+                low_balance_edge: data.data?.low_balance_edge,
+                subscribe_news: data.data?.subscribe_news
+            });
+            return data.data;
         })
         .catch((err) => {
             console.log('redGetUserProfile error: ', err.message)
@@ -51,13 +61,17 @@ export async function redSetUserProfile(fields: Partial<UserProfile>): Promise<U
         },
         body: JSON.stringify({
             'site_id': process.env.SITE_ID,
-            'fields': fields
+            ...fields
         })
     }
     return fetch(process.env.REDREPORT_URL + '/api/kc/profile', options)
-        .then((res: Response) => {
+        .then(async (res: Response) => {
             //console.log('redSetUserProfile: ', res)
-            if (!res.ok) return null
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redSetUserProfile error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then((data) => {

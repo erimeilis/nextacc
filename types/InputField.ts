@@ -10,4 +10,6 @@ export type InputField = {
     isRequired: boolean,
     placeholder: string,
     icon?: Icon,
+    isDropdown?: boolean,
+    dropdownData?: { id: string, name: string }[],
 }

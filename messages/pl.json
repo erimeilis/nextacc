@@ -5,7 +5,9 @@
   "common": {
     "locale": "pl",
     "refresh": "Odśwież",
-    "search": "Szukaj..."
+    "search": "Szukaj...",
+    "yes": "Tak",
+    "no": "Nie"
   },
   "login": {
     "email": "Adres e-mail",
@@ -171,6 +173,9 @@
     "country": "Kraj",
     "address": "Adres",
     "phone": "Telefon",
+    "low_balance_notification": "Powiadomienie o niskim saldzie",
+    "low_balance_edge": "Próg niskiego salda",
+    "subscribe_news": "Subskrybuj wiadomości",
     "update_profile": "Aktualizuj profil",
     "edit_profile": "Edytuj profil",
     "dont_edit_profile": "Anuluj",
@@ -254,7 +259,11 @@
     "cart_add_success": "Produkt został pomyślnie dodany do koszyka",
     "error_title": "Błąd",
     "cart_add_error": "Nie udało się dodać produktu do koszyka",
-    "number_not_available": "Numer jest niedostępny"
+    "number_not_available": "Numer jest niedostępny",
+    "save_success": "Zmiany zostały pomyślnie zapisane",
+    "number_updated_successfully": "Ustawienia numeru zostały zaktualizowane",
+    "save_error": "Nie udało się zapisać zmian",
+    "failed_to_save_changes": "Nie można zapisać zmian. Spróbuj ponownie."
   },
   "number-edit": {
     "number_not_found": "Numer nie został znaleziony",
@@ -263,6 +272,10 @@
     "cancel": "Anuluj",
     "saving": "Zapisywanie...",
     "save_changes": "Zapisz zmiany",
+    "basic_settings": "Ustawienia podstawowe",
+    "name": "Nazwa",
+    "name_placeholder": "Wprowadź nazwę dla tego numeru",
+    "autorenew": "Automatyczne odnawianie",
     "call_destination_settings": "Ustawienia przekierowania połączeń",
     "call_destination": "Cel połączenia",
     "call_priority": "Priorytet połączenia",
@@ -288,7 +301,9 @@
     "hello_file": "Plik powitania",
     "follow_droid_id": "Identyfikator Follow Droid",
     "hello_enable": "Powitanie głosowe",
-    "forwarding_enabled": "Przekierowanie włączone",
+    "forwarding_enabled": "Włącz przekierowanie",
+    "forwarding_enabled_hint": "Włącz przekierowanie połączeń",
+    "forwarding_or_greeting_required": "Powitanie głosowe lub przekierowanie musi być włączone",
     "call_to_all_device": "Dzwoń na wszystkie urządzenia",
     "use_user_pbx": "Użyj PBX użytkownika",
     "extend_user_pbx": "Rozszerz PBX użytkownika",

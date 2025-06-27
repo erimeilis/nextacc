@@ -6,9 +6,11 @@ import {useTranslations} from 'next-intl'
 import {UserProfile} from '@/types/UserProfile'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import LineInput from '@/components/shared/LineInput'
+import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
 import {CheckCircleIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
+import {useToast} from '@/hooks/use-toast'
 import Loader from '@/components/service/Loader'
 import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
@@ -16,9 +18,20 @@ import {profileFields} from '@/constants/profileFields'
 import Show from '@/components/service/Show'
 import {useSearchParams} from 'next/navigation'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
+import {Checkbox} from '@/components/ui/Checkbox'
+import {Boolean} from '@/components/ui/Boolean'
+import {getCountries, CountryOption} from '@/utils/getCountries'
 
 const profileFieldsState: { [index: string]: string } = {}
 profileFields.forEach((field: InputField) => profileFieldsState[field.id] = '')
+
+// Get countries data for flags
+const countries = getCountries()
+
+// Function to find country by ISO-3 code
+const findCountryByIso3 = (iso3Code: string): CountryOption | undefined => {
+    return countries.find(country => country.id.toLowerCase() === iso3Code.toLowerCase())
+}
 
 export default function Profile({
                                     profile
@@ -26,11 +39,13 @@ export default function Profile({
     profile: UserProfile | null
 }): React.ReactElement {
     const t = useTranslations('profile')
+    const toastT = useTranslations('toast')
+    const {toast} = useToast()
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
-    const {reset: resetClientStore} = useClientStore()
+    const {reset: resetClientStore, updateProfile: updateStoreProfile} = useClientStore()
     const {reset: resetCartStore} = useCartStore()
 
     const [modeEditProfile, setModeEditProfile] = useState(false)
@@ -42,8 +57,26 @@ export default function Profile({
     const [ableButtonEditProfile, setAbleButtonEditProfile] = useState(false)
 
     const [profileState, setProfileState] = useState(profileFieldsState)
+
+    // Debug: Log profile state whenever it changes
+    React.useEffect(() => {
+        console.log('Current profileState:', profileState)
+    }, [profileState])
+
     const handleProfileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        console.log(`Input change: ${e.target.id} = ${e.target.value}`)
         setProfileState({...profileState, [e.target.id]: e.target.value})
+        setAbleButtonEditProfile(true)
+    }
+
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        console.log(`Checkbox change: ${id} = ${checked}`)
+        setProfileState({...profileState, [id]: checked.toString()})
+        setAbleButtonEditProfile(true)
+    }
+
+    const handleDropdownChange = (id: string, value: string) => {
+        setProfileState({...profileState, [id]: value})
         setAbleButtonEditProfile(true)
     }
 
@@ -62,6 +95,9 @@ export default function Profile({
                 company: profileState['profileCompany'],
                 country: profileState['profileCountry'],
                 address: profileState['profileAddress'],
+                low_balance_notification: profileState['profileLowBalanceNotification'] === 'true',
+                low_balance_edge: Number(profileState['profileLowBalanceEdge']),
+                subscribe_news: profileState['profileSubscribeNews'] === 'true',
             })
         /*if (data && data.error) {
             setGlobalError(data.error)
@@ -74,28 +110,94 @@ export default function Profile({
         }*/
         //}
         if (data) {
+            // Update profile in store
+            await updateStoreProfile()
+
+            // Show success toast
+            toast({
+                variant: 'success',
+                title: toastT('success_title'),
+                description: toastT('save_success'),
+                duration: 5000, // 5 seconds
+            })
+
             setModeEditProfile(!modeEditProfile)
+            setModeButtonEditProfile(false)
+        } else {
+            // Show error toast
+            toast({
+                variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('save_error'),
+                duration: 5000, // 5 seconds
+            })
+
             setModeButtonEditProfile(false)
         }
     }
 
-    function Userinfo() {
-        const data = profile
-        if (data) {
+    // Use useEffect to update profileState when profile changes
+    React.useEffect(() => {
+        if (profile) {
+            // Create a new state object to update all at once
+            const newState = {...profileFieldsState} // Use the initial state object instead of current state
+            let stateChanged = false
+
+            // Force update for the fields we know should be there
+            // This is a workaround to ensure these fields are always set
+            if ('low_balance_notification' in profile) {
+                const value = profile.low_balance_notification
+                newState['profileLowBalanceNotification'] = value.toString()
+                stateChanged = true
+                console.log(`Force setting profileLowBalanceNotification to ${value.toString()} (original: ${value})`)
+            }
+
+            if ('low_balance_edge' in profile) {
+                const value = profile.low_balance_edge
+                newState['profileLowBalanceEdge'] = value.toString()
+                stateChanged = true
+                console.log(`Force setting profileLowBalanceEdge to ${value.toString()} (original: ${value})`)
+            }
+
+            if ('subscribe_news' in profile) {
+                const value = profile.subscribe_news
+                newState['profileSubscribeNews'] = value.toString()
+                stateChanged = true
+                console.log(`Force setting profileSubscribeNews to ${value.toString()} (original: ${value})`)
+            }
+
+            // Process all other fields normally
             profileFields.forEach((field: InputField) => {
                 const shortId = field.id.split('profile')[1].toLowerCase()
-                if (profileState[field.id] === '' && data[shortId as keyof UserProfile]) {
-                    setProfileState({
-                        ...profileState,
-                        [field.id]: data[shortId as keyof UserProfile].toString()
-                    })
+                console.log(`Checking field ${field.id}, shortId: ${shortId}, exists in data: ${shortId in profile}`)
+
+                // Skip the fields we already forced
+                if (field.id === 'profileLowBalanceNotification' ||
+                    field.id === 'profileLowBalanceEdge' ||
+                    field.id === 'profileSubscribeNews') {
+                    return
+                }
+
+                // Check if the field exists in the profile data (including boolean false values)
+                if (shortId in profile) {
+                    const value = profile[shortId as keyof UserProfile]
+                    const valueStr = value?.toString() || ''
+                    console.log(`Setting ${field.id} to ${valueStr} (original value: ${value})`) // Debug log
+
+                    newState[field.id] = valueStr
+                    stateChanged = true
                 }
             })
-        }
-        return data ?? null
-    }
 
-    const userProfile = Userinfo()
+            // Only update state if changes were made
+            if (stateChanged) {
+                console.log('Updating profileState with:', newState)
+                setProfileState(newState)
+            }
+        }
+    }, [profile]) // Remove profileState from dependencies
+
+    const userProfile = profile
 
     //todo reset persistentID on logout?
     return <Show
@@ -112,9 +214,7 @@ export default function Profile({
                         type="button"
                         className="text-xs sm:text-sm"
                     >
-                        {t('balance')}: {userProfile?.currency == 'USD' ?
-                        '$' + userProfile?.balance.toFixed(2) :
-                        userProfile?.balance.toFixed(2) + ' ' + userProfile?.currency}
+                        {t('balance')}: ${userProfile?.balance.toFixed(2)}
                     </ActionButton>
                     <ActionButton
                         onClick={() => {
@@ -148,28 +248,78 @@ export default function Profile({
                                             when={modeEditProfile}
                                             fallback={
                                                 <>
-                                                    <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">
+                                                    <TableCell className="min-w-32 w-48 sm:min-w-48 sm:w-64 text-muted-foreground font-light">
                                                         {t(field.labelText)}:
                                                     </TableCell>
                                                     <TableCell className="text-right sm:text-left">
-                                                        {profileState[field.id]}
+                                                        {field.type === 'checkbox'
+                                                            ? (
+                                                                <div className="flex items-center gap-2 justify-end sm:justify-start">
+                                                                    <Boolean value={profileState[field.id] === 'true'}/>
+                                                                </div>
+                                                            )
+                                                            : field.id === 'profileCountry' 
+                                                              ? (
+                                                                <div className="flex items-center gap-2 justify-end sm:justify-start">
+                                                                    {(() => {
+                                                                        const countryCode = profileState[field.id];
+                                                                        const country = findCountryByIso3(countryCode);
+                                                                        return country && country.alpha2 ? (
+                                                                            <>
+                                                                                <img
+                                                                                    src={`https://flagcdn.com/w20/${country.alpha2.toLowerCase()}.png`}
+                                                                                    alt={`${country.name} flag`}
+                                                                                    className="h-3 w-5 inline-block"
+                                                                                />
+                                                                                <span>{profileState[field.id]}</span>
+                                                                            </>
+                                                                        ) : profileState[field.id];
+                                                                    })()}
+                                                                </div>
+                                                              )
+                                                              : profileState[field.id]}
                                                     </TableCell>
                                                 </>
                                             }
                                         >
                                             <TableCell colSpan={2} className="p-0">
-                                                <LineInput
-                                                    handleAction={handleProfileChange}
-                                                    value={profileState[field.id]}
-                                                    labelText={t(field.labelText)}
-                                                    labelFor={field.labelFor}
-                                                    id={field.id}
-                                                    name={field.name}
-                                                    type={field.type}
-                                                    isRequired={field.isRequired}
-                                                    placeholder={t(field.placeholder)}
-                                                    size="xs"
-                                                />
+                                                {field.isDropdown ? (
+                                                    <DropdownSelect
+                                                        selectId={field.id}
+                                                        selectTitle={t(field.labelText)}
+                                                        data={field.dropdownData || []}
+                                                        onSelectAction={(value) => handleDropdownChange(field.id, value)}
+                                                        selectedOption={profileState[field.id]}
+                                                        showLabel={field.id === 'profileCountry'}
+                                                        customClass="px-2"
+                                                    />
+                                                ) : field.type === 'checkbox' ? (
+                                                    <div className="flex items-center justify-between p-2">
+                                                        <label htmlFor={field.id} className="text-sm cursor-pointer text-muted-foreground font-light">
+                                                            {t(field.labelText)}:
+                                                        </label>
+                                                        <Checkbox
+                                                            id={field.id}
+                                                            name={field.name}
+                                                            checked={profileState[field.id] === 'true'}
+                                                            onCheckedChange={(checked) => handleCheckboxChange(field.id, checked)}
+                                                            customClass="px-4"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <LineInput
+                                                        handleAction={handleProfileChange}
+                                                        value={profileState[field.id]}
+                                                        labelText={t(field.labelText)}
+                                                        labelFor={field.labelFor}
+                                                        id={field.id}
+                                                        name={field.name}
+                                                        type={field.type}
+                                                        isRequired={field.isRequired}
+                                                        placeholder={t(field.placeholder)}
+                                                        size="xs"
+                                                    />
+                                                )}
                                             </TableCell>
                                         </Show>
                                     </TableRow>

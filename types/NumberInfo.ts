@@ -1,3 +1,6 @@
+import { CallDestinationInfo } from './CallDestinationInfo'
+import { SmsDestinationInfo } from './SmsDestinationInfo'
+
 export type NumberInfo = {
     did: string
     name: string
@@ -17,6 +20,7 @@ export type NumberInfo = {
     paid_till?: string
     months_paid?: number
     voiceDest?: string
-    voiceExt?: object // todo analyze structure and add separate Type
-    smsDest?: object // todo analyze structure and add separate Type
+    voiceExt?: CallDestinationInfo
+    smsDest?: SmsDestinationInfo
+    autorenew: boolean
 }

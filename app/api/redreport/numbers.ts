@@ -21,8 +21,12 @@ export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return null
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redGetMyNumbers error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {
@@ -52,12 +56,17 @@ export async function redGetNumberDetails(number: string): Promise<DetailedNumbe
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
+        .then(async (res: Response) => {
             console.log('redGetNumberDetails: ', res.status)
-            if (!res.ok) return null
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redGetNumberDetails error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {
+            console.log('redGetNumberDetails: ', data)
             return data.data
         })
         .catch((err) => {
@@ -75,7 +84,6 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
         ...data,
         site_id: process.env.SITE_ID || ''
     }
-
     const options: RequestInit = {
         cache: 'no-store',
         method: 'PATCH',
@@ -88,9 +96,13 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
     }
 
     return fetch(url.toString(), options)
-        .then((res: Response) => {
+        .then(async (res: Response) => {
             console.log('redUpdateNumberDetails: ', res.status)
-            if (!res.ok) return null
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redUpdateNumberDetails error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {

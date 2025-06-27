@@ -110,8 +110,12 @@ export async function getCart(
         credentials: 'include'
     }
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return null
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('getCart error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {
@@ -159,8 +163,12 @@ export async function removeFromCart(
         credentials: 'include'
     }
     return fetch(url.toString(), options)
-        .then((res: Response) => {
-            if (!res.ok) return null
+        .then(async (res: Response) => {
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('removeFromCart error response: ', errorData)
+                return null
+            }
             return res.json()
         })
         .then(async (data) => {

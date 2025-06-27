@@ -29,7 +29,7 @@ export default function SmsSettings({
             <div className="bg-card p-4 rounded-lg">
                 <div className="w-full grid grid-cols-1 sm:grid-cols-4 gap-6">
                     <div className="sm:col-span-4">
-                        <h2 className="w-full text-muted-foreground text-sm font-light text-right mb-2 flex justify-between items-center">
+                        <h2 className="w-full text-muted-foreground text-sm font-light text-right mb-2 flex justify-end items-center">
                             <ChatTextIcon className="h-4 w-4 mr-2"/>
                             {t('sms_settings')}
                         </h2>

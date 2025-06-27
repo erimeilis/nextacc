@@ -11,14 +11,15 @@ export type ExtManInfo = {
     vm?: number | null
     vm_file?: string
     vm_email?: string
-    vm_beep?: string
-    hello_enable?: string
+    vm_beep?: boolean
+    hello_enable?: boolean
     hello_file?: string
     ff?: number | null
     cf?: number | null
-    show_real_caller_id?: string
-    folow_droid_id?: string
-    call_to_all_device?: string
+    show_real_caller_id?: boolean
+    folow_droid_id?: boolean
+    call_to_all_device?: boolean
     use_user_pbx?: string
-    extend_user_pbx?: string
+    extend_user_pbx?: boolean
+    forwarding_disabled?: boolean
 }
