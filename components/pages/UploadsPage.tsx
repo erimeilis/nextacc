@@ -20,6 +20,7 @@ export default function UploadsPage() {
     // Fetch data in the background if not available
     useEffect(() => {
         if (!uploads) {
+            console.log('Fetching uploads because they are not available')
             updateUploads()
                 .then((fetchedUploads) => {
                     setLocalUploads(fetchedUploads)
@@ -31,6 +32,7 @@ export default function UploadsPage() {
     useEffect(() => {
         if (uploads && !backgroundFetchDone.current) {
             backgroundFetchDone.current = true
+            console.log('Fetching uploads in the background')
             updateUploads()
                 .then((fetchedUploads) => {
                     setLocalUploads(fetchedUploads)

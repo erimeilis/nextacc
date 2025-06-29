@@ -20,6 +20,7 @@ export default function NumbersPage() {
     // Fetch data in the background if not available
     useEffect(() => {
         if (!numbers) {
+            console.log('Fetching numbers because they are not available')
             updateNumbers()
                 .then((fetchedNumbers) => {
                     setLocalNumbers(fetchedNumbers)
@@ -31,6 +32,7 @@ export default function NumbersPage() {
     useEffect(() => {
         if (numbers && !backgroundFetchDone.current) {
             backgroundFetchDone.current = true
+            console.log('Fetching numbers in the background')
             updateNumbers()
                 .then((fetchedNumbers) => {
                     setLocalNumbers(fetchedNumbers)

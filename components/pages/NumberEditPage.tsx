@@ -6,7 +6,7 @@ import {Button} from '@/components/ui/Button'
 import {Input} from '@/components/ui/Input'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
-import {redGetNumberDetails, redUpdateNumberDetails} from '@/app/api/redreport/numbers'
+import {redGetDidSettings, redUpdateDidSettings} from '@/app/api/redreport/dids'
 import Loader from '@/components/service/Loader'
 import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
 import ExtManSettings from '../ExtManSettings'
@@ -42,7 +42,7 @@ export default function NumberEditPage() {
 
             setLoading(true)
             try {
-                const data = await redGetNumberDetails(number)
+                const data = await redGetDidSettings(number)
                 if (data) {
                     setNumberData(data)
                     setFormData(data)
@@ -255,7 +255,7 @@ export default function NumberEditPage() {
         setSaving(true)
         try {
             console.log('[DEBUG_LOG] Calling API to update number details...')
-            const updatedData = await redUpdateNumberDetails(number, dataToSubmit)
+            const updatedData = await redUpdateDidSettings(number, dataToSubmit)
             console.log('[DEBUG_LOG] API response received:', updatedData)
             if (updatedData) {
                 setNumberData(updatedData)
@@ -363,14 +363,14 @@ export default function NumberEditPage() {
             <div className="space-y-6">
                 {/* Basic Number Settings */}
                 <div className="bg-card p-4 rounded-lg">
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-4 gap-6">
-                        <div className="sm:col-span-4">
+                    <div className="w-full grid grid-cols-4 gap-6">
+                        <div className="col-span-4">
                             <h2 className="w-full text-muted-foreground text-sm font-light text-right mb-2 flex justify-end items-center">
                                 <FadersHorizontalIcon className="h-4 w-4 mr-2"/>
                                 {t('basic_settings')}
                             </h2>
                         </div>
-                        <div className="sm:col-span-3">
+                        <div className="col-span-3">
                             <Input
                                 id="name"
                                 value={formData.name !== undefined ? formData.name : numberData.name || ''}
@@ -379,7 +379,7 @@ export default function NumberEditPage() {
                                 className="mt-1"
                             />
                         </div>
-                        <div className="sm:col-span-1">
+                        <div className="col-span-1">
                             <div className="flex flex-row items-center space-x-2 h-full">
                                 <Checkbox
                                     id="autorenew"

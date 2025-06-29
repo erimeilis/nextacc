@@ -1,7 +1,7 @@
 'use client'
 import React, {useState} from 'react'
 import {useTranslations} from 'next-intl'
-import {useRouter} from 'next/navigation'
+import {useRouter, useSearchParams} from 'next/navigation'
 import {ChatTextIcon, PhoneIcon} from '@phosphor-icons/react'
 import {Switch} from '@/components/ui/Switch'
 import DropdownSelect from '@/components/shared/DropdownSelect'
@@ -12,6 +12,7 @@ import {useClientStore} from '@/stores/useClientStore'
 export default function StatisticsPage() {
     const t = useTranslations('Statistics')
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     // State
     const [statisticsType, setStatisticsType] = useState<'calls' | 'sms'>('calls')
@@ -22,10 +23,13 @@ export default function StatisticsPage() {
 
     // Handle number selection
     const handleNumberSelect = (value: string) => {
+        const params = searchParams?.toString()
+        const queryString = params ? `?${params}` : ''
+
         if (value === 'all') {
-            router.push('/statistics')
+            router.push(`/statistics${queryString}`)
         } else {
-            router.push(`/statistics/${value}`)
+            router.push(`/statistics/${value}${queryString}`)
         }
     }
 

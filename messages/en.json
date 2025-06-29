@@ -31,6 +31,7 @@
     "passwords_mismatch": "Passwords not match",
     "no_user": "User not found",
     "bad_credentials": "Bad credentials",
+    "CredentialsSignin": "Invalid username or password",
     "user_exist": "User already registered",
     "email_unverified": "You cannot login until you verify your email",
     "resend_verify": "Resend verification email",

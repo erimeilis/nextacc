@@ -44,14 +44,14 @@ export default function Tab({
             className={fixedTabClass + ' ' + className + ' ' + (active ? activeTabClass : commonClass) + (isClickDisabled ? ' cursor-not-allowed opacity-75' : '')}
             onClick={handleClick}
         >
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center px-2 sm:px-4">
                 {isLoading && active && (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-4 h-4 border-2 border-t-transparent border-foreground rounded-full animate-spin"></div>
                     </div>
                 )}
-                <div className={`${isLoading && active ? "opacity-0" : ""} flex items-center`}>
-                    {icon && <span className="mr-2">{React.createElement(icon, {className: iconSize})}</span>}
+                <div className={`${isLoading && active ? 'opacity-0' : ''} flex items-center`}>
+                    {icon && <span className="mr-2 hidden sm:inline-block">{React.createElement(icon, {className: iconSize})}</span>}
                     {children}
                 </div>
             </div>

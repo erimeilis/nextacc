@@ -7,8 +7,8 @@ import {UploadInfo} from '@/types/UploadInfo'
 import {redGetUserProfile} from '@/app/api/redreport/profile'
 import {getClientInfo} from '@/app/api/other/ipinfo'
 import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
-import {redGetMyNumbers} from '@/app/api/redreport/numbers'
-import {redGetMyUploads, redUploadFile, redDeleteUpload, redRenameFile} from '@/app/api/redreport/uploads'
+import {redGetMyDids} from '@/app/api/redreport/dids'
+import {redDeleteUpload, redGetMyUploads, redRenameFile, redUploadFile} from '@/app/api/redreport/uploads'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -103,7 +103,7 @@ export const useClientStore = create<ClientStore>()(
                 const profilePromise = redGetUserProfile()
                 const infoPromise = getClientInfo()
                 const transactionsPromise = redGetMoneyTransactionReport()
-                const numbersPromise = redGetMyNumbers()
+                const numbersPromise = redGetMyDids()
                 const uploadsPromise = redGetMyUploads()
 
                 const [
@@ -166,7 +166,7 @@ export const useClientStore = create<ClientStore>()(
                 return transactions
             },
             updateNumbers: async (): Promise<NumberInfo[] | null> => {
-                const numbers = await redGetMyNumbers()
+                const numbers = await redGetMyDids()
                 set(state => {
                     if (
                         state.numbers === undefined ||

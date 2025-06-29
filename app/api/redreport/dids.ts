@@ -3,11 +3,14 @@ import {auth} from '@/auth'
 import {NumberInfo} from '@/types/NumberInfo'
 import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
 
-export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
+export async function redGetMyDids(): Promise<NumberInfo[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return null
+    if (!session || !session.user || session.user.provider === 'anonymous') {
+        console.log('redGetMyDids: No valid session, returning null')
+        return null
+    }
 
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/numbers')
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/dids')
     url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -22,64 +25,65 @@ export async function redGetMyNumbers(): Promise<NumberInfo[] | null> {
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redGetMyDids: Response status:', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('redGetMyNumbers error response: ', errorData)
+                console.log('redGetMyDids error response: ', errorData)
                 return null
             }
             return res.json()
         })
         .then(async (data) => {
-            return data.data.dids
-        })
-        .catch((err) => {
-            console.log('redGetMyNumbers error: ', err.message)
-            return null
-        })
-}
-
-export async function redGetNumberDetails(number: string): Promise<DetailedNumberInfo | null> {
-    const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return null
-
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/numbers/${number}`)
-    url.searchParams.append('site_id', process.env.SITE_ID || '')
-
-    const options: RequestInit = {
-        cache: 'reload',
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Authorization': 'Bearer ' + session?.token,
-        }
-    }
-
-    return fetch(url.toString(), options)
-        .then(async (res: Response) => {
-            console.log('redGetNumberDetails: ', res.status)
-            if (!res.ok) {
-                const errorData = await res.json()
-                console.log('redGetNumberDetails error response: ', errorData)
-                return null
-            }
-            return res.json()
-        })
-        .then(async (data) => {
-            console.log('redGetNumberDetails: ', data)
             return data.data
         })
         .catch((err) => {
-            console.log('redGetNumberDetails error: ', err.message)
+            console.log('redGetMyDids error: ', err.message)
             return null
         })
 }
 
-export async function redUpdateNumberDetails(number: string, data: Partial<DetailedNumberInfo>): Promise<DetailedNumberInfo | null> {
+export async function redGetDidSettings(number: string): Promise<DetailedNumberInfo | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/numbers/${number}`)
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/dids/${number}`)
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        cache: 'reload',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        }
+    }
+
+    return fetch(url.toString(), options)
+        .then(async (res: Response) => {
+            console.log('redGetDidSettings: ', res.status)
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redGetDidSettings error response: ', errorData)
+                return null
+            }
+            return res.json()
+        })
+        .then(async (data) => {
+            console.log('redGetDidSettings: ', data)
+            return data.data
+        })
+        .catch((err) => {
+            console.log('redGetDidSettings error: ', err.message)
+            return null
+        })
+}
+
+export async function redUpdateDidSettings(number: string, data: Partial<DetailedNumberInfo>): Promise<DetailedNumberInfo | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
+
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/dids/${number}`)
     const requestBody = {
         ...data,
         site_id: process.env.SITE_ID || ''
@@ -97,10 +101,10 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redUpdateNumberDetails: ', res.status)
+            console.log('redUpdateDidSettings: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('redUpdateNumberDetails error response: ', errorData)
+                console.log('redUpdateDidSettings error response: ', errorData)
                 return null
             }
             return res.json()
@@ -109,7 +113,7 @@ export async function redUpdateNumberDetails(number: string, data: Partial<Detai
             return data.data
         })
         .catch((err) => {
-            console.log('redUpdateNumberDetails error: ', err.message)
+            console.log('redUpdateDidSettings error: ', err.message)
             return null
         })
 }

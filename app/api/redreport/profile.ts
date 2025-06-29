@@ -34,13 +34,7 @@ export async function redGetUserProfile(): Promise<UserProfile | null> {
             return res.json()
         })
         .then((data) => {
-            console.log('redGetUserProfile: ', data);
-            console.log('Profile data details:', {
-                low_balance_notification: data.data?.low_balance_notification,
-                low_balance_edge: data.data?.low_balance_edge,
-                subscribe_news: data.data?.subscribe_news
-            });
-            return data.data;
+            return data.data
         })
         .catch((err) => {
             console.log('redGetUserProfile error: ', err.message)
