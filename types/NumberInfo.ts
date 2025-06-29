@@ -1,5 +1,5 @@
-import { CallDestinationInfo } from './CallDestinationInfo'
-import { SmsDestinationInfo } from './SmsDestinationInfo'
+import {CallDestinationInfo} from './CallDestinationInfo'
+import {SmsDestinationInfo} from './SmsDestinationInfo'
 
 export type NumberInfo = {
     did: string
@@ -23,4 +23,5 @@ export type NumberInfo = {
     voiceExt?: CallDestinationInfo
     smsDest?: SmsDestinationInfo
     autorenew: boolean
+    country_id?: number
 }

@@ -8,7 +8,7 @@ import {Checkbox} from '@/components/ui/Checkbox'
 import {ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
 import {redGetDidSettings, redUpdateDidSettings} from '@/app/api/redreport/dids'
 import Loader from '@/components/service/Loader'
-import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
+import {MyNumberInfo} from '@/types/MyNumberInfo'
 import ExtManSettings from '../ExtManSettings'
 import SmsSettings from '../SmsSettings'
 import {useToast} from '@/hooks/use-toast'
@@ -29,10 +29,10 @@ export default function NumberEditPage() {
     const toastT = useTranslations('toast')
     const {toast} = useToast()
 
-    const [numberData, setNumberData] = useState<DetailedNumberInfo | null>(null)
+    const [numberData, setNumberData] = useState<MyNumberInfo | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [formData, setFormData] = useState<Partial<DetailedNumberInfo>>({})
+    const [formData, setFormData] = useState<Partial<MyNumberInfo>>({})
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
     // Load number details on component mount
@@ -58,7 +58,7 @@ export default function NumberEditPage() {
     }, [number])
 
     // Handle form field changes
-    const handleInputChange = (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => {
+    const handleInputChange = (field: keyof MyNumberInfo, value: string | number | boolean | null) => {
         setFormData(prev => ({
             ...prev,
             [field]: value

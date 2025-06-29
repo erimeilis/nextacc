@@ -1,16 +1,15 @@
 'use server'
 import {auth} from '@/auth'
-import {NumberInfo} from '@/types/NumberInfo'
-import {MyNumberInfo} from '@/types/MyNumberInfo'
+import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 
-export async function redGetMyDids(): Promise<NumberInfo[] | null> {
+export async function redGetMyWaitingDids(): Promise<MyWaitingNumberInfo[] | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') {
-        console.log('redGetMyDids: No valid session, returning null')
+        console.log('redGetMyWaitingDids: No valid session, returning null')
         return null
     }
 
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/dids')
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/waiting-dids')
     url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -25,10 +24,10 @@ export async function redGetMyDids(): Promise<NumberInfo[] | null> {
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetMyDids: Response status:', res.status)
+            console.log('redGetMyWaitingDids: Response status:', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('redGetMyDids error response: ', errorData)
+                console.log('redGetMyWaitingDids error response: ', errorData)
                 return null
             }
             return res.json()
@@ -37,16 +36,16 @@ export async function redGetMyDids(): Promise<NumberInfo[] | null> {
             return data.data
         })
         .catch((err) => {
-            console.log('redGetMyDids error: ', err.message)
+            console.log('redGetMyWaitingDids error: ', err.message)
             return null
         })
 }
 
-export async function redGetDidSettings(number: string): Promise<MyNumberInfo | null> {
+export async function redGetWaitingDidSettings(number: string): Promise<MyWaitingNumberInfo | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/dids/${number}`)
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${number}`)
     url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -61,29 +60,29 @@ export async function redGetDidSettings(number: string): Promise<MyNumberInfo | 
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetDidSettings: ', res.status)
+            console.log('redGetWaitingDidSettings: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('redGetDidSettings error response: ', errorData)
+                console.log('redGetWaitingDidSettings error response: ', errorData)
                 return null
             }
             return res.json()
         })
         .then(async (data) => {
-            console.log('redGetDidSettings: ', data)
+            console.log('redGetWaitingDidSettings: ', data)
             return data.data
         })
         .catch((err) => {
-            console.log('redGetDidSettings error: ', err.message)
+            console.log('redGetWaitingDidSettings error: ', err.message)
             return null
         })
 }
 
-export async function redUpdateDidSettings(number: string, data: Partial<MyNumberInfo>): Promise<MyNumberInfo | null> {
+export async function redUpdateWaitingDidSettings(number: string, data: Partial<MyWaitingNumberInfo>): Promise<MyWaitingNumberInfo | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/dids/${number}`)
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${number}`)
     const requestBody = {
         ...data,
         site_id: process.env.SITE_ID || ''
@@ -101,10 +100,10 @@ export async function redUpdateDidSettings(number: string, data: Partial<MyNumbe
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redUpdateDidSettings: ', res.status)
+            console.log('redUpdateWaitingDidSettings: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('redUpdateDidSettings error response: ', errorData)
+                console.log('redUpdateWaitingDidSettings error response: ', errorData)
                 return null
             }
             return res.json()
@@ -113,7 +112,7 @@ export async function redUpdateDidSettings(number: string, data: Partial<MyNumbe
             return data.data
         })
         .catch((err) => {
-            console.log('redUpdateDidSettings error: ', err.message)
+            console.log('redUpdateWaitingDidSettings error: ', err.message)
             return null
         })
 }

@@ -7,14 +7,14 @@ import {RadioGroup, RadioGroupItem} from '@/components/ui/RadioGroup'
 import {Slider} from '@/components/ui/Slider'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import Show from '@/components/service/Show'
-import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
+import {MyNumberInfo} from '@/types/MyNumberInfo'
 import {voiceDestinationsFields} from '@/constants/voiceDestinationFields'
 import {PhoneTransferIcon, VoicemailIcon} from '@phosphor-icons/react'
 
 interface ExtManSettingsProps {
-    numberData: DetailedNumberInfo
-    formData: Partial<DetailedNumberInfo>
-    onInputChangeAction: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    numberData: MyNumberInfo
+    formData: Partial<MyNumberInfo>
+    onInputChangeAction: (field: keyof MyNumberInfo, value: string | number | boolean | null) => void
     formErrors: Record<string, string>
 }
 
@@ -55,8 +55,8 @@ export default function ExtManSettings({
         if (value === undefined || value === null) return false
         return value === '1' || value === 'true' || Boolean(value)
     }
-    const helloEnableState = formData.hello_enable !== undefined 
-        ? getHelloEnableValue(formData.hello_enable) 
+    const helloEnableState = formData.hello_enable !== undefined
+        ? getHelloEnableValue(formData.hello_enable)
         : getHelloEnableValue(numberData.hello_enable)
     const helloFileState = formData.hello_file || numberData.hello_file || ''
 

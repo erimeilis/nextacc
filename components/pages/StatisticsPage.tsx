@@ -1,7 +1,7 @@
 'use client'
 import React, {useState} from 'react'
 import {useTranslations} from 'next-intl'
-import {useRouter, useSearchParams} from 'next/navigation'
+import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {ChatTextIcon, PhoneIcon} from '@phosphor-icons/react'
 import {Switch} from '@/components/ui/Switch'
 import DropdownSelect from '@/components/shared/DropdownSelect'
@@ -13,13 +13,37 @@ export default function StatisticsPage() {
     const t = useTranslations('Statistics')
     const router = useRouter()
     const searchParams = useSearchParams()
+    const params = useParams()
 
     // State
     const [statisticsType, setStatisticsType] = useState<'calls' | 'sms'>('calls')
 
-    // Get numbers from client store
+    // Get numbers from the client store
     const {getNumbers} = useClientStore()
     const numbers = getNumbers()
+
+    // Get the selected number from the URL params
+    const selectedNumberDid = params?.number as string
+    const selectedNumber = selectedNumberDid ? numbers?.find(number => number.did === selectedNumberDid) : null
+
+    // Determine switch state based on selected number features
+    const isSwitchDisabled = selectedNumber ? (
+        (selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms || // Voice/toll_free without SMS
+        (!selectedNumber.voice && !selectedNumber.toll_free && selectedNumber.sms)   // SMS only
+    ) : false
+
+    // Set default statistics type based on selected number features
+    React.useEffect(() => {
+        if (selectedNumber) {
+            if ((selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms) {
+                // If the number has voice/toll_free but no SMS, set to calls
+                setStatisticsType('calls')
+            } else if (!selectedNumber.voice && !selectedNumber.toll_free && selectedNumber.sms) {
+                // If the number has SMS only, set to sms
+                setStatisticsType('sms')
+            }
+        }
+    }, [selectedNumber])
 
     // Handle number selection
     const handleNumberSelect = (value: string) => {
@@ -43,7 +67,12 @@ export default function StatisticsPage() {
                     </div>
                     <Switch
                         checked={statisticsType === 'sms'}
-                        onCheckedChange={(checked) => setStatisticsType(checked ? 'sms' : 'calls')}
+                        onCheckedChange={(checked) => {
+                            if (!isSwitchDisabled) {
+                                setStatisticsType(checked ? 'sms' : 'calls')
+                            }
+                        }}
+                        disabled={isSwitchDisabled}
                     />
                     <div className="flex items-center gap-2">
                         <ChatTextIcon size={16} className={`inline-block ${statisticsType === 'sms' ? 'text-primary' : 'text-muted-foreground'}`}/>

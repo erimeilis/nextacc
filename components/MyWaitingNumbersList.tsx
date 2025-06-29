@@ -2,21 +2,83 @@
 import React, {useState} from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import Show from '@/components/service/Show'
-import {NumberInfo} from '@/types/NumberInfo'
-import Loader from '@/components/service/Loader'
+import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
-import {FormattedDate} from '@/components/ui/FormattedDate'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
 
-export default function MyNumbersList({
-                                          options,
-                                      }: {
-    options: NumberInfo[] | null
+// Skeleton loader for waiting numbers list
+function WaitingNumbersSkeleton() {
+    return (
+        <div className="flex flex-col w-full animate-pulse">
+            {/* Total section */}
+            <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
+                <div className="h-4 bg-muted rounded w-32"></div>
+                <div className="h-4 bg-muted rounded w-40"></div>
+            </div>
+
+            {/* Header with search */}
+            <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
+                <div className="flex items-center flex-1">
+                    <div className="relative w-full sm:max-w-xs">
+                        <div className="h-8 bg-muted rounded w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Number list table */}
+            <div className="overflow-x-auto">
+                <div className="space-y-1">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i}>
+                            {/* Main row */}
+                            <div className={`flex flex-row items-center w-full py-1 px-2 ${i % 2 !== 0 ? 'bg-secondary/50 dark:bg-secondary/40' : ''}`}>
+                                {/* Checkbox */}
+                                <div className="w-8">
+                                    <div className="h-4 bg-muted rounded w-4"></div>
+                                </div>
+
+                                {/* Number and name */}
+                                <div className="flex-1">
+                                    <div className="flex flex-col">
+                                        <div className="h-4 bg-muted rounded w-32 mb-1"></div>
+                                    </div>
+                                </div>
+
+                                {/* Feature icons */}
+                                <div className="w-20">
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="w-28">
+                                    <div className="flex items-center justify-end space-x-1">
+                                        {[...Array(3)].map((_, j) => (
+                                            <div key={j} className="h-7 bg-muted rounded w-7"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default function MyWaitingNumbersList({
+                                                 options,
+                                             }: {
+    options: MyWaitingNumberInfo[] | null
 }) {
     const t = useTranslations('dashboard')
     const router = useRouter()
@@ -38,8 +100,7 @@ export default function MyNumbersList({
     // Filter numbers based on a search query
     const filteredOptions = options?.filter(option =>
         searchQuery === '' ||
-        option.did.toString().includes(searchQuery) ||
-        (option.name && option.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        option.did.toString().includes(searchQuery)
     ) || null
 
     // Calculate totals
@@ -78,38 +139,30 @@ export default function MyNumbersList({
     }
 
     // Handle settings button click
-    const handleSettings = (number: NumberInfo) => {
+    const handleSettings = (number: MyWaitingNumberInfo) => {
         // Navigate to number edit page with current search params
         const currentParams = new URLSearchParams(searchParams?.toString())
-        const editUrl = `/numbers/${number.did}/?${currentParams.toString()}`
+        const editUrl = `/waiting-numbers/${number.did}/?${currentParams.toString()}`
         router.push(editUrl)
     }
 
-    // Handle call statistics button click
-    const handleCallStatistics = (number: NumberInfo) => {
-        // Navigate to statistics page with the number as a parameter
-        const currentParams = new URLSearchParams(searchParams?.toString())
-        const statisticsUrl = `/statistics/${number.did}/?${currentParams.toString()}`
-        router.push(statisticsUrl)
-    }
-
     // Handle delete button click
-    const handleDelete = (number: NumberInfo) => {
+    const handleDelete = (number: MyWaitingNumberInfo) => {
         // This would delete the number
-        console.log('Delete number', number.did)
+        console.log('Delete waiting number', number.did)
     }
 
     // Handle deletes the selected button click
     const handleDeleteSelected = () => {
         // This would delete all selected numbers
-        console.log('Delete selected numbers', selectedNumbers)
+        console.log('Delete selected waiting numbers', selectedNumbers)
     }
 
     return (
         <Show when={options !== null}
               fallback={options?.length == 0 ?
-                  <div>{t('no_numbers')}</div> :
-                  <Loader height={32}/>}>
+                  <div>{t('no_waiting_numbers')}</div> :
+                  <WaitingNumbersSkeleton />}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
@@ -149,7 +202,7 @@ export default function MyNumbersList({
                                             />
                                         </TableCell>
 
-                                        {/* Number and name with country flag */}
+                                        {/* Number with country flag */}
                                         <TableCell className="flex-1">
                                             <div className="flex flex-col">
                                                 <div className="flex items-center">
@@ -162,7 +215,6 @@ export default function MyNumbersList({
                                                     )}
                                                     {option.did.toString()}
                                                 </div>
-                                                <div className="text-xs text-muted-foreground">{option.name}</div>
                                             </div>
                                         </TableCell>
 
@@ -183,9 +235,6 @@ export default function MyNumbersList({
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title={t('info')} className="h-7 w-7">
                                                     <InfoIcon size={16}/>
-                                                </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title={t('call_statistics')} className="h-7 w-7">
-                                                    <ChartPieSliceIcon size={16}/>
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive">
                                                     <XIcon size={16}/>
@@ -208,16 +257,6 @@ export default function MyNumbersList({
                                                                     condition: true
                                                                 },
                                                                 {
-                                                                    label: t('name'),
-                                                                    value: option.name,
-                                                                    condition: true
-                                                                },
-                                                                {
-                                                                    label: t('location'),
-                                                                    value: option.where_did,
-                                                                    condition: !!option.where_did
-                                                                },
-                                                                {
                                                                     label: t('setup_fee'),
                                                                     value: `$${option.setup_rate?.toFixed(2) || '0.00'}`,
                                                                     condition: true
@@ -225,6 +264,16 @@ export default function MyNumbersList({
                                                                 {
                                                                     label: t('monthly_fee'),
                                                                     value: `$${option.fix_rate?.toFixed(2) || '0.00'}`,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('pay_sum'),
+                                                                    value: `$${option.pay_sum?.toFixed(2) || '0.00'}`,
+                                                                    condition: true
+                                                                },
+                                                                {
+                                                                    label: t('count_month'),
+                                                                    value: option.count_month,
                                                                     condition: true
                                                                 },
                                                                 {
@@ -238,60 +287,10 @@ export default function MyNumbersList({
                                                                     ),
                                                                     condition: true
                                                                 },
-                                                                {
-                                                                    label: t('incoming_rate'),
-                                                                    value: `$${option.incoming_per_minute?.toFixed(2)}/min`,
-                                                                    condition: !!option.incoming_per_minute
-                                                                },
-                                                                {
-                                                                    label: t('toll_free_rate'),
-                                                                    value: `$${option.toll_free_rate_in_min?.toFixed(2)}/min`,
-                                                                    condition: !!option.toll_free_rate_in_min
-                                                                },
-                                                                {
-                                                                    label: t('sms_rate'),
-                                                                    value: `$${option.incoming_rate_sms?.toFixed(2)}/msg`,
-                                                                    condition: !!option.incoming_rate_sms
-                                                                },
-                                                                {
-                                                                    label: t('creation_date'),
-                                                                    value: <FormattedDate date={option.creation_date}/>,
-                                                                    condition: !!option.creation_date
-                                                                },
-                                                                {
-                                                                    label: t('paid_until'),
-                                                                    value: <FormattedDate date={option.paid_till}/>,
-                                                                    condition: !!option.paid_till
-                                                                },
-                                                                {
-                                                                    label: t('months_paid'),
-                                                                    value: option.months_paid,
-                                                                    condition: !!option.months_paid
-                                                                },
-                                                                {
-                                                                    label: t('voice_destination'),
-                                                                    value: option.voiceDest,
-                                                                    condition: !!option.voiceDest
-                                                                },
-                                                                {
-                                                                    label: t('sms_destination'),
-                                                                    value: option.smsDest && typeof option.smsDest === 'object' ?
-                                                                        ['forward_email', 'forward_http', 'forward_telegram', 'forward_slack', 'forward_sms']
-                                                                            .map(key => {
-                                                                                const smsDest = option.smsDest as Record<string, unknown>
-                                                                                const value = smsDest?.[key]
-                                                                                return value || null
-                                                                            })
-                                                                            .filter(Boolean)
-                                                                            .join(', ')
-                                                                        : '',
-                                                                    condition: !!option.smsDest && typeof option.smsDest === 'object'
-                                                                }
                                                             ].map((item, index) => (
                                                                 item.condition && (
                                                                     <TableRow key={index}>
-                                                                        <TableCell
-                                                                            className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
+                                                                        <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
                                                                         <TableCell className="text-right sm:text-left">{item.value}</TableCell>
                                                                     </TableRow>
                                                                 )
@@ -336,4 +335,4 @@ export default function MyNumbersList({
             </div>
         </Show>
     )
-};
+}

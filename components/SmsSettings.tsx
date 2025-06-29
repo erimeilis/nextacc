@@ -4,13 +4,13 @@ import {useTranslations} from 'next-intl'
 import {Input} from '@/components/ui/Input'
 import {Checkbox} from '@/components/ui/Checkbox'
 import Show from '@/components/service/Show'
-import {DetailedNumberInfo} from '@/types/DetailedNumberInfo'
+import {MyNumberInfo} from '@/types/MyNumberInfo'
 import {ChatTextIcon} from '@phosphor-icons/react'
 
 interface SmsSettingsProps {
-    numberData: DetailedNumberInfo
-    formData: Partial<DetailedNumberInfo>
-    onInputChangeAction: (field: keyof DetailedNumberInfo, value: string | number | boolean | null) => void
+    numberData: MyNumberInfo
+    formData: Partial<MyNumberInfo>
+    onInputChangeAction: (field: keyof MyNumberInfo, value: string | number | boolean | null) => void
     formErrors: Record<string, string>
 }
 
