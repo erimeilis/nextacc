@@ -53,7 +53,7 @@ export default function NumberOffersList({
                             const isSelected = selectedOption === option.did
                             return (
                                 <div key={option.did}
-                                     className={`flex flex-row items-center gap-3 p-2 rounded-md border border-border hover:bg-muted/50 transition-colors overflow-hidden ${options?.length === 1 ? 'col-span-2' : ''}`}>
+                                     className={`flex flex-row items-center gap-3 p-2 rounded-md border ${isSelected ? 'border-primary' : 'border-border'} hover:bg-muted/50 transition-colors overflow-hidden ${options?.length === 1 ? 'col-span-2' : ''} ${isSelected ? 'bg-background dark:bg-background-dark' : ''}`}>
                                     <Radio
                                         id={option.did}
                                         value={option.did}

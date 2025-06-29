@@ -13,7 +13,8 @@ const Table = React.forwardRef<
             ref={ref}
             className={cn(
                 'w-full caption-bottom text-sm [&_tbody_tr]:hover:bg-muted/50 [&_tbody_tr]:transition-colors',
-                striped && '[&_tbody_tr:nth-child(odd)]:bg-white [&_tbody_tr:nth-child(even)]:bg-muted/30 dark:[&_tbody_tr:nth-child(odd)]:bg-card dark:[&_tbody_tr:nth-child(even)]:bg-muted/20',
+                striped && '[&_tbody_tr:nth-child(odd)]:bg-background [&_tbody_tr:nth-child(even)]:bg-muted/30 dark:[&_tbody_tr:nth-child(odd)]:bg-card' +
+                ' dark:[&_tbody_tr:nth-child(even)]:bg-muted/20',
                 className
             )}
             {...props}

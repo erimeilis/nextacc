@@ -5,7 +5,7 @@ import Show from '@/components/service/Show'
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {ChatCircleTextIcon, CircleNotchIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {Input} from '@/components/ui/Input'
@@ -86,6 +86,7 @@ export default function MyWaitingNumbersList({
     const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
+    const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
     const { countriesMap } = useOffersStore()
 
     // Get all countries from all types
@@ -140,6 +141,9 @@ export default function MyWaitingNumbersList({
 
     // Handle settings button click
     const handleSettings = (number: MyWaitingNumberInfo) => {
+        // Set loading state for this number
+        setLoadingEdit(number.did)
+
         // Navigate to number edit page with current search params
         const currentParams = new URLSearchParams(searchParams?.toString())
         const editUrl = `/waiting-numbers/${number.did}/?${currentParams.toString()}`
@@ -230,8 +234,12 @@ export default function MyWaitingNumbersList({
                                         {/* Action buttons */}
                                         <TableCell className="w-28">
                                             <div className="flex items-center justify-end space-x-1">
-                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7">
-                                                    <PenNibIcon size={16}/>
+                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7" disabled={loadingEdit === option.did}>
+                                                    {loadingEdit === option.did ? (
+                                                        <CircleNotchIcon size={16} className="animate-spin"/>
+                                                    ) : (
+                                                        <PenNibIcon size={16}/>
+                                                    )}
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title={t('info')} className="h-7 w-7">
                                                     <InfoIcon size={16}/>

@@ -101,11 +101,11 @@ export async function redDeleteUpload(fileId: string): Promise<boolean> {
         })
 }
 
-export async function redRenameFile(filename: string, name: string): Promise<boolean> {
+export async function redRenameFile(fileId: string, name: string): Promise<boolean> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return false
 
-    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads')
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads/' + fileId)
     url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -116,7 +116,6 @@ export async function redRenameFile(filename: string, name: string): Promise<boo
             'Authorization': 'Bearer ' + session?.token,
         },
         body: JSON.stringify({
-            filename: filename,
             name: name
         })
     }

@@ -277,16 +277,29 @@ export default function BuyNumberForm({
         // Build location string
         const locationParts = [countryName, areaName].filter(Boolean)
 
-        // Check if area contains '/' to determine layout
+        // Check if the area contains '/' to determine layout
         const shouldBreakLine = areaName && areaName.includes('/')
+
+        // Get country code for a flag
+        const countryCode = countryId ?
+            countriesMap?.find(c => c.id === countryId)?.geo || '' : ''
 
         return (
             <>
-                {formattedNumber}
+                {countryCode && (
+                    <img
+                        src={`https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`}
+                        alt={`${countryName} flag`}
+                        className="mr-2 h-3 w-5 inline-block"
+                    />
+                )}
+                <span className="mr-2">
+                    {formattedNumber}
+                </span>
                 {locationParts.length > 0 && (
                     <>
                         {shouldBreakLine ? <br/> : ' '}
-                        <span className="ml-2 text-muted-foreground font-light">
+                        <span className="text-muted-foreground font-light">
                             {locationParts.join(', ')}
                         </span>
                     </>

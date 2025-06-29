@@ -6,7 +6,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {ChartPieSliceIcon, ChatCircleTextIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {ChartPieSliceIcon, ChatCircleTextIcon, CircleNotchIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {FormattedDate} from '@/components/ui/FormattedDate'
@@ -24,6 +24,8 @@ export default function MyNumbersList({
     const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
+    const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
+    const [loadingStats, setLoadingStats] = useState<string | null>(null)
     const { countriesMap } = useOffersStore()
 
     // Get all countries from all types
@@ -79,6 +81,9 @@ export default function MyNumbersList({
 
     // Handle settings button click
     const handleSettings = (number: NumberInfo) => {
+        // Set loading state for this number
+        setLoadingEdit(number.did)
+
         // Navigate to number edit page with current search params
         const currentParams = new URLSearchParams(searchParams?.toString())
         const editUrl = `/numbers/${number.did}/?${currentParams.toString()}`
@@ -87,6 +92,9 @@ export default function MyNumbersList({
 
     // Handle call statistics button click
     const handleCallStatistics = (number: NumberInfo) => {
+        // Set loading state for this number
+        setLoadingStats(number.did)
+
         // Navigate to statistics page with the number as a parameter
         const currentParams = new URLSearchParams(searchParams?.toString())
         const statisticsUrl = `/statistics/${number.did}/?${currentParams.toString()}`
@@ -178,14 +186,22 @@ export default function MyNumbersList({
                                         {/* Action buttons */}
                                         <TableCell className="w-28">
                                             <div className="flex items-center justify-end space-x-1">
-                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7">
-                                                    <PenNibIcon size={16}/>
+                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7" disabled={loadingEdit === option.did}>
+                                                    {loadingEdit === option.did ? (
+                                                        <CircleNotchIcon size={16} className="animate-spin"/>
+                                                    ) : (
+                                                        <PenNibIcon size={16}/>
+                                                    )}
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title={t('info')} className="h-7 w-7">
                                                     <InfoIcon size={16}/>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title={t('call_statistics')} className="h-7 w-7">
-                                                    <ChartPieSliceIcon size={16}/>
+                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title={t('call_statistics')} className="h-7 w-7" disabled={loadingStats === option.did}>
+                                                    {loadingStats === option.did ? (
+                                                        <CircleNotchIcon size={16} className="animate-spin"/>
+                                                    ) : (
+                                                        <ChartPieSliceIcon size={16}/>
+                                                    )}
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive">
                                                     <XIcon size={16}/>

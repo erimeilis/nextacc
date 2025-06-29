@@ -71,6 +71,7 @@ export default function UploadsList({
     const [editingFile, setEditingFile] = useState<string | null>(null)
     const [editingName, setEditingName] = useState<string>('')
     const [savingFile, setSavingFile] = useState<string | null>(null)
+    const [deletingFile, setDeletingFile] = useState<string | null>(null)
     const {uploadFile, deleteUpload, renameFile} = useClientStore()
 
     // Filter uploads based on a search query
@@ -130,14 +131,24 @@ export default function UploadsList({
 
     // Handle delete button click
     const handleDelete = async (upload: UploadInfo) => {
-        await deleteUpload(upload.filename)
+        setDeletingFile(upload.filename)
+        try {
+            await deleteUpload(upload.filename)
+        } finally {
+            setDeletingFile(null)
+        }
     }
 
     // Handle deletes the selected button click
     const handleDeleteSelected = async () => {
         // Delete all selected uploads one by one
         for (const filename of selectedUploads) {
-            await deleteUpload(filename)
+            setDeletingFile(filename)
+            try {
+                await deleteUpload(filename)
+            } finally {
+                setDeletingFile(null)
+            }
         }
         // Clear selection
         setSelectedUploads([])
@@ -343,8 +354,13 @@ export default function UploadsList({
                                                 onClick={() => handleDelete(upload)}
                                                 className="h-7 w-7 text-destructive"
                                                 title={t('delete')}
+                                                disabled={deletingFile === upload.filename}
                                             >
-                                                <XIcon size={16}/>
+                                                {deletingFile === upload.filename ? (
+                                                    <CircleNotchIcon size={16} className="animate-spin"/>
+                                                ) : (
+                                                    <XIcon size={16}/>
+                                                )}
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -374,8 +390,16 @@ export default function UploadsList({
                             size="sm"
                             onClick={handleDeleteSelected}
                             className="text-xs text-muted-foreground p-0 h-auto"
+                            disabled={deletingFile !== null}
                         >
-                            {t('delete_selected')}
+                            {deletingFile !== null ? (
+                                <span className="flex items-center">
+                                    <CircleNotchIcon size={14} className="animate-spin mr-1"/>
+                                    {t('deleting')}...
+                                </span>
+                            ) : (
+                                t('delete_selected')
+                            )}
                         </Button>
                     )}
                 </div>
