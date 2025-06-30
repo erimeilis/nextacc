@@ -11,6 +11,7 @@ import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 import dynamic from 'next/dynamic'
 import {useCartStore} from '@/stores/useCartStore'
+import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
 import {numberTypes} from '@/constants/numberTypes'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {CountryInfo} from '@/types/CountryInfo'
@@ -39,6 +40,7 @@ export default function OffersPage() {
     const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
     const {countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers} = useOffersStore()
     const {cart} = useCartStore()
+    const {waitingDids} = useWaitingDidsStore()
     const buyForm = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -59,12 +61,18 @@ export default function OffersPage() {
                     const isNumeric = /^\d+$/.test(cartItem.did)
                     // If it's numeric and matches the current number's did, return true (this item is in the cart)
                     return isNumeric && cartItem.did === searchParams.get('number')
+                }) ||
+                waitingDids.some(myWaitingNumber => {
+                    // Check if cartItem.did is numeric
+                    const isNumeric = /^\d+$/.test(myWaitingNumber.did)
+                    // If it's numeric and matches the current number's did, return true (this item is in the cart)
+                    return isNumeric && myWaitingNumber.did === searchParams.get('number')
                 }))
         ) {
             // If the number is not in the localNumbersMap (not available), redirect to a path without a number
             router.push(pathName + '?' + CreateQueryString('', '', searchParams, ['number']))
         }
-    }, [searchParams, pathName, router, localNumbersMap, cart])
+    }, [searchParams, pathName, router, localNumbersMap, cart, waitingDids])
 
     const type = searchParams ? searchParams.get('type') : null
     const countryBySlug = (searchParams && searchParams.has('country')) ?
@@ -268,8 +276,15 @@ export default function OffersPage() {
                 // If it's numeric and matches the current number's did, return true (this item is in the cart)
                 return isNumeric && cartItem.did === number.did
             })
+            // Check if this number exists in the cart and has a numeric DID
+            const existsInWaitingDids = waitingDids.some(myWaitingNumber => {
+                // Check if cartItem.did is numeric
+                const isNumeric = /^\d+$/.test(myWaitingNumber.did)
+                // If it's numeric and matches the current number's did, return true (this item is in the cart)
+                return isNumeric && myWaitingNumber.did === number.did
+            })
             // Return true only for numbers NOT in the cart (filter those out)
-            return !existsInCart
+            return !existsInCart && !existsInWaitingDids
         }) :
         null
     const getNumber: NumberInfo | null = number ?

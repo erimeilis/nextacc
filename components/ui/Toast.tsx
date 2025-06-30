@@ -47,16 +47,26 @@ const Toast = React.forwardRef<
     variant?: VariantProps<typeof toastVariants>['variant'];
     onDismiss?: () => void;
 }
->(({className, variant, ...props}, ref) => {
-    // We don't destructure onDismiss here, but it will still be in props
-    // and won't be used directly in this component
+>(({className, variant, onDismiss, ...props}, ref) => {
+    // Handle onDismiss by combining it with onOpenChange
+    const handleOpenChange = (open: boolean) => {
+        // Call the original onOpenChange if it exists
+        if (props.onOpenChange) {
+            props.onOpenChange(open);
+        }
 
-    // This way we're not explicitly defining a variable that's unused
+        // Call onDismiss when toast is closed
+        if (!open && onDismiss) {
+            onDismiss();
+        }
+    };
+
     return (
         <ToastPrimitives.Root
             ref={ref}
             className={cn(toastVariants({variant}), className)}
             {...props}
+            onOpenChange={handleOpenChange}
         />
     )
 })

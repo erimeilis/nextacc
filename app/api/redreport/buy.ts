@@ -4,6 +4,8 @@ import {NumberDestination} from '@/types/NumberDestination'
 import {auth} from '@/auth'
 import {getAppIp} from '@/utils/getAppIp'
 import {ClientInfo} from '@/types/ClientInfo'
+import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
+import {MyNumberInfo} from '@/types/MyNumberInfo'
 
 export async function buy(
     {
@@ -27,13 +29,16 @@ export async function buy(
         sms?: NumberDestination,
         docs?: { [doc_slug: string]: string } | Array<{ type: string, file: string }>
     }): Promise<{
-    type?: string,
-    order_id?: string,
+    type: string,
+    data: MyWaitingNumberInfo[] | MyNumberInfo[] | null,
     error?: { status: number, message: string }
 }> {
     if (!uid || !number) {
         console.log('buy: no uid or number')
-        return {}
+        return {
+            type: 'fail',
+            data: null
+        }
     }
 
     const session = await auth()
@@ -52,8 +57,6 @@ export async function buy(
                 return {type, file: value}
             })
         }
-        // Log the processed docs to verify
-        console.log('Processed docs:', JSON.stringify(processedDocs))
     }
 
     const options: RequestInit = {
@@ -86,27 +89,24 @@ export async function buy(
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/buy' : '/api/buy'), options)
         .then((res: Response) => {
-            console.log('buy: ', res)
             if (!res.ok) {
                 // Return error information including status code
                 if (res.status === 404) {
-                    return {error: {status: 404, message: 'number_not_available'}}
+                    return {type: 'fail', data: null, error: {status: 404, message: 'number_not_available'}}
                 }
-                return {error: {status: res.status, message: 'buy'}}
+                return {type: 'fail', data: null, error: {status: res.status, message: 'buy_error'}}
             }
-            return res.json().then(data => {
-                // Check if the response contains type and order_id
-                if (data.type) {
-                    return {
-                        type: data.type,
-                    }
-                }
-                // Default case - just return the data as is
-                return data
-            })
+            return res.json().then(data => ({
+                type: data.data.type,
+                data: data.data.dids
+            }))
         })
         .catch((err) => {
             console.log('buy error: ', err.message)
-            return {error: {status: 500, message: 'buy'}}
+            return {
+                type: 'fail',
+                data: null,
+                error: {status: 500, message: 'buy_error'}
+            }
         })
 }

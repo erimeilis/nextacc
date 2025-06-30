@@ -10,6 +10,7 @@ import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
+import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
 
 // Skeleton loader for waiting numbers list
 function WaitingNumbersSkeleton() {
@@ -83,11 +84,11 @@ export default function MyWaitingNumbersList({
     const t = useTranslations('dashboard')
     const router = useRouter()
     const searchParams = useSearchParams()
-    const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
     const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
-    const { countriesMap } = useOffersStore()
+    const {countriesMap} = useOffersStore()
+    const {selectedDids, selectDid} = useWaitingDidsStore()
 
     // Get all countries from all types
     const allCountries = Object.values(countriesMap).flat()
@@ -98,11 +99,11 @@ export default function MyWaitingNumbersList({
         return allCountries.find(country => country.id === countryId)
     }
 
-    // Filter numbers based on a search query
-    const filteredOptions = options?.filter(option =>
-        searchQuery === '' ||
-        option.did.toString().includes(searchQuery)
-    ) || null
+    // Filter numbers based on a search query and exclude all-numeric DIDs
+    const filteredOptions = options?.filter(option => {
+        // Filter based on search query and exclude all-numeric DIDs
+        return (searchQuery === '' || option.did.toString().includes(searchQuery))
+    }) || null
 
     // Calculate totals
     const totalNumbers = options?.length || 0
@@ -110,22 +111,13 @@ export default function MyWaitingNumbersList({
 
     // Handle checkbox selection
     const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedNumbers(filteredOptions?.map(option => option.did) || [])
-        } else {
-            setSelectedNumbers([])
+        if (filteredOptions) {
+            filteredOptions.forEach(option => {
+                selectDid(option.did, checked)
+            })
         }
     }
-
-    const handleSelectNumber = (did: string, checked: boolean) => {
-        if (checked) {
-            setSelectedNumbers(prev => [...prev, did])
-        } else {
-            setSelectedNumbers(prev => prev.filter(id => id !== did))
-        }
-    }
-
-    // Handle search input change
+// Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value)
     }
@@ -159,14 +151,14 @@ export default function MyWaitingNumbersList({
     // Handle deletes the selected button click
     const handleDeleteSelected = () => {
         // This would delete all selected numbers
-        console.log('Delete selected waiting numbers', selectedNumbers)
+        console.log('Delete selected waiting numbers', selectedDids)
     }
 
     return (
         <Show when={options !== null}
               fallback={options?.length == 0 ?
                   <div>{t('no_waiting_numbers')}</div> :
-                  <WaitingNumbersSkeleton />}>
+                  <WaitingNumbersSkeleton/>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
@@ -200,8 +192,8 @@ export default function MyWaitingNumbersList({
                                         <TableCell className="w-8">
                                             <Checkbox
                                                 id={`checkbox-${option.did}`}
-                                                checked={selectedNumbers.includes(option.did)}
-                                                onCheckedChange={(checked) => handleSelectNumber(option.did, checked)}
+                                                checked={selectedDids.includes(option.did)}
+                                                onCheckedChange={(checked) => selectDid(option.did, checked)}
                                                 variant="sm"
                                             />
                                         </TableCell>
@@ -211,7 +203,7 @@ export default function MyWaitingNumbersList({
                                             <div className="flex flex-col">
                                                 <div className="flex items-center">
                                                     {option.country_id && getCountryByID(option.country_id)?.geo && (
-                                                        <img 
+                                                        <img
                                                             src={`https://flagcdn.com/w20/${getCountryByID(option.country_id)?.geo.toLowerCase()}.png`}
                                                             alt={`${getCountryByID(option.country_id)?.countryname || ''} flag`}
                                                             className="mr-2 h-3 w-5 inline-block"
@@ -234,7 +226,8 @@ export default function MyWaitingNumbersList({
                                         {/* Action buttons */}
                                         <TableCell className="w-28">
                                             <div className="flex items-center justify-end space-x-1">
-                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7" disabled={loadingEdit === option.did}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7"
+                                                        disabled={loadingEdit === option.did}>
                                                     {loadingEdit === option.did ? (
                                                         <CircleNotchIcon size={16} className="animate-spin"/>
                                                     ) : (
@@ -298,7 +291,8 @@ export default function MyWaitingNumbersList({
                                                             ].map((item, index) => (
                                                                 item.condition && (
                                                                     <TableRow key={index}>
-                                                                        <TableCell className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
+                                                                        <TableCell
+                                                                            className="min-w-24 w-24 sm:min-w-32 sm:w-32 text-muted-foreground font-light">{item.label}</TableCell>
                                                                         <TableCell className="text-right sm:text-left">{item.value}</TableCell>
                                                                     </TableRow>
                                                                 )
@@ -320,7 +314,8 @@ export default function MyWaitingNumbersList({
                     <div className="flex items-center">
                         <Checkbox
                             id="select-all"
-                            checked={selectedNumbers.length === (filteredOptions?.length || 0) && (filteredOptions?.length || 0) > 0}
+                            checked={Boolean(filteredOptions && filteredOptions.length > 0 &&
+                                filteredOptions.every(option => selectedDids.includes(option.did)))}
                             onCheckedChange={(checked) => handleSelectAll(checked)}
                             variant="sm"
                         />
@@ -329,7 +324,7 @@ export default function MyWaitingNumbersList({
                         </label>
                     </div>
 
-                    {selectedNumbers.length > 0 && (
+                    {selectedDids.length > 0 && (
                         <Button
                             variant="link"
                             size="sm"

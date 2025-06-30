@@ -88,7 +88,6 @@ export async function getNumbers({type, country, area}: { type: string, country:
 
         if (response && response.data && response.data.length > 0) {
             const numbers: NumberResponseRaw[] = response.data
-            console.log('getNumbers: ', numbers)
             return numbers.map(number => ({
                 did: number.did,
                 //name: number.did + ' (' + number.where_did + ')',

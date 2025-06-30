@@ -23,12 +23,14 @@ import {ClientInfo} from '@/types/ClientInfo'
 import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {useClientStore} from '@/stores/useClientStore'
+import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
 import {useToast} from '@/hooks/use-toast'
 import {useRouter} from 'next/navigation'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {UploadInfo} from '@/types/UploadInfo'
 import {Card} from '@/components/ui/Card'
+import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -43,6 +45,8 @@ export default function BuyNumberForm({
     countriesMap: CountryInfo[] | null
     areasMap: AreaInfo[] | null
 }) {
+    const router = useRouter()
+
     const t = useTranslations('offers')
     const d = useTranslations('docs')
     const toastT = useTranslations('toast')
@@ -51,9 +55,11 @@ export default function BuyNumberForm({
         'ip': '',
         'country': '',
     }, 'persistentClientInfo')
-    const {updateData} = useCartStore()
+
+    const {updateData: updateCartData} = useCartStore()
+    const {updateData: updateWaitingDidsData} = useWaitingDidsStore()
+
     const {toast} = useToast()
-    const router = useRouter()
     const getClientInfo = async () => {
         const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
         const info = await res.json()
@@ -86,7 +92,7 @@ export default function BuyNumberForm({
                     voiceDestination: voiceDestinationState,
                     smsType: smsTypeState,
                     smsDestination: smsDestinationState,
-                    // Include document uploads based on selected type
+                    // Include document uploads based on the selected type
                     ...(selectedDocType === 'personal' ? personalDocUploads :
                         selectedDocType === 'business' ? businessDocUploads : {})
                 }
@@ -98,9 +104,6 @@ export default function BuyNumberForm({
                 // If there are validation errors, display them and stop submission
                 if (errors) {
                     setFormErrors(errors)
-                    console.error('Validation errors:', errors)
-
-                    // Show error toast for validation
                     toast({
                         variant: 'destructive',
                         title: toastT('validation_error_title'),
@@ -137,15 +140,11 @@ export default function BuyNumberForm({
 
                 // If there are field-specific errors, stop submission
                 if (hasFieldErrors) {
-                    console.error('Field validation errors exist')
-
-                    // Show error toast for field validation
                     toast({
                         variant: 'destructive',
                         title: toastT('validation_error_title'),
                         description: toastT('validation_error_description'),
                     })
-
                     return
                 }
 
@@ -163,25 +162,24 @@ export default function BuyNumberForm({
                     sms: numberInfo.sms ?
                         {type: smsTypeState, destination: smsDestinationState} :
                         undefined,
-                    docs: selectedDocType === 'personal' && personalDocUploads ? 
+                    docs: selectedDocType === 'personal' && personalDocUploads ?
                         Object.entries(personalDocUploads).map(([key, value]) => {
                             // Remove 'doc_' prefix from key
-                            const type = key.startsWith('doc_') ? key.substring(4) : key;
-                            return { type, file: value };
+                            const type = key.startsWith('doc_') ? key.substring(4) : key
+                            return {type, file: value}
                         }) :
                         selectedDocType === 'business' && businessDocUploads ?
-                        Object.entries(businessDocUploads).map(([key, value]) => {
-                            // Remove 'doc_' prefix from key
-                            const type = key.startsWith('doc_') ? key.substring(4) : key;
-                            return { type, file: value };
-                        }) : undefined
+                            Object.entries(businessDocUploads).map(([key, value]) => {
+                                // Remove 'doc_' prefix from key
+                                const type = key.startsWith('doc_') ? key.substring(4) : key
+                                return {type, file: value}
+                            }) : undefined
                 }
 
                 await getClientInfo()
 
                 // Determine which action to take based on the button clicked
                 if (buttonId === 'buy') {
-                    console.log('Buying number:', numberInfo)
                     const response = await buy(commonParams)
 
                     if (response.error) {
@@ -202,17 +200,30 @@ export default function BuyNumberForm({
                             })
                         }
                     } else {
-                        // Show success toast with appropriate message
+                        // Update waiting-dids data
+                        if (response.data) {
+                            updateWaitingDidsData(response.data as MyWaitingNumberInfo[])
+                        }
+
+                        // Show success toast with the appropriate message
                         toast({
                             variant: 'success',
                             title: toastT('success_title'),
-                            description: response.type === 'manual' 
-                                ? toastT('buy_success_manual') 
-                                : toastT('buy_success')
+                            description: response.type === 'manual'
+                                ? toastT('buy_success_manual')
+                                : toastT('buy_success'),
+                            onDismiss: () => {
+                                // If the type is manual, update waiting DIDs and redirect to numbers page with waiting tab selected
+                                if (response.type === 'manual') {
+                                    // Open minicart when toast is dismissed
+                                    const url = new URL(window.location.href)
+                                    url.searchParams.set('tab', 'waiting')
+                                    router.push('/numbers' + url.search)
+                                }
+                            }
                         })
                     }
                 } else {
-                    console.log('Adding to cart:', numberInfo)
                     const response = await addToCart(commonParams)
 
                     if (response.error) {
@@ -247,7 +258,7 @@ export default function BuyNumberForm({
                     } else {
                         // Update cart data
                         if (response.data) {
-                            updateData(response.data)
+                            updateCartData(response.data)
                         }
 
                         // Show success toast
@@ -316,14 +327,14 @@ export default function BuyNumberForm({
     function GetDocsPersonal(numberInfo: NumberInfo | null) {
         if (!numberInfo || !numberInfo.docs_personal || !numberInfo.docs_personal.length) return null
         const docsList = numberInfo.docs_personal.map(key => d(key))
-        console.log(docsList)
+        //console.log(docsList)
         return docsList.length > 0 ? docsList : null
     }
 
     function GetDocsBusiness(numberInfo: NumberInfo | null) {
         if (!numberInfo || !numberInfo.docs_business || !numberInfo.docs_business.length) return null
         const docsList = numberInfo.docs_business.map(key => d(key))
-        console.log(docsList)
+        //console.log(docsList)
         return docsList.length > 0 ? docsList : null
     }
 
@@ -454,15 +465,15 @@ export default function BuyNumberForm({
                 // Always try to fetch fresh uploads first
                 await updateUploads()
                 const newUploads = getUploads()
-                console.log('Uploads after fetch:', newUploads)
+                //console.log('Uploads after fetch:', newUploads)
 
                 if (newUploads && newUploads.length > 0) {
-                    console.log('Using fresh uploads, count:', newUploads.length)
+                    //console.log('Using fresh uploads, count:', newUploads.length)
                     setUploads(newUploads)
                 } else {
                     // If no uploads from API, try to get from store
                     const storeUploads = getUploads()
-                    console.log('No uploads from API, using store uploads:', storeUploads)
+                    //console.log('No uploads from API, using store uploads:', storeUploads)
 
                     // If still no uploads, set to empty array to prevent null
                     setUploads(storeUploads || [])
@@ -478,7 +489,7 @@ export default function BuyNumberForm({
             }
         }
 
-        fetchUploads()
+        fetchUploads().then()
     }, [getUploads, updateUploads])
 
     // Create a form validation schema based on the numberInfo properties

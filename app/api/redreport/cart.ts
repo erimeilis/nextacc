@@ -27,7 +27,10 @@ export async function addToCart(
         voice?: NumberDestination,
         sms?: NumberDestination,
         docs?: { [doc_slug: string]: string } | Array<{ type: string, file: string }>
-    }): Promise<{ data: CartItem[] | null, error?: { status: number, message: string } }> {
+    }): Promise<{
+    data: CartItem[] | null,
+    error?: { status: number, message: string }
+}> {
     if (!uid || !number) {
         console.log('addToCart: no uid or number')
         return {data: []}
@@ -49,8 +52,6 @@ export async function addToCart(
                 return {type, file: value}
             })
         }
-        // Log the processed docs to verify
-        console.log('Processed docs:', JSON.stringify(processedDocs))
     }
 
     const options: RequestInit = {
@@ -83,7 +84,6 @@ export async function addToCart(
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart' : '/api/cart'), options)
         .then((res: Response) => {
-            console.log('addToCart: ', res)
             if (!res.ok) {
                 // Return error information including status code
                 if (res.status === 404) {
@@ -91,11 +91,16 @@ export async function addToCart(
                 }
                 return {data: null, error: {status: res.status, message: 'cart_add_error'}}
             }
-            return res.json().then(data => ({data: data.data.cart}))
+            return res.json().then(data => ({
+                data: data.data.cart
+            }))
         })
         .catch((err) => {
             console.log('addToCart error: ', err.message)
-            return {data: null, error: {status: 500, message: 'cart_add_error'}}
+            return {
+                data: null,
+                error: {status: 500, message: 'cart_add_error'}
+            }
         })
 }
 

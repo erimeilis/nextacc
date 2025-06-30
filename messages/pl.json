@@ -277,6 +277,7 @@
     "cart_add_error": "Nie udało się dodać produktu do koszyka",
     "number_not_available": "Numer jest niedostępny",
     "buy": "Nie udało się zakupić numeru",
+    "buy_error": "Nie udało się zakupić numeru",
     "save_success": "Zmiany zostały pomyślnie zapisane",
     "number_updated_successfully": "Ustawienia numeru zostały zaktualizowane",
     "save_error": "Nie udało się zapisać zmian",
