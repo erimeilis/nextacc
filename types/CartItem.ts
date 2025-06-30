@@ -13,5 +13,6 @@ export type CartItem = {
     date: string,
     voice?: NumberDestination,
     sms?: NumberDestination,
-    did_info?: ModifiedNumberInfo
+    did_info?: ModifiedNumberInfo,
+    docs?: { [doc_slug: string]: string }
 }

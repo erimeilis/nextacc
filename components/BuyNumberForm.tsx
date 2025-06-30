@@ -1,5 +1,5 @@
 'use client'
-import React, {ChangeEvent, SyntheticEvent, useEffect, useState} from 'react'
+import React, {ChangeEvent, SyntheticEvent, useEffect, useMemo, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
@@ -17,14 +17,18 @@ import {z} from 'zod'
 import {ChatTextIcon, PhoneTransferIcon} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/Table'
 import {addToCart} from '@/app/api/redreport/cart'
+import {buy} from '@/app/api/redreport/buy'
 import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
 import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
+import {useClientStore} from '@/stores/useClientStore'
 import {useToast} from '@/hooks/use-toast'
 import {useRouter} from 'next/navigation'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
+import {UploadInfo} from '@/types/UploadInfo'
+import {Card} from '@/components/ui/Card'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -63,7 +67,7 @@ export default function BuyNumberForm({
     const sms: { id: string, name: string }[] = smsDestinationsFields.map((i) => {
         return {id: i.id, name: t(i.labelText)}
     })
-    const handleAddToCart = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+    const handleFormSubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
 
         // Get the button that was clicked
@@ -81,7 +85,10 @@ export default function BuyNumberForm({
                     voiceType: voiceTypeState,
                     voiceDestination: voiceDestinationState,
                     smsType: smsTypeState,
-                    smsDestination: smsDestinationState
+                    smsDestination: smsDestinationState,
+                    // Include document uploads based on selected type
+                    ...(selectedDocType === 'personal' ? personalDocUploads :
+                        selectedDocType === 'business' ? businessDocUploads : {})
                 }
 
                 // Validate form data
@@ -142,9 +149,8 @@ export default function BuyNumberForm({
                     return
                 }
 
-                console.log('Adding to cart:', numberInfo)
-                await getClientInfo()
-                const response = await addToCart({
+                // Prepare common parameters for both cart and buy actions
+                const commonParams = {
                     clientInfo: persistentClientInfo,
                     uid: persistentId,
                     number: numberInfo,
@@ -156,30 +162,99 @@ export default function BuyNumberForm({
                         undefined,
                     sms: numberInfo.sms ?
                         {type: smsTypeState, destination: smsDestinationState} :
-                        undefined
-                })
+                        undefined,
+                    docs: selectedDocType === 'personal' && personalDocUploads ? 
+                        Object.entries(personalDocUploads).map(([key, value]) => {
+                            // Remove 'doc_' prefix from key
+                            const type = key.startsWith('doc_') ? key.substring(4) : key;
+                            return { type, file: value };
+                        }) :
+                        selectedDocType === 'business' && businessDocUploads ?
+                        Object.entries(businessDocUploads).map(([key, value]) => {
+                            // Remove 'doc_' prefix from key
+                            const type = key.startsWith('doc_') ? key.substring(4) : key;
+                            return { type, file: value };
+                        }) : undefined
+                }
 
-                if (response.error) {
-                    // Handle specific error cases
-                    if (response.error.status === 404) {
-                        // Show error toast for number not available
-                        toast({
-                            variant: 'destructive',
-                            title: toastT('error_title'),
-                            description: toastT('number_not_available'),
-                            onDismiss: () => {
-                                // Open minicart when toast is dismissed
-                                const url = new URL(window.location.href)
-                                url.searchParams.set('cart', 'open')
-                                router.push(url.pathname + url.search)
-                            }
-                        })
+                await getClientInfo()
+
+                // Determine which action to take based on the button clicked
+                if (buttonId === 'buy') {
+                    console.log('Buying number:', numberInfo)
+                    const response = await buy(commonParams)
+
+                    if (response.error) {
+                        // Handle specific error cases
+                        if (response.error.status === 404) {
+                            // Show error toast for number not available
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('number_not_available')
+                            })
+                        } else {
+                            // Show generic error toast
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT(response.error.message)
+                            })
+                        }
                     } else {
-                        // Show generic error toast
+                        // Show success toast with appropriate message
                         toast({
-                            variant: 'destructive',
-                            title: toastT('error_title'),
-                            description: toastT(response.error.message),
+                            variant: 'success',
+                            title: toastT('success_title'),
+                            description: response.type === 'manual' 
+                                ? toastT('buy_success_manual') 
+                                : toastT('buy_success')
+                        })
+                    }
+                } else {
+                    console.log('Adding to cart:', numberInfo)
+                    const response = await addToCart(commonParams)
+
+                    if (response.error) {
+                        // Handle specific error cases
+                        if (response.error.status === 404) {
+                            // Show error toast for number not available
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('number_not_available'),
+                                onDismiss: () => {
+                                    // Open minicart when toast is dismissed
+                                    const url = new URL(window.location.href)
+                                    url.searchParams.set('cart', 'open')
+                                    router.push(url.pathname + url.search)
+                                }
+                            })
+                        } else {
+                            // Show generic error toast
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT(response.error.message),
+                                onDismiss: () => {
+                                    // Open minicart when toast is dismissed
+                                    const url = new URL(window.location.href)
+                                    url.searchParams.set('cart', 'open')
+                                    router.push(url.pathname + url.search)
+                                }
+                            })
+                        }
+                    } else {
+                        // Update cart data
+                        if (response.data) {
+                            updateData(response.data)
+                        }
+
+                        // Show success toast
+                        toast({
+                            variant: 'success',
+                            title: toastT('success_title'),
+                            description: toastT('cart_add_success'),
                             onDismiss: () => {
                                 // Open minicart when toast is dismissed
                                 const url = new URL(window.location.href)
@@ -188,36 +263,32 @@ export default function BuyNumberForm({
                             }
                         })
                     }
-                } else if (response.data) {
-                    updateData(response.data)
-                    // Show success toast
-                    toast({
-                        variant: 'success',
-                        title: toastT('success_title'),
-                        description: toastT('cart_add_success'),
-                        onDismiss: () => {
-                            // Open minicart when toast is dismissed
-                            const url = new URL(window.location.href)
-                            url.searchParams.set('cart', 'open')
-                            router.push(url.pathname + url.search)
-                        }
-                    })
                 }
             }
         } catch (error) {
-            console.error('Error adding to cart:', error)
+            console.error('Error processing request:', error)
             // Show error toast
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('cart_add_error'),
-                onDismiss: () => {
-                    // Open minicart when toast is dismissed
-                    const url = new URL(window.location.href)
-                    url.searchParams.set('cart', 'open')
-                    router.push(url.pathname + url.search)
-                }
-            })
+            if (buttonId === 'buy') {
+                // For Buy button, don't open cart
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('cart_add_error')
+                })
+            } else {
+                // For Add to Cart button, open cart
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('cart_add_error'),
+                    onDismiss: () => {
+                        // Open minicart when toast is dismissed
+                        const url = new URL(window.location.href)
+                        url.searchParams.set('cart', 'open')
+                        router.push(url.pathname + url.search)
+                    }
+                })
+            }
         } finally {
             setLoadingButton(null)
         }
@@ -318,6 +389,98 @@ export default function BuyNumberForm({
     const [loadingButton, setLoadingButton] = useState<string | null>(null)
     const [formErrors, setFormErrors] = useState<{ [index: string]: string[] | undefined }>({})
 
+    // Document selection state
+    const [selectedDocType, setSelectedDocType] = useState<'personal' | 'business' | null>(null)
+    const [personalDocUploads, setPersonalDocUploads] = useState<{ [key: string]: string }>({})
+    const [businessDocUploads, setBusinessDocUploads] = useState<{ [key: string]: string }>({})
+    // For backward compatibility with existing code
+    // Wrap in useMemo to prevent recreation on every render
+    const docUploads = useMemo(() => {
+        return selectedDocType === 'personal' ? personalDocUploads :
+            selectedDocType === 'business' ? businessDocUploads : {}
+    }, [selectedDocType, personalDocUploads, businessDocUploads])
+
+    // Handle document upload selection
+    const handleDocUploadSelection = (fieldName: string, value: string) => {
+        if (selectedDocType === 'personal') {
+            setPersonalDocUploads(prev => ({
+                ...prev,
+                [fieldName]: value
+            }))
+        } else if (selectedDocType === 'business') {
+            setBusinessDocUploads(prev => ({
+                ...prev,
+                [fieldName]: value
+            }))
+        }
+    }
+
+    // Handle file upload for documents
+    const handleFileUpload = async (fieldName: string, file: File) => {
+        try {
+            setUploadingField(fieldName)
+            const success = await uploadFile(file)
+            if (success) {
+                // Get the updated uploads list
+                const updatedUploads = getUploads() || []
+
+                // Find the newly uploaded file (assuming it's the most recent one)
+                if (updatedUploads.length > 0) {
+                    const newUpload = updatedUploads[0]
+
+                    // Update the document selection with the new file
+                    handleDocUploadSelection(fieldName, newUpload.filename)
+
+                    // Update the local uploads state
+                    setUploads(updatedUploads)
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error)
+        } finally {
+            setUploadingField(null)
+        }
+    }
+
+    // Get uploads from the client store
+    const {getUploads, updateUploads, uploadFile, isUserLoggedIn} = useClientStore()
+    const [uploads, setUploads] = useState<UploadInfo[]>([])
+    const [uploadingField, setUploadingField] = useState<string | null>(null)
+
+    // Fetch uploads when the component mounts
+    useEffect(() => {
+        const fetchUploads = async () => {
+            try {
+                // Always try to fetch fresh uploads first
+                await updateUploads()
+                const newUploads = getUploads()
+                console.log('Uploads after fetch:', newUploads)
+
+                if (newUploads && newUploads.length > 0) {
+                    console.log('Using fresh uploads, count:', newUploads.length)
+                    setUploads(newUploads)
+                } else {
+                    // If no uploads from API, try to get from store
+                    const storeUploads = getUploads()
+                    console.log('No uploads from API, using store uploads:', storeUploads)
+
+                    // If still no uploads, set to empty array to prevent null
+                    setUploads(storeUploads || [])
+                }
+            } catch (error) {
+                console.error('Error fetching uploads:', error)
+                // If error, try to get from store
+                const storeUploads = getUploads()
+                console.log('Error fetching uploads, using store uploads:', storeUploads)
+
+                // If still no uploads, set to empty array to prevent null
+                setUploads(storeUploads || [])
+            }
+        }
+
+        fetchUploads()
+    }, [getUploads, updateUploads])
+
     // Create a form validation schema based on the numberInfo properties
     const createFormSchema = (numberInfo: NumberInfo | null) => {
         if (!numberInfo) return z.object({})
@@ -343,8 +506,27 @@ export default function BuyNumberForm({
             })
             : z.object({})
 
+        // Add document uploads validation if a document type is selected
+        let docsSchema = z.object({})
+
+        if (selectedDocType === 'personal' && numberInfo.docs_personal && numberInfo.docs_personal.length > 0) {
+            // Create a dynamic schema for each document in docs_personal
+            const docFields: Record<string, z.ZodString> = {}
+            numberInfo.docs_personal.forEach(doc => {
+                docFields[`doc_${doc}`] = z.string().min(1, {message: 'upload_required'})
+            })
+            docsSchema = z.object(docFields)
+        } else if (selectedDocType === 'business' && numberInfo.docs_business && numberInfo.docs_business.length > 0) {
+            // Create a dynamic schema for each document in docs_business
+            const docFields: Record<string, z.ZodString> = {}
+            numberInfo.docs_business.forEach(doc => {
+                docFields[`doc_${doc}`] = z.string().min(1, {message: 'upload_required'})
+            })
+            docsSchema = z.object(docFields)
+        }
+
         // Merge all schemas
-        return baseSchema.merge(voiceSchema).merge(smsSchema)
+        return baseSchema.merge(voiceSchema).merge(smsSchema).merge(docsSchema)
     }
 
     const handleVoiceTypeChange = (value: string) => {
@@ -424,12 +606,30 @@ export default function BuyNumberForm({
 
     const voiceDestination = voiceDestinationsFields.find(i => i.id === voiceTypeState)
     const smsDestination = smsDestinationsFields.find(i => i.id === smsTypeState)
+
+    // Debug uploads data
+    useEffect(() => {
+        console.log('BuyNumberForm uploads state changed:', {
+            uploadsLength: uploads.length,
+            uploadsData: uploads.slice(0, 5), // Show the first 5 items to avoid console clutter
+            selectedDocType,
+            docUploads
+        })
+    }, [uploads, selectedDocType, docUploads])
+
+    // Debug uploads data on render
+    console.log('BuyNumberForm render:', {
+        uploadsLength: uploads.length,
+        selectedDocType,
+        docUploadsCount: Object.keys(docUploads).length
+    })
+
     return numberInfo ? (
         <form
             id="buyNumberForm"
             name="buyNumberForm"
             className="mt-8 space-y-8 transition-all duration-500 ease-in-out"
-            onSubmit={handleAddToCart}
+            onSubmit={handleFormSubmit}
             method="post"
         >
             <div className="flex flex-col lg:flex-row gap-6 justify-between">
@@ -523,27 +723,130 @@ export default function BuyNumberForm({
                         </div>
                     ) : null}
 
-                    {GetDocsPersonal(numberInfo) ? (
-                        <div className="text-sm text-muted-foreground mt-2">
-                            <div className="font-medium">{t('personal_docs')}:</div>
-                            <ul className="list-disc pl-5">
-                                {GetDocsPersonal(numberInfo)?.map((doc, index) => (
-                                    <li key={index}>{doc}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ) : null}
+                    {/* Document selection section */}
+                    {(GetDocsPersonal(numberInfo) || GetDocsBusiness(numberInfo)) && (
+                        <div className="space-y-4 mt-4">
+                            <div className="font-medium text-sm">{t('required_documents')}:</div>
 
-                    {GetDocsBusiness(numberInfo) ? (
-                        <div className="text-sm text-muted-foreground mt-2">
-                            <div className="font-medium">{t('business_docs')}:</div>
-                            <ul className="list-disc pl-5">
-                                {GetDocsBusiness(numberInfo)?.map((doc, index) => (
-                                    <li key={index}>{doc}</li>
-                                ))}
-                            </ul>
+                            <div className="flex flex-col gap-4">
+                                {/* Personal Documents Card */}
+                                {GetDocsPersonal(numberInfo) && (
+                                    <Card
+                                        className={`p-4 border cursor-pointer transition-all ${selectedDocType === 'personal' ? 'border-primary bg-primary/5' : 'border-muted bg-background'}`}
+                                        onClick={() => {
+                                            setSelectedDocType('personal')
+                                        }}
+                                    >
+                                        <div className="font-medium text-sm mb-2">{t('personal_docs')}</div>
+
+                                        {selectedDocType === 'personal' ? (
+                                            <div className="space-y-2">
+                                                {numberInfo?.docs_personal?.map((docKey, index) => {
+                                                    const docName = d(docKey)
+                                                    const fieldName = `doc_${docKey}`
+
+                                                    return (
+                                                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                                                            <div className="text-sm text-muted-foreground flex-2">{docName}</div>
+                                                            <div className="flex-1">
+                                                                <DropdownSelect
+                                                                    selectId={fieldName}
+                                                                    selectTitle={t('select_upload')}
+                                                                    data={uploads.map(upload => ({
+                                                                        id: upload.filename,
+                                                                        name: upload.name || upload.filename
+                                                                    }))}
+                                                                    onSelectAction={(value) => {
+                                                                        handleDocUploadSelection(fieldName, value)
+                                                                    }}
+                                                                    selectedOption={docUploads[fieldName] || ''}
+                                                                    customClass="w-full text-xs"
+                                                                    disabled={uploads.length === 0}
+                                                                    success={!!docUploads[fieldName]}
+                                                                    allowUpload={true}
+                                                                    isUploading={uploadingField === fieldName}
+                                                                    onFileUpload={(file) => handleFileUpload(fieldName, file)}
+                                                                />
+                                                                {formErrors[fieldName] && (
+                                                                    <div className="text-destructive text-xs mt-1">
+                                                                        {formErrors[fieldName]?.map(err => t(err)).join(', ')}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                                                {GetDocsPersonal(numberInfo)?.map((doc, index) => (
+                                                    <li key={index}>{doc}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </Card>
+                                )}
+
+                                {/* Business Documents Card */}
+                                {GetDocsBusiness(numberInfo) && (
+                                    <Card
+                                        className={`p-4 border cursor-pointer transition-all ${selectedDocType === 'business' ? 'border-primary bg-primary/5' : 'border-muted bg-background'}`}
+                                        onClick={() => {
+                                            setSelectedDocType('business')
+                                        }}
+                                    >
+                                        <div className="font-medium text-sm mb-2">{t('business_docs')}</div>
+
+                                        {selectedDocType === 'business' ? (
+                                            <div className="space-y-2">
+                                                {numberInfo?.docs_business?.map((docKey, index) => {
+                                                    const docName = d(docKey)
+                                                    const fieldName = `doc_${docKey}`
+
+                                                    return (
+                                                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                                                            <div className="text-sm text-muted-foreground flex-2">{docName}</div>
+                                                            <div className="flex-1">
+                                                                <DropdownSelect
+                                                                    selectId={fieldName}
+                                                                    selectTitle={t('select_upload')}
+                                                                    data={uploads.map(upload => ({
+                                                                        id: upload.filename,
+                                                                        name: upload.name || upload.filename
+                                                                    }))}
+                                                                    onSelectAction={(value) => {
+                                                                        handleDocUploadSelection(fieldName, value)
+                                                                    }}
+                                                                    selectedOption={docUploads[fieldName] || ''}
+                                                                    customClass="w-full text-xs"
+                                                                    disabled={uploads.length === 0}
+                                                                    success={!!docUploads[fieldName]}
+                                                                    allowUpload={true}
+                                                                    isUploading={uploadingField === fieldName}
+                                                                    onFileUpload={(file) => handleFileUpload(fieldName, file)}
+                                                                />
+                                                                {formErrors[fieldName] && (
+                                                                    <div className="text-destructive text-xs mt-1">
+                                                                        {formErrors[fieldName]?.map(err => t(err)).join(', ')}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                                                {GetDocsBusiness(numberInfo)?.map((doc, index) => (
+                                                    <li key={index}>{doc}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </Card>
+                                )}
+                            </div>
                         </div>
-                    ) : null}
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-6 w-full lg:w-fit">
@@ -601,14 +904,16 @@ export default function BuyNumberForm({
                         >
                             {t('add_to_cart')}
                         </ActionButton>
-                        <ActionButton
-                            type="submit"
-                            style="pillow"
-                            id="buy"
-                            loading={loadingButton === 'buy'}
-                        >
-                            {t('buy')}
-                        </ActionButton>
+                        {isUserLoggedIn() && (
+                            <ActionButton
+                                type="submit"
+                                style="pillow"
+                                id="buy"
+                                loading={loadingButton === 'buy'}
+                            >
+                                {t('buy')}
+                            </ActionButton>
+                        )}
                     </div>
                 </div>
             </div>

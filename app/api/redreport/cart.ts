@@ -15,7 +15,8 @@ export async function addToCart(
         areaCode,
         qty,
         voice,
-        sms
+        sms,
+        docs
     }: {
         clientInfo: ClientInfo | null,
         uid: string,
@@ -24,16 +25,34 @@ export async function addToCart(
         areaCode: number | null,
         qty: number,
         voice?: NumberDestination,
-        sms?: NumberDestination
+        sms?: NumberDestination,
+        docs?: { [doc_slug: string]: string } | Array<{ type: string, file: string }>
     }): Promise<{ data: CartItem[] | null, error?: { status: number, message: string } }> {
     if (!uid || !number) {
         console.log('addToCart: no uid or number')
-        return { data: [] }
+        return {data: []}
     }
-    console.log('addToCart: ', uid, number, countryId, areaCode, qty, voice, sms)
+
     const session = await auth()
     const anonymous = !session || !session.user || session.user.provider === 'anonymous'
     const appIp = await getAppIp()
+    // Process documents based on format (object or array)
+    let processedDocs: { [key: string]: string } | Array<{ type: string, file: string }> | undefined = undefined
+    if (docs) {
+        if (Array.isArray(docs)) {
+            processedDocs = docs
+        } else {
+            // Convert an object format to an array format
+            processedDocs = Object.entries(docs).map(([key, value]) => {
+                // Remove the 'doc _' prefix from a key
+                const type = key.startsWith('doc_') ? key.substring(4) : key
+                return {type, file: value}
+            })
+        }
+        // Log the processed docs to verify
+        console.log('Processed docs:', JSON.stringify(processedDocs))
+    }
+
     const options: RequestInit = {
         cache: 'no-store',
         method: 'POST',
@@ -58,7 +77,8 @@ export async function addToCart(
             'area_code': areaCode,
             'qty': qty,
             'voice': voice,
-            'sms': sms
+            'sms': sms,
+            'docs': processedDocs
         })
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart' : '/api/cart'), options)
@@ -67,15 +87,15 @@ export async function addToCart(
             if (!res.ok) {
                 // Return error information including status code
                 if (res.status === 404) {
-                    return { data: null, error: { status: 404, message: 'number_not_available' } }
+                    return {data: null, error: {status: 404, message: 'number_not_available'}}
                 }
-                return { data: null, error: { status: res.status, message: 'cart_add_error' } }
+                return {data: null, error: {status: res.status, message: 'cart_add_error'}}
             }
-            return res.json().then(data => ({ data: data.data.cart }))
+            return res.json().then(data => ({data: data.data.cart}))
         })
         .catch((err) => {
             console.log('addToCart error: ', err.message)
-            return { data: null, error: { status: 500, message: 'cart_add_error' } }
+            return {data: null, error: {status: 500, message: 'cart_add_error'}}
         })
 }
 

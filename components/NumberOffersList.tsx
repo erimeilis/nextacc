@@ -5,8 +5,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import Show from '@/components/service/Show'
 import {Label} from '@/components/ui/Label'
 import {Radio, RadioGroup} from '@/components/ui/RadioGroup'
-import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon} from '@phosphor-icons/react'
-
+import {ChatCircleTextIcon, FilePlusIcon, HeadsetIcon, PhoneIcon} from '@phosphor-icons/react'
 export default function NumberOffersList({
                                              options,
                                              onSelectAction,
@@ -61,13 +60,21 @@ export default function NumberOffersList({
                                     />
                                     <Label
                                         htmlFor={option.did}
-                                        className={`w-full flex flex-row items-center gap-1.5 py-1 text-sm font-medium ${isSelected ? 'text-primary' : 'cursor-pointer'}`}
+                                        className={`w-full flex flex-row items-center justify-between gap-1.5 py-1 text-sm font-medium ${isSelected ? 'text-primary' : 'cursor-pointer'}`}
                                         onClick={isSelected ? undefined : () => handleLabelClick(option.did)}
                                     >
-                                        {option.name}
-                                        {option.voice ? <PhoneIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
-                                        {option.sms ? <ChatCircleTextIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
-                                        {option.toll_free ? <HeadsetIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
+                                        <div className="flex">{option.name}</div>
+                                        <div className="flex flex-row gap-2">
+                                            <div className="flex flex-col items-center justify-center gap-0.5">
+                                                {(option.docs_personal?.length > 0 || option.docs_business?.length > 0) ?
+                                                    <FilePlusIcon weight="light" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={16}/> : ''}
+                                            </div>
+                                            <div className="flex flex-col items-center justify-center gap-0.5">
+                                                {option.voice ? <PhoneIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={12}/> : ''}
+                                                {option.sms ? <ChatCircleTextIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={12}/> : ''}
+                                                {option.toll_free ? <HeadsetIcon weight="fill" className={isSelected ? 'text-primary' : 'text-muted-foreground'} size={12}/> : ''}
+                                            </div>
+                                        </div>
                                     </Label>
                                 </div>
                             )

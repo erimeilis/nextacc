@@ -3,8 +3,9 @@ import Loader from '@/components/service/Loader'
 import {Label} from '@/components/ui/Label'
 import {useEffect, useRef, useState} from 'react'
 import getSlug from '@/utils/getSlug'
-import {CaretDownIcon, CheckIcon} from '@phosphor-icons/react'
+import {CaretDownIcon, CheckIcon, CloudArrowUpIcon} from '@phosphor-icons/react'
 import {createPortal} from 'react-dom'
+import {useTranslations} from 'next-intl'
 
 export default function DropdownSelect({
                                            selectId,
@@ -16,7 +17,11 @@ export default function DropdownSelect({
                                            customClass = '',
                                            disabled = false,
                                            showFlags = true,
-                                           showLabel = false
+                                           showLabel = false,
+                                           success = false,
+                                           allowUpload = false,
+                                           onFileUpload,
+                                           isUploading = false
                                        }: {
     selectId: string
     selectTitle: string
@@ -28,7 +33,13 @@ export default function DropdownSelect({
     disabled?: boolean
     showFlags?: boolean
     showLabel?: boolean
+    success?: boolean
+    allowUpload?: boolean
+    onFileUpload?: (file: File) => Promise<void>
+    isUploading?: boolean
 }) {
+    const t = useTranslations('dashboard')
+    console.log(`DropdownSelect ${selectId}:`, {data, selectedOption, loading, disabled})
     const [localSelectedOption, setLocalSelectedOption] = useState<string | null>(selectedOption || null)
     const [isOpen, setIsOpen] = useState(false)
     const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0, isMobile: false})
@@ -36,6 +47,7 @@ export default function DropdownSelect({
     const buttonRef = useRef<HTMLButtonElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
     const selectedItemRef = useRef<HTMLDivElement>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Update local state when prop changes
     useEffect(() => {
@@ -140,6 +152,14 @@ export default function DropdownSelect({
 
     const handleOptionSelect = (id: string) => {
         if (!disabled) {
+            // Check if this is the upload option
+            if (id === 'upload_file' && allowUpload && onFileUpload) {
+                // Trigger file input click
+                fileInputRef.current?.click()
+                setIsOpen(false)
+                return
+            }
+
             // Update local state immediately
             setLocalSelectedOption(id)
             setIsOpen(false)
@@ -148,6 +168,15 @@ export default function DropdownSelect({
             setTimeout(() => {
                 onSelectAction(id)
             }, 0)
+        }
+    }
+
+    // Handle file selection
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0 && onFileUpload) {
+            onFileUpload(e.target.files[0]).then()
+            // Reset the input value so the same file can be selected again
+            e.target.value = ''
         }
     }
 
@@ -182,6 +211,12 @@ export default function DropdownSelect({
         )
     }
 
+    // Prepare data with upload option if needed
+    const displayData = allowUpload ? [
+        ...data,
+        {id: 'upload_file', name: t('upload_file')}
+    ] : data
+
     return (
         <div className={'flex flex-row w-full ' + customClass + (disabled ? ' bg-transparent' : '')} ref={dropdownRef}>
             {showLabel && (
@@ -194,6 +229,17 @@ export default function DropdownSelect({
             )}
 
             <div className="relative flex-grow flex items-end">
+                {/* Hidden file input for upload option */}
+                {allowUpload && onFileUpload && (
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="application/pdf,image/jpeg,image/jpg,image/gif,image/png"
+                    />
+                )}
+
                 {/* Custom select button */}
                 <button
                     ref={buttonRef}
@@ -205,7 +251,7 @@ export default function DropdownSelect({
                     text-foreground disabled:text-muted-foreground disabled:bg-muted border-muted border-b
                     dark:text-foreground dark:disabled:text-muted-foreground dark:disabled:bg-muted animate-in fade-in zoom-in-95 
                     hover:scale-[1.01] active:scale-[0.99] ${disabled ? 'bg-transparent opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
-                    disabled={data.length === 0 || loading || disabled}
+                    disabled={loading || disabled}
                 >
                     <span className="whitespace-nowrap flex items-center">
                         {selectedItem && showFlags && selectedItem.alpha2 && (
@@ -217,10 +263,21 @@ export default function DropdownSelect({
                         )}
                         {selectedItem ? selectedItem.name : selectTitle}
                     </span>
-                    <CaretDownIcon
-                        className={`pl-1 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                        weight="bold"
-                    />
+                    {isUploading ? (
+                        <div className="flex items-center">
+                            <Loader height={4}/>
+                        </div>
+                    ) : success && selectedItem ? (
+                        <CheckIcon
+                            className="pl-1 h-4 w-4 text-green-500"
+                            weight="bold"
+                        />
+                    ) : (
+                        <CaretDownIcon
+                            className={`pl-1 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                            weight="bold"
+                        />
+                    )}
                 </button>
 
                 {/* Dropdown */}
@@ -247,14 +304,16 @@ export default function DropdownSelect({
                                 scrollbarColor: 'hsl(var(--primary)) hsl(var(--muted))'
                             }}
                         >
-                            {data && data.length > 0 ? (
-                                data.map(item => {
+                            {displayData && displayData.length > 0 ? (
+                                displayData.map(item => {
                                     // Use the same matching logic as for selectedItem
                                     const isSelected =
                                         item.id === localSelectedOption ||
                                         (typeof localSelectedOption === 'string' && item.id.toLowerCase() === localSelectedOption.toLowerCase()) ||
                                         (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
 
+                                    // Check if this is the upload option
+                                    const isUploadOption = item.id === 'upload_file'
 
                                     return (
                                         <div
@@ -276,14 +335,19 @@ export default function DropdownSelect({
                                                         className="mr-2 h-3 w-5 inline-block"
                                                     />
                                                 )}
-                                                {item.name}
+                                                {isUploadOption && (
+                                                    <CloudArrowUpIcon className="mr-2 h-4 w-4 text-primary"/>
+                                                )}
+                                                <span className={isUploadOption ? 'text-primary' : ''}>{item.name}</span>
                                             </span>
                                             {isSelected && <CheckIcon className="pl-1 h-4 w-4 text-foreground"/>}
                                         </div>
                                     )
                                 })
                             ) : (
-                                <div className="px-3 py-2 text-muted-foreground whitespace-nowrap">No results found</div>
+                                <div className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                                    {data.length === 0 ? t('no_uploads_available') : t('no_results')}
+                                </div>
                             )}
                         </div>
                     </div>,
