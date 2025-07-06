@@ -12,23 +12,23 @@ const fixedErrorClass = `
     bg-destructive rounded-md
 `
 
-export default function Input({
-                                  handleChangeAction,
-                                  value,
-                                  labelText,
-                                  labelFor,
-                                  id,
-                                  name,
-                                  type,
-                                  isRequired = false,
-                                  placeholder,
-                                  customClass,
-                                  icon, // eslint-disable-line @typescript-eslint/no-unused-vars
-                                  error = '',
-                                  size = 'md',
-                                  disabled = false,
-                                  hideLabel = false
-                              }: {
+export default function CommonInput({
+                                        handleChangeAction,
+                                        value,
+                                        labelText,
+                                        labelFor,
+                                        id,
+                                        name,
+                                        type,
+                                        isRequired = false,
+                                        placeholder,
+                                        customClass,
+                                        icon, // eslint-disable-line @typescript-eslint/no-unused-vars
+                                        error = '',
+                                        size = 'md',
+                                        disabled = false,
+                                        hideLabel = false
+                                    }: {
     handleChangeAction: (event: ChangeEvent<HTMLInputElement>) => void
     value: string
     labelText?: string

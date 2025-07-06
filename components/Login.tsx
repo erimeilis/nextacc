@@ -1,6 +1,6 @@
 'use client'
 import ActionButton from '@/components/shared/ActionButton'
-import Input from '@/components/shared/Input'
+import CommonInput from '@/components/shared/CommonInput'
 import Toggle from '@/components/shared/Toggle'
 import {forgotFields} from '@/constants/forgotFields'
 import {loginFields} from '@/constants/loginFields'
@@ -180,7 +180,7 @@ export default function Login() {
                     <div className="space-y-4">
                         {
                             loginFields.map(field => {
-                                    return <Input
+                                    return <CommonInput
                                         key={field.id}
                                         handleChangeAction={handleLoginChange}
                                         value={loginState[field.id]}
@@ -252,7 +252,7 @@ export default function Login() {
                     <div className="space-y-4">
                         {
                             signupFields.map(field =>
-                                <Input
+                                <CommonInput
                                     key={field.id}
                                     handleChangeAction={handleSignupChange}
                                     value={signupState[field.id]}
@@ -308,7 +308,7 @@ export default function Login() {
                     >
                         {
                             forgotFields.map(field =>
-                                <Input
+                                <CommonInput
                                     key={field.id}
                                     handleChangeAction={handleForgotChange}
                                     value={forgotState[field.id]}
@@ -352,7 +352,7 @@ export default function Login() {
                         >
                             {
                                 verifyFields.map(field =>
-                                    <Input
+                                    <CommonInput
                                         key={field.id}
                                         handleChangeAction={handleVerifyChange}
                                         value={verifyState[field.id]}

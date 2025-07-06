@@ -115,7 +115,8 @@ export default function UploadsList({
             setIsUploading(true)
             try {
                 // Upload only the first file as the current implementation only supports single file upload
-                await uploadFile(files[0])
+                const res = await uploadFile(files[0])
+                if (res) options = res
             } finally {
                 setIsUploading(false)
             }
@@ -133,7 +134,8 @@ export default function UploadsList({
     const handleDelete = async (upload: UploadInfo) => {
         setDeletingFile(upload.filename)
         try {
-            await deleteUpload(upload.filename)
+            const res = await deleteUpload(upload.filename)
+            if (res) options = res
         } finally {
             setDeletingFile(null)
         }
@@ -145,7 +147,8 @@ export default function UploadsList({
         for (const filename of selectedUploads) {
             setDeletingFile(filename)
             try {
-                await deleteUpload(filename)
+                const res = await deleteUpload(filename)
+                if (res) options = res
             } finally {
                 setDeletingFile(null)
             }
@@ -170,9 +173,10 @@ export default function UploadsList({
     const handleEditSave = async (filename: string) => {
         if (editingName.trim()) {
             setSavingFile(filename)
-            const success = await renameFile(filename, editingName.trim())
+            const res = await renameFile(filename, editingName.trim())
             setSavingFile(null)
-            if (success) {
+            if (res) {
+                options = res
                 setEditingFile(null)
                 setEditingName('')
             }

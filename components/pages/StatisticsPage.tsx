@@ -1,5 +1,5 @@
 'use client'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useTranslations} from 'next-intl'
 import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {ChatTextIcon, PhoneIcon} from '@phosphor-icons/react'
@@ -33,7 +33,7 @@ export default function StatisticsPage() {
     ) : false
 
     // Set default statistics type based on selected number features
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedNumber) {
             if ((selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms) {
                 // If the number has voice/toll_free but no SMS, set to calls
@@ -87,12 +87,12 @@ export default function StatisticsPage() {
                             {id: 'all', name: t('show_all')},
                             ...(numbers?.map(number => ({id: number.did, name: number.did})) || [])
                         ]}
+                        selectedOption={selectedNumberDid || 'all'}
                         onSelectAction={handleNumberSelect}
                         customClass="text-xs w-max"
                     />
                 </div>
             </div>
-
             {statisticsType === 'calls' ? (
                 <CallsList/>
             ) : (

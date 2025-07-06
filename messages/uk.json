@@ -136,6 +136,7 @@
     "info": "Інформація",
     "call_statistics": "Статистика дзвінків",
     "total_numbers": "Загальна кількість номерів",
+    "total_cost": "Загальна вартість",
     "total_monthly_cost": "Загальна щомісячна вартість",
     "total_uploads": "Загальна кількість файлів",
     "total_size": "Загальний розмір",
@@ -171,12 +172,14 @@
     "voice_destination": "Голосове призначення",
     "sms_destination": "SMS призначення",
     "documentation": "Документація",
+    "docs": "Документи",
     "not_available": "Н/Д",
     "drop_files_here": "Перетягніть файли сюди",
     "drag_drop_files": "Перетягніть файли",
     "max_file_size": "Максимальний розмір файлу",
     "select_files": "Вибрати файли",
-    "upload_errors": "Помилки завантаження"
+    "upload_errors": "Помилки завантаження",
+    "deleting": "Видалення"
   },
   "profile": {
     "signed_in_as": "Вхід як",
@@ -276,12 +279,17 @@
     "error_title": "Помилка",
     "cart_add_error": "Не вдалося додати товар до кошика",
     "number_not_available": "Номер недоступний",
+    "low_balance": "Недостатній баланс. Будь ласка, поповніть свій рахунок.",
+    "already_exists": "Цей номер вже існує у вашому обліковому записі.",
+    "unknown_error": "Сталася невідома помилка. Будь ласка, спробуйте пізніше.",
     "buy": "Не вдалося придбати номер",
     "buy_error": "Не вдалося придбати номер",
     "save_success": "Зміни успішно збережено",
+    "changes_saved": "Зміни успішно збережено",
     "number_updated_successfully": "Налаштування номера було оновлено",
     "save_error": "Не вдалося зберегти зміни",
-    "failed_to_save_changes": "Неможливо зберегти зміни. Будь ласка, спробуйте ще раз."
+    "failed_to_save_changes": "Неможливо зберегти зміни. Будь ласка, спробуйте ще раз.",
+    "failed_to_load_number": "Не вдалося завантажити деталі номера. Будь ласка, спробуйте ще раз."
   },
   "number-edit": {
     "number_not_found": "Номер не знайдено",
@@ -379,5 +387,31 @@
     "send_call_statistics_error": "Помилка надсилання статистики дзвінків",
     "get_sms_statistics_error": "Помилка отримання статистики SMS",
     "send_sms_statistics_error": "Помилка надсилання статистики SMS"
+  },
+  "waiting-numbers": {
+    "waiting_number_not_found": "Номер очікування не знайдено",
+    "back_to_waiting_numbers": "Повернутися до номерів очікування",
+    "edit_waiting_number": "Редагувати номер очікування:",
+    "save_changes": "Зберегти зміни",
+    "cancel": "Скасувати",
+    "saving": "Збереження...",
+    "setupfee": "Підключення",
+    "monthlyfee": "Щомісячна плата",
+    "months": "Місяців",
+    "pay_sum": "Загальна сума оплати",
+    "select_voice_destination": "Голосове переадресування",
+    "select_sms_destination": "Переадресація SMS",
+    "required_documents": "Необхідні документи",
+    "documents": "Документи",
+    "select_upload": "Виберіть файл",
+    "phone": "Телефон",
+    "country_flag": "Прапор {country}"
+  },
+  "errors": {
+    "failed_to_load_waiting_number": "Не вдалося завантажити деталі номера очікування",
+    "error_uploading_file": "Помилка завантаження файлу",
+    "failed_to_save_waiting_number": "Не вдалося зберегти налаштування номера очікування",
+    "error_deleting_waiting_number": "Помилка видалення номера очікування",
+    "error_deleting_waiting_number_id": "Помилка видалення номера очікування {id}"
   }
 }

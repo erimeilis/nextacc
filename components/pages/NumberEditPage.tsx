@@ -5,7 +5,7 @@ import {useTranslations} from 'next-intl'
 import {Button} from '@/components/ui/Button'
 import {Input} from '@/components/ui/Input'
 import {Checkbox} from '@/components/ui/Checkbox'
-import {ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon, XIcon} from '@phosphor-icons/react'
+import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon} from '@phosphor-icons/react'
 import {redGetDidSettings, redUpdateDidSettings} from '@/app/api/redreport/dids'
 import Loader from '@/components/service/Loader'
 import {MyNumberInfo} from '@/types/MyNumberInfo'
@@ -49,13 +49,18 @@ export default function NumberEditPage() {
                 }
             } catch (error) {
                 console.error('Failed to load number details:', error)
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('failed_to_load_number'),
+                })
             } finally {
                 setLoading(false)
             }
         }
 
         loadNumberDetails().then()
-    }, [number])
+    }, [number, toast, toastT])
 
     // Handle form field changes
     const handleInputChange = (field: keyof MyNumberInfo, value: string | number | boolean | null) => {
@@ -182,7 +187,7 @@ export default function NumberEditPage() {
         // Use formData directly for submission and ensure required fields are not undefined
         const dataToSubmit = {
             ...formData,
-            // Ensure name is never undefined - use empty string as fallback
+            // Ensure the name is never undefined - use empty string as fallback
             name: formData.name ?? numberData?.name ?? '',
             // Ensure autorenew is never undefined - use false as fallback
             autorenew: formData.autorenew ?? numberData?.autorenew ?? false
@@ -340,7 +345,7 @@ export default function NumberEditPage() {
                         title={t('cancel')}
                         className="h-7 w-7 text-destructive"
                     >
-                        <XIcon size={16}/>
+                        <ArrowArcLeftIcon size={16}/>
                     </Button>
                     <Button
                         variant="ghost"
@@ -422,7 +427,7 @@ export default function NumberEditPage() {
                     title={t('cancel')}
                     className="h-7 w-7 text-destructive"
                 >
-                    <XIcon size={16}/>
+                    <ArrowArcLeftIcon size={16}/>
                 </Button>
                 <Button
                     variant="ghost"

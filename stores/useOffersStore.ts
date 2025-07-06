@@ -19,10 +19,23 @@ interface OffersStore {
     discounts: { id: string, name: string }[];
 
     fetchData: () => Promise<void>;
-    updateCountries: (type: string) => Promise<CountryInfo[]>;
-    updateAreas: (type: string, countryId: number) => Promise<AreaInfo[]>;
-    updateNumbers: (type: string, countryId: number, areaPrefix: number) => Promise<NumberInfo[]>;
-    updateDiscounts: () => Promise<{ id: string, name: string }[]>;
+    fetchCountries: (type: string) => Promise<CountryInfo[]>;
+    fetchAreas: (type: string, countryId: number) => Promise<AreaInfo[]>;
+    fetchNumbers: (type: string, countryId: number, areaPrefix: number) => Promise<NumberInfo[]>;
+    fetchDiscounts: () => Promise<{ id: string, name: string }[]>;
+}
+
+// Define the persisted state type (only the data that gets stored)
+type PersistedOffersState = {
+    countriesMap: { [key: string]: CountryInfo[] }
+    areasMap: { [key: string]: AreaInfo[] }
+    numbersMap: { [key: string]: NumberInfo[] }
+    discounts: { id: string, name: string }[]
+}
+
+// Type guard to check if the persisted state has the expected shape
+function isValidPersistedOffersState(state: unknown): state is Partial<PersistedOffersState> {
+    return state !== null && typeof state === 'object'
 }
 
 export const useOffersStore = create<OffersStore>()(
@@ -41,7 +54,7 @@ export const useOffersStore = create<OffersStore>()(
                 }
             },
 
-            updateCountries: async (type): Promise<CountryInfo[]> => {
+            fetchCountries: async (type): Promise<CountryInfo[]> => {
                 const countries = await getCountries({type})
                 set(state => {
                     if (
@@ -60,7 +73,7 @@ export const useOffersStore = create<OffersStore>()(
                 return countries // Return the fetched countries
             },
 
-            updateAreas: async (type, countryId): Promise<AreaInfo[]> => {
+            fetchAreas: async (type, countryId): Promise<AreaInfo[]> => {
                 const areas = await getAreas({type, country: countryId})
                 set(state => {
                     const key = `${type}_${countryId}`
@@ -80,7 +93,7 @@ export const useOffersStore = create<OffersStore>()(
                 return areas // Return the fetched areas
             },
 
-            updateNumbers: async (type, countryId, areaPrefix): Promise<NumberInfo[]> => {
+            fetchNumbers: async (type, countryId, areaPrefix): Promise<NumberInfo[]> => {
                 const numbers = await getNumbers({type, country: countryId, area: areaPrefix})
                 set(state => {
                     const key = `${type}_${countryId}_${areaPrefix}`
@@ -100,7 +113,7 @@ export const useOffersStore = create<OffersStore>()(
                 return numbers // Return the fetched numbers
             },
 
-            updateDiscounts: async (): Promise<{ id: string, name: string }[]> => {
+            fetchDiscounts: async (): Promise<{ id: string, name: string }[]> => {
                 const discounts = await getDiscounts()
                 set(state => {
                     if (
@@ -119,35 +132,32 @@ export const useOffersStore = create<OffersStore>()(
         {
             name: 'offers-storage',
             storage: idbStorage,
-            version: 1,
-            partialize: (state: OffersStore) => ({
+            version: 2,
+            migrate: (persistedState: unknown, version: number): PersistedOffersState => {
+                // Handle migration from version 1 to version 2
+                if (version === 1 && isValidPersistedOffersState(persistedState)) {
+                    return {
+                        countriesMap: persistedState.countriesMap ?? {},
+                        areasMap: persistedState.areasMap ?? {},
+                        numbersMap: persistedState.numbersMap ?? {},
+                        discounts: persistedState.discounts ?? [],
+                    }
+                }
+
+                // For any other version mismatches or invalid state, return a clean state
+                return {
+                    countriesMap: {},
+                    areasMap: {},
+                    numbersMap: {},
+                    discounts: [],
+                }
+            },
+            partialize: (state: OffersStore): PersistedOffersState => ({
                 countriesMap: state.countriesMap,
                 areasMap: state.areasMap,
                 numbersMap: state.numbersMap,
                 discounts: state.discounts,
             }),
-            merge: (persistedState, currentState) => {
-                const persisted = persistedState as Partial<OffersStore> || {}
-                return {
-                    ...currentState,
-                    countriesMap:
-                        persisted.countriesMap && Object.keys(persisted.countriesMap).length > 0
-                            ? persisted.countriesMap
-                            : currentState.countriesMap,
-                    areasMap:
-                        persisted.areasMap && Object.keys(persisted.areasMap).length > 0
-                            ? persisted.areasMap
-                            : currentState.areasMap,
-                    numbersMap:
-                        persisted.numbersMap && Object.keys(persisted.numbersMap).length > 0
-                            ? persisted.numbersMap
-                            : currentState.numbersMap,
-                    discounts:
-                        persisted.discounts && persisted.discounts.length > 0
-                            ? persisted.discounts
-                            : currentState.discounts,
-                }
-            },
         }
     )
 )

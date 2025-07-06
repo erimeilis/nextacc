@@ -41,11 +41,11 @@ export async function redGetMyWaitingDids(): Promise<MyWaitingNumberInfo[] | nul
         })
 }
 
-export async function redGetWaitingDidSettings(number: string): Promise<MyWaitingNumberInfo | null> {
+export async function redGetWaitingDidSettings(id: string): Promise<MyWaitingNumberInfo | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${number}`)
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${id}`)
     url.searchParams.append('site_id', process.env.SITE_ID || '')
 
     const options: RequestInit = {
@@ -69,7 +69,7 @@ export async function redGetWaitingDidSettings(number: string): Promise<MyWaitin
             return res.json()
         })
         .then(async (data) => {
-            console.log('redGetWaitingDidSettings: ', data)
+            //console.log('redGetWaitingDidSettings: ', data)
             return data.data
         })
         .catch((err) => {
@@ -78,11 +78,11 @@ export async function redGetWaitingDidSettings(number: string): Promise<MyWaitin
         })
 }
 
-export async function redUpdateWaitingDidSettings(number: string, data: Partial<MyWaitingNumberInfo>): Promise<MyWaitingNumberInfo | null> {
+export async function redUpdateWaitingDidSettings(id: string, data: Partial<MyWaitingNumberInfo>): Promise<MyWaitingNumberInfo | null> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return null
 
-    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${number}`)
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${id}`)
     const requestBody = {
         ...data,
         site_id: process.env.SITE_ID || ''
@@ -113,6 +113,42 @@ export async function redUpdateWaitingDidSettings(number: string, data: Partial<
         })
         .catch((err) => {
             console.log('redUpdateWaitingDidSettings error: ', err.message)
+            return null
+        })
+}
+
+export async function redDeleteWaitingDid(id: string): Promise<MyWaitingNumberInfo[] | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
+
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/waiting-dids/${id}`)
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        cache: 'no-store',
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        }
+    }
+
+    return fetch(url.toString(), options)
+        .then(async (res: Response) => {
+            console.log('redDeleteWaitingDid: ', res.status)
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redDeleteWaitingDid error response: ', errorData)
+                return null
+            }
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data
+        })
+        .catch((err) => {
+            console.log('redDeleteWaitingDid error: ', err.message)
             return null
         })
 }

@@ -37,9 +37,9 @@ export async function redGetMyUploads(): Promise<UploadInfo[] | null> {
         })
 }
 
-export async function redUploadFile(file: File): Promise<boolean> {
+export async function redUploadFile(file: File): Promise<UploadInfo[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return false
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads')
     url.searchParams.append('site_id', process.env.SITE_ID || '')
@@ -60,19 +60,22 @@ export async function redUploadFile(file: File): Promise<boolean> {
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redUploadFile error response: ', errorData)
-                return false
+                return null
             }
-            return true
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data.uploads
         })
         .catch((err) => {
             console.log('redUploadFile error: ', err.message)
-            return false
+            return null
         })
 }
 
-export async function redDeleteUpload(fileId: string): Promise<boolean> {
+export async function redDeleteUpload(fileId: string): Promise<UploadInfo[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return false
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads/' + fileId)
     url.searchParams.append('site_id', process.env.SITE_ID || '')
@@ -91,19 +94,22 @@ export async function redDeleteUpload(fileId: string): Promise<boolean> {
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redDeleteUpload error response: ', errorData)
-                return false
+                return null
             }
-            return true
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data.uploads
         })
         .catch((err) => {
             console.log('redDeleteUpload error: ', err.message)
-            return false
+            return null
         })
 }
 
-export async function redRenameFile(fileId: string, name: string): Promise<boolean> {
+export async function redRenameFile(fileId: string, name: string): Promise<UploadInfo[] | null> {
     const session = await auth()
-    if (!session || !session.user || session.user.provider === 'anonymous') return false
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
 
     const url = new URL(process.env.REDREPORT_URL + '/api/kc/uploads/' + fileId)
     url.searchParams.append('site_id', process.env.SITE_ID || '')
@@ -125,12 +131,15 @@ export async function redRenameFile(fileId: string, name: string): Promise<boole
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redRenameFile error response: ', errorData)
-                return false
+                return null
             }
-            return true
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data.uploads
         })
         .catch((err) => {
             console.log('redRenameFile error: ', err.message)
-            return false
+            return null
         })
 }

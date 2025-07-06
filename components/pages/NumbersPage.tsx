@@ -2,81 +2,100 @@
 import MyNumbersList from '@/components/MyNumbersList'
 import MyWaitingNumbersList from '@/components/MyWaitingNumbersList'
 import {NumberInfo} from '@/types/NumberInfo'
+import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {useEffect, useRef, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 import {Switch} from '@/components/ui/Switch'
 import {useTranslations} from 'next-intl'
-import {useSearchParams} from 'next/navigation'
-import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
+import {usePathname, useRouter, useSearchParams} from 'next/navigation'
+import {useWaitingStore} from '@/stores/useWaitingStore'
 
 export default function NumbersPage() {
     const t = useTranslations('dashboard')
+    const router = useRouter()
+    const pathname = usePathname()
     const searchParams = useSearchParams()
     const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>([])
-    const [showWaiting, setShowWaiting] = useState<boolean>(searchParams?.get('tab') === 'waiting')
-    const {getNumbers, updateNumbers} = useClientStore()
-    const {waitingDids, fetchData: fetchWaitingDids, isLoading: isLoadingWaitingDids} = useWaitingDidsStore()
+    const [localWaitingNumbers, setLocalWaitingNumbers] = useState<MyWaitingNumberInfo[] | null>([])
+    const [showWaiting, setShowWaiting] = useState<boolean>(pathname?.includes('/waiting-numbers') || false)
+    const {getNumbers, fetchNumbers} = useClientStore()
+    const {waitingNumbers, fetchWaitingNumbers} = useWaitingStore()
     const numbers = getNumbers()
-    const backgroundFetchDone = useRef(false)
+    const numbersBackgroundFetchDone = useRef(false)
+    const waitingNumbersBackgroundFetchDone = useRef(false)
 
-    // Set data from the store immediately if available
+
+    // Set data from the store immediately if available and fetch in the background if needed
     useEffect(() => {
         if (numbers) {
             setLocalNumbers(numbers)
         }
-    }, [numbers])
-
-    // Fetch data in the background if not available
-    useEffect(() => {
-        if (!numbers) {
-            console.log('Fetching numbers because they are not available')
-            updateNumbers()
+        if (!numbers || !numbersBackgroundFetchDone.current) {
+            numbersBackgroundFetchDone.current = true
+            console.log('Fetching numbers in background')
+            fetchNumbers()
                 .then((fetchedNumbers) => {
                     setLocalNumbers(fetchedNumbers)
                 })
         }
-    }, [numbers, updateNumbers])
+    }, [numbers, fetchNumbers])
 
-    // Fetch data in the background even when it exists, but only once per-page visit
+    // Set waiting data from the store immediately if available and fetch in the background if needed
     useEffect(() => {
-        if (numbers && !backgroundFetchDone.current) {
-            backgroundFetchDone.current = true
-            console.log('Fetching numbers in the background')
-            updateNumbers()
-                .then((fetchedNumbers) => {
-                    setLocalNumbers(fetchedNumbers)
+        if (waitingNumbers) {
+            setLocalWaitingNumbers(waitingNumbers)
+        }
+        if (!waitingNumbers || !waitingNumbersBackgroundFetchDone.current) {
+            waitingNumbersBackgroundFetchDone.current = true
+            console.log('Fetching waiting numbers in background')
+            fetchWaitingNumbers()
+                .then(() => {
+                    setLocalWaitingNumbers(waitingNumbers)
                 })
         }
-    }, [numbers, updateNumbers])
+    }, [waitingNumbers, fetchWaitingNumbers])
 
-    // Fetch waiting numbers
-    useEffect(() => {
-        if (showWaiting) {
-            console.log('Fetching waiting numbers')
-            // Fetch waiting numbers using the store
-            fetchWaitingDids()
-                .catch(error => {
-                    console.error('Error fetching waiting numbers:', error)
-                })
+    // Handle switch change
+    const handleSwitchChange = (checked: boolean) => {
+        setShowWaiting(checked)
+
+        // Update URL - navigate between numbers and waiting-numbers paths
+        if (!pathname) {
+            return // Early return if the pathname is null
         }
-    }, [showWaiting, fetchWaitingDids])
+
+        if (checked) {
+            // Navigate to waiting-numbers
+            const newPath = pathname.replace('/numbers', '/waiting-numbers')
+            router.push(newPath + (searchParams?.toString() ? '?' + searchParams.toString() : ''))
+        } else {
+            // Navigate to numbers
+            const newPath = pathname.replace('/waiting-numbers', '/numbers')
+            router.push(newPath + (searchParams?.toString() ? '?' + searchParams.toString() : ''))
+        }
+    }
 
     return (
-        <div className="flex flex-col w-full">
-            <div className="flex items-center space-x-2 mb-4">
-                <div className={showWaiting ? 'text-muted-foreground' : 'font-medium'}>{t('active')}</div>
-                <Switch
-                    checked={showWaiting}
-                    onCheckedChange={setShowWaiting}
-                />
-                <div className={showWaiting ? 'font-medium' : 'text-muted-foreground'}>{t('waiting')}</div>
+        <>
+            <div className="flex flex-col w-full mb-4">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                    <div className={showWaiting ? 'text-muted-foreground' : 'font-medium'}>{t('active')}</div>
+                    <Switch
+                        checked={showWaiting}
+                        onCheckedChange={handleSwitchChange}
+                    />
+                    <div className={showWaiting ? 'font-medium' : 'text-muted-foreground'}>{t('waiting')}</div>
+                </div>
             </div>
-
             {showWaiting ? (
-                <MyWaitingNumbersList options={isLoadingWaitingDids ? null : waitingDids}/>
+                <MyWaitingNumbersList
+                    options={localWaitingNumbers}
+                />
             ) : (
-                <MyNumbersList options={localNumbers}/>
+                <MyNumbersList
+                    options={localNumbers}
+                />
             )}
-        </div>
+        </>
     )
 }

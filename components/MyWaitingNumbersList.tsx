@@ -5,14 +5,14 @@ import Show from '@/components/service/Show'
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
-import {ChatCircleTextIcon, CircleNotchIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {ChatCircleTextIcon, CircleNotchIcon, FilePlusIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
-import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
+import {useWaitingStore} from '@/stores/useWaitingStore'
 
-// Skeleton loader for waiting numbers list
+// Skeleton loader for a waiting numbers list
 function WaitingNumbersSkeleton() {
     return (
         <div className="flex flex-col w-full animate-pulse">
@@ -81,14 +81,23 @@ export default function MyWaitingNumbersList({
                                              }: {
     options: MyWaitingNumberInfo[] | null
 }) {
+    // Get waiting numbers directly from the store to ensure we always have the latest data
+    const {waitingNumbers} = useWaitingStore()
+
+    // Always use store waiting numbers if they exist, otherwise use options prop
+    // This ensures we always have the latest data from the store
+    const displayOptions = waitingNumbers || options
     const t = useTranslations('dashboard')
+    const errorsT = useTranslations('errors')
     const router = useRouter()
     const searchParams = useSearchParams()
+    const [selectedNumbers, setSelectedNumbers] = useState<string[]>([])
     const [expandedNumbers, setExpandedNumbers] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
     const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
+    const [loadingDelete, setLoadingDelete] = useState<string | null>(null)
     const {countriesMap} = useOffersStore()
-    const {selectedDids, selectDid} = useWaitingDidsStore()
+    const {deleteWaitingNumber} = useWaitingStore()
 
     // Get all countries from all types
     const allCountries = Object.values(countriesMap).flat()
@@ -100,70 +109,114 @@ export default function MyWaitingNumbersList({
     }
 
     // Filter numbers based on a search query and exclude all-numeric DIDs
-    const filteredOptions = options?.filter(option => {
-        // Filter based on search query and exclude all-numeric DIDs
-        return (searchQuery === '' || option.did.toString().includes(searchQuery))
-    }) || null
+    const filteredOptions = displayOptions && Array.isArray(displayOptions) ?
+        displayOptions.filter(option => {
+            // Filter based on a search query and exclude all-numeric DIDs
+            return (searchQuery === '' || option.did.toString().includes(searchQuery))
+        }) :
+        null
 
     // Calculate totals
-    const totalNumbers = options?.length || 0
-    const totalMonthlyCost = options?.reduce((sum, option) => sum + option.fix_rate, 0) || 0
+    const totalNumbers = displayOptions && Array.isArray(displayOptions) ?
+        displayOptions.length :
+        0
+    const totalCost = displayOptions && Array.isArray(displayOptions) ?
+        displayOptions?.reduce((sum, option) => sum + option.pay_sum, 0) :
+        0
 
     // Handle checkbox selection
     const handleSelectAll = (checked: boolean) => {
-        if (filteredOptions) {
-            filteredOptions.forEach(option => {
-                selectDid(option.did, checked)
-            })
+        if (checked) {
+            setSelectedNumbers(filteredOptions && Array.isArray(filteredOptions) ?
+                filteredOptions.map(option => option.id) :
+                [])
+        } else {
+            setSelectedNumbers([])
         }
     }
-// Handle search input change
+
+    const handleSelectNumber = (id: string, checked: boolean) => {
+        if (checked) {
+            setSelectedNumbers(prev => [...prev, id])
+        } else {
+            setSelectedNumbers(prev => prev.filter(numberId => numberId !== id))
+        }
+    }
+
+    // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value)
     }
 
     // Toggle number info expansion - only one can be open at a time
-    const toggleNumberInfo = (did: string) => {
-        if (expandedNumbers.includes(did)) {
+    const toggleNumberInfo = (id: string) => {
+        if (expandedNumbers.includes(id)) {
             setExpandedNumbers([])
         } else {
-            setExpandedNumbers([did])
+            setExpandedNumbers([id])
         }
     }
 
     // Handle settings button click
     const handleSettings = (number: MyWaitingNumberInfo) => {
-        // Set loading state for this number
-        setLoadingEdit(number.did)
+        // Set the loading state for this number
+        setLoadingEdit(number.id)
 
         // Navigate to number edit page with current search params
         const currentParams = new URLSearchParams(searchParams?.toString())
-        const editUrl = `/waiting-numbers/${number.did}/?${currentParams.toString()}`
+        const editUrl = `/waiting-numbers/${number.id}/?${currentParams.toString()}`
         router.push(editUrl)
     }
 
     // Handle delete button click
-    const handleDelete = (number: MyWaitingNumberInfo) => {
-        // This would delete the number
-        console.log('Delete waiting number', number.did)
+    const handleDelete = async (number: MyWaitingNumberInfo) => {
+        // Set the loading state for this number
+        setLoadingDelete(number.id)
+
+        try {
+            // Call the API to delete the number
+            // The deleteWaitingNumber function already updates the store with the new list
+            const res = await deleteWaitingNumber(number.id)
+            if (res) options = res
+        } catch (error) {
+            console.error(errorsT('error_deleting_waiting_number'), error)
+        } finally {
+            // Clear loading state
+            setLoadingDelete(null)
+        }
     }
 
     // Handle deletes the selected button click
-    const handleDeleteSelected = () => {
-        // This would delete all selected numbers
-        console.log('Delete selected waiting numbers', selectedDids)
+    const handleDeleteSelected = async () => {
+        if (selectedNumbers.length === 0) return
+
+        // Delete each selected number one by one
+        for (const id of selectedNumbers) {
+            setLoadingDelete(id)
+            try {
+                // The deleteWaitingNumber function already updates the store with the new list
+                const res = await deleteWaitingNumber(id)
+                if (res) options = res
+            } catch (error) {
+                console.error(errorsT('error_deleting_waiting_number_id', { id }), error)
+            }
+        }
+
+        // Clear selected numbers and loading state
+        setSelectedNumbers([])
+        setLoadingDelete(null)
     }
 
     return (
-        <Show when={options !== null}
-              fallback={options?.length == 0 ?
+        <Show when={displayOptions !== null}
+              fallback={displayOptions?.length == 0 ?
                   <div>{t('no_waiting_numbers')}</div> :
                   <WaitingNumbersSkeleton/>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
-                    <div className="text-xs sm:text-sm">{t('total_numbers')}: {totalNumbers}</div>
-                    <div className="text-xs sm:text-sm">{t('total_monthly_cost')}: ${totalMonthlyCost?.toFixed(2) || '0.00'}</div>
+                    <div className="text-xs">{t('total_numbers')}: {totalNumbers}</div>
+                    <div className="text-xs">{t('total_cost')}: ${totalCost?.toFixed(2) || '0.00'}</div>
                 </div>
 
                 {/* Header with search */}
@@ -186,19 +239,19 @@ export default function MyWaitingNumbersList({
                     <Table striped className="[&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                         <TableBody>
                             {filteredOptions?.map((option) => (
-                                <React.Fragment key={option.did.toString()}>
+                                <React.Fragment key={option.id.toString()}>
                                     <TableRow>
                                         {/* Checkbox */}
                                         <TableCell className="w-8">
                                             <Checkbox
-                                                id={`checkbox-${option.did}`}
-                                                checked={selectedDids.includes(option.did)}
-                                                onCheckedChange={(checked) => selectDid(option.did, checked)}
+                                                id={`checkbox-${option.id}`}
+                                                checked={selectedNumbers.includes(option.id)}
+                                                onCheckedChange={(checked) => handleSelectNumber(option.id, checked)}
                                                 variant="sm"
                                             />
                                         </TableCell>
 
-                                        {/* Number with country flag */}
+                                        {/* Number with a country flag */}
                                         <TableCell className="flex-1">
                                             <div className="flex flex-col">
                                                 <div className="flex items-center">
@@ -214,8 +267,16 @@ export default function MyWaitingNumbersList({
                                             </div>
                                         </TableCell>
 
+                                        {/* Docs */}
+                                        <TableCell>
+                                            <div className="flex items-center justify-end space-x-2">
+                                                {option.docs && option.docs.length > 0 &&
+                                                    <FilePlusIcon weight="light" className="text-muted-foreground mr-4" size={16}/>}
+                                            </div>
+                                        </TableCell>
+
                                         {/* Feature icons */}
-                                        <TableCell className="w-20">
+                                        <TableCell className="w-8">
                                             <div className="flex items-center justify-center space-x-2">
                                                 {option.voice && <PhoneIcon weight="fill" className="text-primary" size={16}/>}
                                                 {option.sms && <ChatCircleTextIcon weight="fill" className="text-primary" size={16}/>}
@@ -227,27 +288,32 @@ export default function MyWaitingNumbersList({
                                         <TableCell className="w-28">
                                             <div className="flex items-center justify-end space-x-1">
                                                 <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7"
-                                                        disabled={loadingEdit === option.did}>
-                                                    {loadingEdit === option.did ? (
+                                                        disabled={loadingEdit === option.id}>
+                                                    {loadingEdit === option.id ? (
                                                         <CircleNotchIcon size={16} className="animate-spin"/>
                                                     ) : (
                                                         <PenNibIcon size={16}/>
                                                     )}
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title={t('info')} className="h-7 w-7">
+                                                <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.id)} title={t('info')} className="h-7 w-7">
                                                     <InfoIcon size={16}/>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive">
-                                                    <XIcon size={16}/>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive"
+                                                        disabled={loadingDelete === option.id}>
+                                                    {loadingDelete === option.id ? (
+                                                        <CircleNotchIcon size={16} className="animate-spin"/>
+                                                    ) : (
+                                                        <XIcon size={16}/>
+                                                    )}
                                                 </Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
 
                                     {/* Expanded info section */}
-                                    {expandedNumbers.includes(option.did) && (
+                                    {expandedNumbers.includes(option.id) && (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="p-0">
+                                            <TableCell colSpan={5} className="p-0">
                                                 <div className="pl-10 pr-2 py-1 text-xs sm:text-sm bg-muted/20 border-l-2 border-muted/25 ml-2">
                                                     <Table className="w-full [&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                                                         <TableBody>
@@ -278,6 +344,16 @@ export default function MyWaitingNumbersList({
                                                                     condition: true
                                                                 },
                                                                 {
+                                                                    label: t('docs'),
+                                                                    value: (
+                                                                        <div>
+                                                                            {option.docs && option.docs.length > 0 &&
+                                                                                <FilePlusIcon weight="light" className="text-secondary mr-4" size={16}/>}
+                                                                        </div>
+                                                                    ),
+                                                                    condition: true
+                                                                },
+                                                                {
                                                                     label: t('features'),
                                                                     value: (
                                                                         <div className="flex justify-end sm:justify-start space-x-2">
@@ -287,6 +363,16 @@ export default function MyWaitingNumbersList({
                                                                         </div>
                                                                     ),
                                                                     condition: true
+                                                                },
+                                                                {
+                                                                    label: t('voice_destination'),
+                                                                    value: option.voiceDestType && option.voiceDestType !== 'none' ? option.voiceDest : t('not_available'),
+                                                                    condition: option.voice || option.toll_free
+                                                                },
+                                                                {
+                                                                    label: t('sms_destination'),
+                                                                    value: (option.smsDestType && option.smsDestType !== 'none') || (option.smsDestType && option.smsDestType !== 'none') ? option.smsDest : t('not_available'),
+                                                                    condition: option.sms
                                                                 },
                                                             ].map((item, index) => (
                                                                 item.condition && (
@@ -314,8 +400,7 @@ export default function MyWaitingNumbersList({
                     <div className="flex items-center">
                         <Checkbox
                             id="select-all"
-                            checked={Boolean(filteredOptions && filteredOptions.length > 0 &&
-                                filteredOptions.every(option => selectedDids.includes(option.did)))}
+                            checked={selectedNumbers.length === (filteredOptions?.length || 0) && (filteredOptions?.length || 0) > 0}
                             onCheckedChange={(checked) => handleSelectAll(checked)}
                             variant="sm"
                         />
@@ -324,7 +409,7 @@ export default function MyWaitingNumbersList({
                         </label>
                     </div>
 
-                    {selectedDids.length > 0 && (
+                    {selectedNumbers.length > 0 && (
                         <Button
                             variant="link"
                             size="sm"

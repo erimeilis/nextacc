@@ -137,6 +137,7 @@
     "info": "Info",
     "call_statistics": "Call Statistics",
     "total_numbers": "Total Numbers",
+    "total_cost": "Total Cost",
     "total_monthly_cost": "Total Monthly Cost",
     "total_uploads": "Total Uploads",
     "total_size": "Total Size",
@@ -172,12 +173,14 @@
     "voice_destination": "Voice Destination",
     "sms_destination": "SMS Destination",
     "documentation": "Documentation",
+    "docs": "Documents",
     "not_available": "N/A",
     "drop_files_here": "Drop files here",
     "drag_drop_files": "Drag & drop files",
     "max_file_size": "Max file size",
     "select_files": "Select Files",
-    "upload_errors": "Upload errors"
+    "upload_errors": "Upload errors",
+    "deleting": "Deleting"
   },
   "profile": {
     "signed_in_as": "Signed in as",
@@ -277,12 +280,17 @@
     "error_title": "Error",
     "cart_add_error": "Failed to add item to cart",
     "number_not_available": "Number is not available",
+    "low_balance": "Insufficient balance. Please top up your account.",
+    "already_exists": "This number already exists in your account.",
+    "unknown_error": "An unknown error occurred. Please try again later.",
     "buy": "Failed to purchase number",
     "buy_error": "Failed to purchase number",
     "save_success": "Changes saved successfully",
+    "changes_saved": "Changes saved successfully",
     "number_updated_successfully": "Number settings have been updated",
     "save_error": "Failed to save changes",
-    "failed_to_save_changes": "Unable to save changes. Please try again."
+    "failed_to_save_changes": "Unable to save changes. Please try again.",
+    "failed_to_load_number": "Failed to load number details. Please try again."
   },
   "number-edit": {
     "number_not_found": "Number not found",
@@ -380,5 +388,31 @@
     "send_call_statistics_error": "sendCallStatistics error",
     "get_sms_statistics_error": "getSmsStatistics error",
     "send_sms_statistics_error": "sendSmsStatistics error"
+  },
+  "waiting-numbers": {
+    "waiting_number_not_found": "Waiting number not found",
+    "back_to_waiting_numbers": "Back to Waiting Numbers",
+    "edit_waiting_number": "Edit Waiting Number:",
+    "save_changes": "Save Changes",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "setupfee": "Setup fee",
+    "monthlyfee": "Monthly fee",
+    "months": "Months",
+    "pay_sum": "Total Payment",
+    "select_voice_destination": "Voice destination",
+    "select_sms_destination": "SMS destination",
+    "required_documents": "Required documents",
+    "documents": "Documents",
+    "select_upload": "Select upload",
+    "phone": "Phone",
+    "country_flag": "{country} flag"
+  },
+  "errors": {
+    "failed_to_load_waiting_number": "Failed to load waiting number details",
+    "error_uploading_file": "Error uploading file",
+    "failed_to_save_waiting_number": "Failed to save waiting number settings",
+    "error_deleting_waiting_number": "Error deleting waiting number",
+    "error_deleting_waiting_number_id": "Error deleting waiting number {id}"
   }
 }

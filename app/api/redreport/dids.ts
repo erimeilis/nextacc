@@ -70,7 +70,7 @@ export async function redGetDidSettings(number: string): Promise<MyNumberInfo | 
             return res.json()
         })
         .then(async (data) => {
-            console.log('redGetDidSettings: ', data)
+            //console.log('redGetDidSettings: ', data)
             return data.data
         })
         .catch((err) => {
@@ -114,6 +114,42 @@ export async function redUpdateDidSettings(number: string, data: Partial<MyNumbe
         })
         .catch((err) => {
             console.log('redUpdateDidSettings error: ', err.message)
+            return null
+        })
+}
+
+export async function redDeleteDid(number: string): Promise<NumberInfo[] | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') return null
+
+    const url = new URL(process.env.REDREPORT_URL + `/api/kc/dids/${number}`)
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        cache: 'no-store',
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        }
+    }
+
+    return fetch(url.toString(), options)
+        .then(async (res: Response) => {
+            console.log('redDeleteDid: ', res.status)
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redDeleteDid error response: ', errorData)
+                return null
+            }
+            return res.json()
+        })
+        .then(async (data) => {
+            return data.data
+        })
+        .catch((err) => {
+            console.log('redDeleteDid error: ', err.message)
             return null
         })
 }

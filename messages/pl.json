@@ -136,6 +136,7 @@
     "info": "Informacje",
     "call_statistics": "Statystyki połączeń",
     "total_numbers": "Łączna liczba numerów",
+    "total_cost": "Całkowity koszt",
     "total_monthly_cost": "Łączny miesięczny koszt",
     "total_uploads": "Łączna liczba plików",
     "total_size": "Łączny rozmiar",
@@ -171,12 +172,14 @@
     "voice_destination": "Cel głosowy",
     "sms_destination": "Cel SMS",
     "documentation": "Dokumentacja",
+    "docs": "Dokumenty",
     "not_available": "N/D",
     "drop_files_here": "Upuść pliki tutaj",
     "drag_drop_files": "Przeciągnij i upuść pliki",
     "max_file_size": "Maksymalny rozmiar pliku",
     "select_files": "Wybierz pliki",
-    "upload_errors": "Błędy przesyłania"
+    "upload_errors": "Błędy przesyłania",
+    "deleting": "Usuwanie"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",
@@ -276,12 +279,17 @@
     "error_title": "Błąd",
     "cart_add_error": "Nie udało się dodać produktu do koszyka",
     "number_not_available": "Numer jest niedostępny",
+    "low_balance": "Niewystarczające saldo. Proszę doładować konto.",
+    "already_exists": "Ten numer już istnieje na twoim koncie.",
+    "unknown_error": "Wystąpił nieznany błąd. Spróbuj ponownie później.",
     "buy": "Nie udało się zakupić numeru",
     "buy_error": "Nie udało się zakupić numeru",
     "save_success": "Zmiany zostały pomyślnie zapisane",
+    "changes_saved": "Zmiany zostały pomyślnie zapisane",
     "number_updated_successfully": "Ustawienia numeru zostały zaktualizowane",
     "save_error": "Nie udało się zapisać zmian",
-    "failed_to_save_changes": "Nie można zapisać zmian. Spróbuj ponownie."
+    "failed_to_save_changes": "Nie można zapisać zmian. Spróbuj ponownie.",
+    "failed_to_load_number": "Nie udało się załadować szczegółów numeru. Spróbuj ponownie."
   },
   "number-edit": {
     "number_not_found": "Numer nie został znaleziony",
@@ -379,5 +387,31 @@
     "send_call_statistics_error": "Błąd wysyłania statystyk połączeń",
     "get_sms_statistics_error": "Błąd pobierania statystyk SMS",
     "send_sms_statistics_error": "Błąd wysyłania statystyk SMS"
+  },
+  "waiting-numbers": {
+    "waiting_number_not_found": "Nie znaleziono numeru oczekującego",
+    "back_to_waiting_numbers": "Powrót do numerów oczekujących",
+    "edit_waiting_number": "Edytuj numer oczekujący:",
+    "save_changes": "Zapisz zmiany",
+    "cancel": "Anuluj",
+    "saving": "Zapisywanie...",
+    "setupfee": "Koszt podłączenia",
+    "monthlyfee": "Miesięczna opłata",
+    "months": "Miesiące",
+    "pay_sum": "Suma płatności",
+    "select_voice_destination": "Przekierowanie głosowe",
+    "select_sms_destination": "Przekierowanie SMS",
+    "required_documents": "Wymagane dokumenty",
+    "documents": "Dokumenty",
+    "select_upload": "Wybierz plik",
+    "phone": "Telefon",
+    "country_flag": "Flaga {country}"
+  },
+  "errors": {
+    "failed_to_load_waiting_number": "Nie udało się załadować szczegółów numeru oczekującego",
+    "error_uploading_file": "Błąd podczas przesyłania pliku",
+    "failed_to_save_waiting_number": "Nie udało się zapisać ustawień numeru oczekującego",
+    "error_deleting_waiting_number": "Błąd podczas usuwania numeru oczekującego",
+    "error_deleting_waiting_number_id": "Błąd podczas usuwania numeru oczekującego {id}"
   }
 }

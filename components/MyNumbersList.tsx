@@ -3,7 +3,6 @@ import React, {useState} from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import Show from '@/components/service/Show'
 import {NumberInfo} from '@/types/NumberInfo'
-import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
 import {ChartPieSliceIcon, ChatCircleTextIcon, CircleNotchIcon, HeadsetIcon, InfoIcon, MagnifyingGlassIcon, PenNibIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
@@ -12,12 +11,84 @@ import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {FormattedDate} from '@/components/ui/FormattedDate'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
+import {useClientStore} from '@/stores/useClientStore'
+
+// Skeleton loader for a numbers list
+function NumbersSkeleton() {
+    return (
+        <div className="flex flex-col w-full animate-pulse">
+            {/* Total section */}
+            <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
+                <div className="h-4 bg-muted rounded w-32"></div>
+                <div className="h-4 bg-muted rounded w-40"></div>
+            </div>
+
+            {/* Header with search */}
+            <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
+                <div className="flex items-center flex-1">
+                    <div className="relative w-full sm:max-w-xs">
+                        <div className="h-8 bg-muted rounded w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Number list table */}
+            <div className="overflow-x-auto">
+                <div className="space-y-1">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i}>
+                            {/* Main row */}
+                            <div className={`flex flex-row items-center w-full py-1 px-2 ${i % 2 !== 0 ? 'bg-secondary/50 dark:bg-secondary/40' : ''}`}>
+                                {/* Checkbox */}
+                                <div className="w-8">
+                                    <div className="h-4 bg-muted rounded w-4"></div>
+                                </div>
+
+                                {/* Number and name */}
+                                <div className="flex-1">
+                                    <div className="flex flex-col">
+                                        <div className="h-4 bg-muted rounded w-32 mb-1"></div>
+                                    </div>
+                                </div>
+
+                                {/* Feature icons */}
+                                <div className="w-20">
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                        <div className="h-4 bg-muted rounded w-4"></div>
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="w-28">
+                                    <div className="flex items-center justify-end space-x-1">
+                                        {[...Array(3)].map((_, j) => (
+                                            <div key={j} className="h-7 bg-muted rounded w-7"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
 
 export default function MyNumbersList({
                                           options,
                                       }: {
     options: NumberInfo[] | null
 }) {
+    // Get numbers directly from the store to ensure we always have the latest data
+    const {getNumbers} = useClientStore()
+    const storeNumbers = getNumbers()
+
+    // Always use store numbers if they exist, otherwise use options prop
+    // This ensures we always have the latest data from the store
+    const displayOptions = storeNumbers || options
     const t = useTranslations('dashboard')
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -26,7 +97,9 @@ export default function MyNumbersList({
     const [searchQuery, setSearchQuery] = useState<string>('')
     const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
     const [loadingStats, setLoadingStats] = useState<string | null>(null)
-    const { countriesMap } = useOffersStore()
+    const [loadingDelete, setLoadingDelete] = useState<string | null>(null)
+    const {countriesMap} = useOffersStore()
+    const {deleteNumber} = useClientStore()
 
     // Get all countries from all types
     const allCountries = Object.values(countriesMap).flat()
@@ -38,30 +111,30 @@ export default function MyNumbersList({
     }
 
     // Filter numbers based on a search query
-    const filteredOptions = options?.filter(option =>
+    const filteredOptions = displayOptions?.filter(option =>
         searchQuery === '' ||
         option.did.toString().includes(searchQuery) ||
         (option.name && option.name.toLowerCase().includes(searchQuery.toLowerCase()))
     ) || null
 
     // Calculate totals
-    const totalNumbers = options?.length || 0
-    const totalMonthlyCost = options?.reduce((sum, option) => sum + option.fix_rate, 0) || 0
+    const totalNumbers = displayOptions?.length || 0
+    const totalMonthlyCost = displayOptions?.reduce((sum, option) => sum + option.fix_rate, 0) || 0
 
     // Handle checkbox selection
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
-            setSelectedNumbers(filteredOptions?.map(option => option.did) || [])
+            setSelectedNumbers(filteredOptions?.map(option => option.id) || [])
         } else {
             setSelectedNumbers([])
         }
     }
 
-    const handleSelectNumber = (did: string, checked: boolean) => {
+    const handleSelectNumber = (id: string, checked: boolean) => {
         if (checked) {
-            setSelectedNumbers(prev => [...prev, did])
+            setSelectedNumbers(prev => [...prev, id])
         } else {
-            setSelectedNumbers(prev => prev.filter(id => id !== did))
+            setSelectedNumbers(prev => prev.filter(numberId => numberId !== id))
         }
     }
 
@@ -71,18 +144,18 @@ export default function MyNumbersList({
     }
 
     // Toggle number info expansion - only one can be open at a time
-    const toggleNumberInfo = (did: string) => {
-        if (expandedNumbers.includes(did)) {
+    const toggleNumberInfo = (id: string) => {
+        if (expandedNumbers.includes(id)) {
             setExpandedNumbers([])
         } else {
-            setExpandedNumbers([did])
+            setExpandedNumbers([id])
         }
     }
 
     // Handle settings button click
     const handleSettings = (number: NumberInfo) => {
-        // Set loading state for this number
-        setLoadingEdit(number.did)
+        // Set the loading state for this number
+        setLoadingEdit(number.id)
 
         // Navigate to number edit page with current search params
         const currentParams = new URLSearchParams(searchParams?.toString())
@@ -92,37 +165,64 @@ export default function MyNumbersList({
 
     // Handle call statistics button click
     const handleCallStatistics = (number: NumberInfo) => {
-        // Set loading state for this number
-        setLoadingStats(number.did)
+        // Set the loading state for this number
+        setLoadingStats(number.id)
 
-        // Navigate to statistics page with the number as a parameter
+        // Navigate to the statistics page with the number as a parameter
         const currentParams = new URLSearchParams(searchParams?.toString())
         const statisticsUrl = `/statistics/${number.did}/?${currentParams.toString()}`
         router.push(statisticsUrl)
     }
 
     // Handle delete button click
-    const handleDelete = (number: NumberInfo) => {
-        // This would delete the number
-        console.log('Delete number', number.did)
+    const handleDelete = async (number: NumberInfo) => {
+        // Set the loading state for this number
+        setLoadingDelete(number.did)
+
+        try {
+            // Call the API to delete the number
+            // The deleteNumber function already updates the store with the new list
+            const res = await deleteNumber(number.id)
+            if (res) options = res
+        } catch (error) {
+            console.error('Error deleting number:', error)
+        } finally {
+            // Clear loading state
+            setLoadingDelete(null)
+        }
     }
 
     // Handle deletes the selected button click
-    const handleDeleteSelected = () => {
-        // This would delete all selected numbers
-        console.log('Delete selected numbers', selectedNumbers)
+    const handleDeleteSelected = async () => {
+        if (selectedNumbers.length === 0) return
+
+        // Delete each selected number one by one
+        for (const id of selectedNumbers) {
+            setLoadingDelete(id)
+            try {
+                // The deleteNumber function already updates the store with the new list
+                const res = await deleteNumber(id)
+                if (res) options = res
+            } catch (error) {
+                console.error(`Error deleting number ${id}:`, error)
+            }
+        }
+
+        // Clear selected numbers and loading state
+        setSelectedNumbers([])
+        setLoadingDelete(null)
     }
 
     return (
-        <Show when={options !== null}
-              fallback={options?.length == 0 ?
+        <Show when={displayOptions !== null}
+              fallback={displayOptions?.length == 0 ?
                   <div>{t('no_numbers')}</div> :
-                  <Loader height={32}/>}>
+                  <NumbersSkeleton/>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
-                <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
-                    <div className="text-xs sm:text-sm">{t('total_numbers')}: {totalNumbers}</div>
-                    <div className="text-xs sm:text-sm">{t('total_monthly_cost')}: ${totalMonthlyCost?.toFixed(2) || '0.00'}</div>
+                <div className="flex flex-col text-xs sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
+                    <div className="text-xs">{t('total_numbers')}: {totalNumbers}</div>
+                    <div className="text-xs">{t('total_monthly_cost')}: ${totalMonthlyCost?.toFixed(2) || '0.00'}</div>
                 </div>
 
                 {/* Header with search */}
@@ -145,14 +245,14 @@ export default function MyNumbersList({
                     <Table striped className="[&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                         <TableBody>
                             {filteredOptions?.map((option) => (
-                                <React.Fragment key={option.did.toString()}>
+                                <React.Fragment key={option.id.toString()}>
                                     <TableRow>
                                         {/* Checkbox */}
                                         <TableCell className="w-8">
                                             <Checkbox
-                                                id={`checkbox-${option.did}`}
-                                                checked={selectedNumbers.includes(option.did)}
-                                                onCheckedChange={(checked) => handleSelectNumber(option.did, checked)}
+                                                id={`checkbox-${option.id}`}
+                                                checked={selectedNumbers.includes(option.id)}
+                                                onCheckedChange={(checked) => handleSelectNumber(option.id, checked)}
                                                 variant="sm"
                                             />
                                         </TableCell>
@@ -162,7 +262,7 @@ export default function MyNumbersList({
                                             <div className="flex flex-col">
                                                 <div className="flex items-center">
                                                     {option.country_id && getCountryByID(option.country_id)?.geo && (
-                                                        <img 
+                                                        <img
                                                             src={`https://flagcdn.com/w20/${getCountryByID(option.country_id)?.geo.toLowerCase()}.png`}
                                                             alt={`${getCountryByID(option.country_id)?.countryname || ''} flag`}
                                                             className="mr-2 h-3 w-5 inline-block"
@@ -186,32 +286,39 @@ export default function MyNumbersList({
                                         {/* Action buttons */}
                                         <TableCell className="w-28">
                                             <div className="flex items-center justify-end space-x-1">
-                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7" disabled={loadingEdit === option.did}>
-                                                    {loadingEdit === option.did ? (
+                                                <Button variant="ghost" size="icon" onClick={() => handleSettings(option)} title={t('settings')} className="h-7 w-7"
+                                                        disabled={loadingEdit === option.id}>
+                                                    {loadingEdit === option.id ? (
                                                         <CircleNotchIcon size={16} className="animate-spin"/>
                                                     ) : (
                                                         <PenNibIcon size={16}/>
                                                     )}
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.did)} title={t('info')} className="h-7 w-7">
+                                                <Button variant="ghost" size="icon" onClick={() => toggleNumberInfo(option.id)} title={t('info')} className="h-7 w-7">
                                                     <InfoIcon size={16}/>
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title={t('call_statistics')} className="h-7 w-7" disabled={loadingStats === option.did}>
-                                                    {loadingStats === option.did ? (
+                                                <Button variant="ghost" size="icon" onClick={() => handleCallStatistics(option)} title={t('call_statistics')} className="h-7 w-7"
+                                                        disabled={loadingStats === option.id}>
+                                                    {loadingStats === option.id ? (
                                                         <CircleNotchIcon size={16} className="animate-spin"/>
                                                     ) : (
                                                         <ChartPieSliceIcon size={16}/>
                                                     )}
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive">
-                                                    <XIcon size={16}/>
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(option)} title={t('delete')} className="h-7 w-7 text-destructive"
+                                                        disabled={loadingDelete === option.id}>
+                                                    {loadingDelete === option.id ? (
+                                                        <CircleNotchIcon size={16} className="animate-spin"/>
+                                                    ) : (
+                                                        <XIcon size={16}/>
+                                                    )}
                                                 </Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
 
                                     {/* Expanded info section */}
-                                    {expandedNumbers.includes(option.did) && (
+                                    {expandedNumbers.includes(option.id) && (
                                         <TableRow>
                                             <TableCell colSpan={4} className="p-0">
                                                 <div className="pl-10 pr-2 py-1 text-xs sm:text-sm bg-muted/20 border-l-2 border-muted/25 ml-2">

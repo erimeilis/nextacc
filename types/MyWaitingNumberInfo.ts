@@ -1,4 +1,5 @@
 export type MyWaitingNumberInfo = {
+    id: string
     did: string
     setup_rate: number
     fix_rate: number
@@ -6,9 +7,9 @@ export type MyWaitingNumberInfo = {
     count_month: number
     voiceDestType: string
     voiceDest: string
-    smsDesType: string
+    smsDestType: string
     smsDest: string
-    docs: string[]
+    docs: (string | { type: string; file: string })[]
     voice: boolean
     sms: boolean
     toll_free: boolean

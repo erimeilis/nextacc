@@ -4,7 +4,7 @@ import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
 import ActionButton from '@/components/shared/ActionButton'
-import Input from '@/components/shared/Input'
+import CommonInput from '@/components/shared/CommonInput'
 import {voiceDestinationsFields} from '@/constants/voiceDestinationFields'
 import {smsDestinationsFields} from '@/constants/smsDestinationFields'
 import {validateFormData, validateInputData} from '@/utils/validation'
@@ -23,7 +23,7 @@ import {ClientInfo} from '@/types/ClientInfo'
 import {useCartStore} from '@/stores/useCartStore'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {useClientStore} from '@/stores/useClientStore'
-import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
+import {useWaitingStore} from '@/stores/useWaitingStore'
 import {useToast} from '@/hooks/use-toast'
 import {useRouter} from 'next/navigation'
 import {CountryInfo} from '@/types/CountryInfo'
@@ -57,7 +57,7 @@ export default function BuyNumberForm({
     }, 'persistentClientInfo')
 
     const {updateData: updateCartData} = useCartStore()
-    const {updateData: updateWaitingDidsData} = useWaitingDidsStore()
+    const {updateWaitingNumbers} = useWaitingStore()
 
     const {toast} = useToast()
     const getClientInfo = async () => {
@@ -170,7 +170,7 @@ export default function BuyNumberForm({
                         }) :
                         selectedDocType === 'business' && businessDocUploads ?
                             Object.entries(businessDocUploads).map(([key, value]) => {
-                                // Remove 'doc_' prefix from key
+                                // Remove the 'doc _' prefix from a key
                                 const type = key.startsWith('doc_') ? key.substring(4) : key
                                 return {type, file: value}
                             }) : undefined
@@ -185,11 +185,32 @@ export default function BuyNumberForm({
                     if (response.error) {
                         // Handle specific error cases
                         if (response.error.status === 404) {
-                            // Show error toast for number not available
+                            // Show error toast for a number not available
                             toast({
                                 variant: 'destructive',
                                 title: toastT('error_title'),
                                 description: toastT('number_not_available')
+                            })
+                        } else if (response.error.status === 402) {
+                            // Show error toast for low balance
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('low_balance')
+                            })
+                        } else if (response.error.status === 409) {
+                            // Show error toast for already exists
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('already_exists')
+                            })
+                        } else if (response.error.status === 500) {
+                            // Show error toast for unknown error
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('unknown_error')
                             })
                         } else {
                             // Show generic error toast
@@ -202,7 +223,7 @@ export default function BuyNumberForm({
                     } else {
                         // Update waiting-dids data
                         if (response.data) {
-                            updateWaitingDidsData(response.data as MyWaitingNumberInfo[])
+                            await updateWaitingNumbers(response.data as MyWaitingNumberInfo[])
                         }
 
                         // Show success toast with the appropriate message
@@ -213,12 +234,12 @@ export default function BuyNumberForm({
                                 ? toastT('buy_success_manual')
                                 : toastT('buy_success'),
                             onDismiss: () => {
-                                // If the type is manual, update waiting DIDs and redirect to numbers page with waiting tab selected
+                                setSelectedDocType(null)
+                                // If the type is manual, update waiting DIDs and redirect to number page with waiting tab selected
                                 if (response.type === 'manual') {
                                     // Open minicart when toast is dismissed
                                     const url = new URL(window.location.href)
-                                    url.searchParams.set('tab', 'waiting')
-                                    router.push('/numbers' + url.search)
+                                    router.push('/waiting-numbers' + url.search)
                                 }
                             }
                         })
@@ -229,17 +250,32 @@ export default function BuyNumberForm({
                     if (response.error) {
                         // Handle specific error cases
                         if (response.error.status === 404) {
-                            // Show error toast for number not available
+                            // Show error toast for a number not available
                             toast({
                                 variant: 'destructive',
                                 title: toastT('error_title'),
                                 description: toastT('number_not_available'),
-                                onDismiss: () => {
-                                    // Open minicart when toast is dismissed
-                                    const url = new URL(window.location.href)
-                                    url.searchParams.set('cart', 'open')
-                                    router.push(url.pathname + url.search)
-                                }
+                            })
+                        } else if (response.error.status === 402) {
+                            // Show error toast for low balance
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('low_balance'),
+                            })
+                        } else if (response.error.status === 409) {
+                            // Show error toast for already exists
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('already_exists'),
+                            })
+                        } else if (response.error.status === 500) {
+                            // Show error toast for unknown error
+                            toast({
+                                variant: 'destructive',
+                                title: toastT('error_title'),
+                                description: toastT('unknown_error'),
                             })
                         } else {
                             // Show generic error toast
@@ -248,7 +284,8 @@ export default function BuyNumberForm({
                                 title: toastT('error_title'),
                                 description: toastT(response.error.message),
                                 onDismiss: () => {
-                                    // Open minicart when toast is dismissed
+                                    setSelectedDocType(null)
+                                    // Open a mini cart when toast is dismissed
                                     const url = new URL(window.location.href)
                                     url.searchParams.set('cart', 'open')
                                     router.push(url.pathname + url.search)
@@ -280,24 +317,18 @@ export default function BuyNumberForm({
             console.error('Error processing request:', error)
             // Show error toast
             if (buttonId === 'buy') {
-                // For Buy button, don't open cart
+                // For the Buy button, don't open the cart
                 toast({
                     variant: 'destructive',
                     title: toastT('error_title'),
                     description: toastT('cart_add_error')
                 })
             } else {
-                // For Add to Cart button, open cart
+                // For the Add to Cart button, open the cart
                 toast({
                     variant: 'destructive',
                     title: toastT('error_title'),
                     description: toastT('cart_add_error'),
-                    onDismiss: () => {
-                        // Open minicart when toast is dismissed
-                        const url = new URL(window.location.href)
-                        url.searchParams.set('cart', 'open')
-                        router.push(url.pathname + url.search)
-                    }
                 })
             }
         } finally {
@@ -306,13 +337,13 @@ export default function BuyNumberForm({
     }
 
     function Discounts(): { id: string, name: string }[] {
-        const {discounts, updateDiscounts} = useOffersStore()
+        const {discounts, fetchDiscounts} = useOffersStore()
 
         // First show cached data from the store
         // Then update in the background
         useEffect(() => {
-            updateDiscounts().then()
-        }, [updateDiscounts])
+            fetchDiscounts().then()
+        }, [fetchDiscounts])
 
         // Add a default "1 month" option if a discount array is empty
         if (discounts.length === 0) {
@@ -404,7 +435,7 @@ export default function BuyNumberForm({
     const [selectedDocType, setSelectedDocType] = useState<'personal' | 'business' | null>(null)
     const [personalDocUploads, setPersonalDocUploads] = useState<{ [key: string]: string }>({})
     const [businessDocUploads, setBusinessDocUploads] = useState<{ [key: string]: string }>({})
-    // For backward compatibility with existing code
+    // For backward compatibility with existing code,
     // Wrap in useMemo to prevent recreation on every render
     const docUploads = useMemo(() => {
         return selectedDocType === 'personal' ? personalDocUploads :
@@ -430,20 +461,16 @@ export default function BuyNumberForm({
     const handleFileUpload = async (fieldName: string, file: File) => {
         try {
             setUploadingField(fieldName)
-            const success = await uploadFile(file)
-            if (success) {
-                // Get the updated uploads list
-                const updatedUploads = getUploads() || []
-
-                // Find the newly uploaded file (assuming it's the most recent one)
-                if (updatedUploads.length > 0) {
-                    const newUpload = updatedUploads[0]
+            const res = await uploadFile(file)
+            if (res) {
+                if (res.length > 0) {
+                    const newUpload = res[0]
 
                     // Update the document selection with the new file
                     handleDocUploadSelection(fieldName, newUpload.filename)
 
                     // Update the local uploads state
-                    setUploads(updatedUploads)
+                    setUploads(res)
                 }
             }
         } catch (error) {
@@ -454,43 +481,20 @@ export default function BuyNumberForm({
     }
 
     // Get uploads from the client store
-    const {getUploads, updateUploads, uploadFile, isUserLoggedIn} = useClientStore()
+    const {getUploads, fetchUploads, uploadFile, isUserLoggedIn} = useClientStore()
     const [uploads, setUploads] = useState<UploadInfo[]>([])
     const [uploadingField, setUploadingField] = useState<string | null>(null)
 
     // Fetch uploads when the component mounts
     useEffect(() => {
-        const fetchUploads = async () => {
-            try {
-                // Always try to fetch fresh uploads first
-                await updateUploads()
-                const newUploads = getUploads()
-                //console.log('Uploads after fetch:', newUploads)
-
-                if (newUploads && newUploads.length > 0) {
-                    //console.log('Using fresh uploads, count:', newUploads.length)
-                    setUploads(newUploads)
-                } else {
-                    // If no uploads from API, try to get from store
-                    const storeUploads = getUploads()
-                    //console.log('No uploads from API, using store uploads:', storeUploads)
-
-                    // If still no uploads, set to empty array to prevent null
-                    setUploads(storeUploads || [])
-                }
-            } catch (error) {
-                console.error('Error fetching uploads:', error)
-                // If error, try to get from store
-                const storeUploads = getUploads()
-                console.log('Error fetching uploads, using store uploads:', storeUploads)
-
-                // If still no uploads, set to empty array to prevent null
-                setUploads(storeUploads || [])
-            }
+        if (getUploads()) {
+            setUploads(getUploads()!)
+        } else {
+            fetchUploads().then(fetchedUploads => {
+                setUploads(fetchedUploads ?? [])
+            })
         }
-
-        fetchUploads().then()
-    }, [getUploads, updateUploads])
+    }, [fetchUploads, getUploads])
 
     // Create a form validation schema based on the numberInfo properties
     const createFormSchema = (numberInfo: NumberInfo | null) => {
@@ -618,23 +622,6 @@ export default function BuyNumberForm({
     const voiceDestination = voiceDestinationsFields.find(i => i.id === voiceTypeState)
     const smsDestination = smsDestinationsFields.find(i => i.id === smsTypeState)
 
-    // Debug uploads data
-    useEffect(() => {
-        console.log('BuyNumberForm uploads state changed:', {
-            uploadsLength: uploads.length,
-            uploadsData: uploads.slice(0, 5), // Show the first 5 items to avoid console clutter
-            selectedDocType,
-            docUploads
-        })
-    }, [uploads, selectedDocType, docUploads])
-
-    // Debug uploads data on render
-    console.log('BuyNumberForm render:', {
-        uploadsLength: uploads.length,
-        selectedDocType,
-        docUploadsCount: Object.keys(docUploads).length
-    })
-
     return numberInfo ? (
         <form
             id="buyNumberForm"
@@ -675,7 +662,7 @@ export default function BuyNumberForm({
                                     customClass="w-full"
                                 />
                             </div>
-                            <Input
+                            <CommonInput
                                 handleChangeAction={handleVoiceDestinationChange}
                                 value={voiceDestinationState}
                                 labelText={voiceDestination ? t(voiceDestination.labelText) : t('select_voice_destination')}
@@ -712,7 +699,7 @@ export default function BuyNumberForm({
                                     customClass="w-full"
                                 />
                             </div>
-                            <Input
+                            <CommonInput
                                 handleChangeAction={handleSmsDestinationChange}
                                 value={smsDestinationState}
                                 labelText={smsDestination ? t(smsDestination.labelText) : t('select_sms_destination')}

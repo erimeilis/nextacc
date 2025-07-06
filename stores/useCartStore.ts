@@ -22,6 +22,19 @@ interface CartStore {
     reset: () => void
 }
 
+// Define the persisted state type (only the data that gets stored)
+type PersistedCartState = {
+    cart: CartItem[]
+    totalItems: number
+    totalPrice: number
+    selectedItems: number[]
+}
+
+// Type guard to check if the persisted state has the expected shape
+function isValidPersistedCartState(state: unknown): state is Partial<PersistedCartState> {
+    return state !== null && typeof state === 'object'
+}
+
 export const useCartStore = create<CartStore>()(
     persist(
         (set) => ({
@@ -122,31 +135,32 @@ export const useCartStore = create<CartStore>()(
         }), {
             name: 'cart-storage', // unique name
             storage: idbStorage,
-            version: 1,
-            partialize: (state: CartStore) => ({
+            version: 2,
+            migrate: (persistedState: unknown, version: number): PersistedCartState => {
+                // Handle migration from version 1 to version 2
+                if (version === 1 && isValidPersistedCartState(persistedState)) {
+                    return {
+                        cart: persistedState.cart ?? [],
+                        totalItems: persistedState.totalItems ?? 0,
+                        totalPrice: persistedState.totalPrice ?? 0,
+                        selectedItems: persistedState.selectedItems ?? [],
+                    }
+                }
+
+                // For any other version mismatches or invalid state, return a clean state
+                return {
+                    cart: [],
+                    totalItems: 0,
+                    totalPrice: 0,
+                    selectedItems: [],
+                }
+            },
+            partialize: (state: CartStore): PersistedCartState => ({
                 cart: state.cart,
                 selectedItems: state.selectedItems,
                 totalItems: state.totalItems,
                 totalPrice: state.totalPrice,
             }),
-            merge: (persistedState, currentState) => {
-                const persisted = persistedState as Partial<CartStore> || {}
-                return {
-                    ...currentState,
-                    cart:
-                        persisted.cart && Object.keys(persisted.cart).length > 0
-                            ? persisted.cart
-                            : currentState.cart,
-                    selectedItems:
-                        persisted.selectedItems && Object.keys(persisted.selectedItems).length > 0
-                            ? persisted.selectedItems
-                            : currentState.selectedItems,
-                    totalItems:
-                        persisted.totalItems ? persisted.totalItems : currentState.totalItems,
-                    totalPrice:
-                        persisted.totalPrice ? persisted.totalPrice : currentState.totalPrice,
-                }
-            },
         }
     )
 )

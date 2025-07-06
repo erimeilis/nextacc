@@ -2,6 +2,7 @@ import {CallDestinationInfo} from './CallDestinationInfo'
 import {SmsDestinationInfo} from './SmsDestinationInfo'
 
 export type NumberInfo = {
+    id: string
     did: string
     name: string
     where_did?: string

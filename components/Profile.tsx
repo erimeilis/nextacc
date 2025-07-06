@@ -20,7 +20,7 @@ import {useSearchParams} from 'next/navigation'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Boolean} from '@/components/ui/Boolean'
-import {getCountries, CountryOption} from '@/utils/getCountries'
+import {CountryOption, getCountries} from '@/utils/getCountries'
 
 const profileFieldsState: { [index: string]: string } = {}
 profileFields.forEach((field: InputField) => profileFieldsState[field.id] = '')
@@ -45,7 +45,7 @@ export default function Profile({
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
-    const {reset: resetClientStore, updateProfile: updateStoreProfile} = useClientStore()
+    const {reset: resetClientStore, fetchProfile: updateStoreProfile} = useClientStore()
     const {reset: resetCartStore} = useCartStore()
 
     const [modeEditProfile, setModeEditProfile] = useState(false)
@@ -258,26 +258,26 @@ export default function Profile({
                                                                     <Boolean value={profileState[field.id] === 'true'}/>
                                                                 </div>
                                                             )
-                                                            : field.id === 'profileCountry' 
-                                                              ? (
-                                                                <div className="flex items-center gap-2 justify-end sm:justify-start">
-                                                                    {(() => {
-                                                                        const countryCode = profileState[field.id];
-                                                                        const country = findCountryByIso3(countryCode);
-                                                                        return country && country.alpha2 ? (
-                                                                            <>
-                                                                                <img
-                                                                                    src={`https://flagcdn.com/w20/${country.alpha2.toLowerCase()}.png`}
-                                                                                    alt={`${country.name} flag`}
-                                                                                    className="h-3 w-5 inline-block"
-                                                                                />
-                                                                                <span>{profileState[field.id]}</span>
-                                                                            </>
-                                                                        ) : profileState[field.id];
-                                                                    })()}
-                                                                </div>
-                                                              )
-                                                              : profileState[field.id]}
+                                                            : field.id === 'profileCountry'
+                                                                ? (
+                                                                    <div className="flex items-center gap-2 justify-end sm:justify-start">
+                                                                        {(() => {
+                                                                            const countryCode = profileState[field.id]
+                                                                            const country = findCountryByIso3(countryCode)
+                                                                            return country && country.alpha2 ? (
+                                                                                <>
+                                                                                    <img
+                                                                                        src={`https://flagcdn.com/w20/${country.alpha2.toLowerCase()}.png`}
+                                                                                        alt={`${country.name} flag`}
+                                                                                        className="h-3 w-5 inline-block"
+                                                                                    />
+                                                                                    <span>{profileState[field.id]}</span>
+                                                                                </>
+                                                                            ) : profileState[field.id]
+                                                                        })()}
+                                                                    </div>
+                                                                )
+                                                                : profileState[field.id]}
                                                     </TableCell>
                                                 </>
                                             }

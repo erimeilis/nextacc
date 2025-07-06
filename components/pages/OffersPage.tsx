@@ -11,7 +11,8 @@ import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 import dynamic from 'next/dynamic'
 import {useCartStore} from '@/stores/useCartStore'
-import {useWaitingDidsStore} from '@/stores/useWaitingDidsStore'
+import {useWaitingStore} from '@/stores/useWaitingStore'
+import {useClientStore} from '@/stores/useClientStore'
 import {numberTypes} from '@/constants/numberTypes'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {CountryInfo} from '@/types/CountryInfo'
@@ -38,9 +39,10 @@ export default function OffersPage() {
     const [localCountriesMap, setLocalCountriesMap] = useState<CountryInfo[] | null>([])
     const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>([])
     const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
-    const {countriesMap, areasMap, numbersMap, updateCountries, updateAreas, updateNumbers} = useOffersStore()
+    const {countriesMap, areasMap, numbersMap, fetchCountries, fetchAreas, fetchNumbers} = useOffersStore()
     const {cart} = useCartStore()
-    const {waitingDids} = useWaitingDidsStore()
+    const {waitingNumbers} = useWaitingStore()
+    const {isUserLoggedIn} = useClientStore()
     const buyForm = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -62,17 +64,19 @@ export default function OffersPage() {
                     // If it's numeric and matches the current number's did, return true (this item is in the cart)
                     return isNumeric && cartItem.did === searchParams.get('number')
                 }) ||
-                waitingDids.some(myWaitingNumber => {
-                    // Check if cartItem.did is numeric
-                    const isNumeric = /^\d+$/.test(myWaitingNumber.did)
-                    // If it's numeric and matches the current number's did, return true (this item is in the cart)
-                    return isNumeric && myWaitingNumber.did === searchParams.get('number')
-                }))
+                (isUserLoggedIn() &&
+                    Array.isArray(waitingNumbers) &&
+                    waitingNumbers.some(myWaitingNumber => {
+                        // Check if cartItem.did is numeric
+                        const isNumeric = /^\d+$/.test(myWaitingNumber.did)
+                        // If it's numeric and matches the current number's did, return true (this item is in the cart)
+                        return isNumeric && myWaitingNumber.did === searchParams.get('number')
+                    })))
         ) {
             // If the number is not in the localNumbersMap (not available), redirect to a path without a number
             router.push(pathName + '?' + CreateQueryString('', '', searchParams, ['number']))
         }
-    }, [searchParams, pathName, router, localNumbersMap, cart, waitingDids])
+    }, [searchParams, pathName, router, localNumbersMap, cart, waitingNumbers, isUserLoggedIn])
 
     const type = searchParams ? searchParams.get('type') : null
     const countryBySlug = (searchParams && searchParams.has('country')) ?
@@ -117,7 +121,7 @@ export default function OffersPage() {
                         null)) :
                 null
             if (newArea) {
-                updateNumbers(type!, country, newArea)
+                fetchNumbers(type!, country, newArea)
                     .then((fetchedNumbers) => {
                         setLocalNumbersMap(fetchedNumbers)
                         // Auto-select the only number if there's just one
@@ -130,7 +134,7 @@ export default function OffersPage() {
             }
         }
         router.push(pathName + '?' + CreateQueryString('area', area, searchParams, ['number']))
-    }, [areaBySlug, country, handleNumber, pathName, router, searchParams, type, updateNumbers])
+    }, [areaBySlug, country, handleNumber, pathName, router, searchParams, type, fetchNumbers])
 
     useEffect(() => {
         if (type) {
@@ -139,7 +143,7 @@ export default function OffersPage() {
                 setLocalCountriesMap(countriesMap[type!])
             } else {
                 // Only fetch if not available
-                updateCountries(type!)
+                fetchCountries(type!)
                     .then((fetchedCountries) => {
                         setLocalCountriesMap(fetchedCountries)
                     })
@@ -165,7 +169,7 @@ export default function OffersPage() {
                     }
                 } else {
                     // Only fetch if not available
-                    updateAreas(type!, country)
+                    fetchAreas(type!, country)
                         .then((fetchedAreas) => {
                             setLocalAreasMap(fetchedAreas)
                             // Handle auto-selection of area when there's only one option
@@ -191,7 +195,7 @@ export default function OffersPage() {
                         }
                     } else {
                         // Only fetch if not available
-                        updateNumbers(type!, country, area)
+                        fetchNumbers(type!, country, area)
                             .then((fetchedNumbers) => {
                                 setLocalNumbersMap(fetchedNumbers)
                                 // Auto-select the only number if there's just one
@@ -217,7 +221,7 @@ export default function OffersPage() {
             setLocalAreasMap(null)
             setLocalNumbersMap(null)
         }
-    }, [area, areasMap, countriesMap, country, handleArea, handleNumber, numbersMap, pathName, router, searchParams, type, updateAreas, updateCountries, updateNumbers])
+    }, [area, areasMap, countriesMap, country, handleArea, handleNumber, numbersMap, pathName, router, searchParams, type, fetchAreas, fetchCountries, fetchNumbers])
 
     const countries = localCountriesMap ?
         localCountriesMap.map(country => ({
@@ -237,7 +241,7 @@ export default function OffersPage() {
                         null)) :
                 null
             if (newCountry) {
-                updateAreas(type!, newCountry)
+                fetchAreas(type!, newCountry)
                     .then((fetchedAreas) => {
                         setLocalAreasMap(fetchedAreas)
                         // Handle auto-selection of area when there's only one option
@@ -251,15 +255,15 @@ export default function OffersPage() {
             }
         }
         router.push(pathName + '?' + CreateQueryString('country', countryParam, searchParams, ['area', 'number']))
-    }, [countries, countryBySlug, handleArea, pathName, router, searchParams, type, updateAreas])
+    }, [countries, countryBySlug, handleArea, pathName, router, searchParams, type, fetchAreas])
 
     const handleType = useCallback((t: string) => {
-        updateCountries(t)
+        fetchCountries(t)
             .then((fetchedCountries) => {
                 setLocalCountriesMap(fetchedCountries)
             })
         router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
-    }, [pathName, router, searchParams, updateCountries])
+    }, [pathName, router, searchParams, fetchCountries])
 
     const areas = localAreasMap ?
         localAreasMap.map(area => ({
@@ -269,22 +273,30 @@ export default function OffersPage() {
         null
     const numbers = localNumbersMap ?
         localNumbersMap.filter(number => {
+            // Only filter if a user is logged in
+            if (!isUserLoggedIn()) {
+                return true // Keep all numbers if a user is not logged in
+            }
+
             // Check if this number exists in the cart and has a numeric DID
-            const existsInCart = cart.some(cartItem => {
+            const existsInCart = cart && cart.some(cartItem => {
                 // Check if cartItem.did is numeric
                 const isNumeric = /^\d+$/.test(cartItem.did)
                 // If it's numeric and matches the current number's did, return true (this item is in the cart)
                 return isNumeric && cartItem.did === number.did
             })
-            // Check if this number exists in the cart and has a numeric DID
-            const existsInWaitingDids = waitingDids.some(myWaitingNumber => {
-                // Check if cartItem.did is numeric
-                const isNumeric = /^\d+$/.test(myWaitingNumber.did)
-                // If it's numeric and matches the current number's did, return true (this item is in the cart)
-                return isNumeric && myWaitingNumber.did === number.did
-            })
-            // Return true only for numbers NOT in the cart (filter those out)
-            return !existsInCart && !existsInWaitingDids
+
+            // Check if this number exists in the waiting numbers and has a numeric DID
+            const existsInWaitingNumbers = Array.isArray(waitingNumbers) &&
+                waitingNumbers?.some(myWaitingNumber => {
+                    // Check if myWaitingNumber.did is numeric
+                    const isNumeric = /^\d+$/.test(myWaitingNumber.did)
+                    // If it's numeric and matches the current number's did, return true (this item is in the waiting numbers)
+                    return isNumeric && myWaitingNumber.did === number.did
+                })
+
+            // Return true only for numbers NOT in the cart or waiting numbers (filter those out)
+            return !existsInCart && !existsInWaitingNumbers
         }) :
         null
     const getNumber: NumberInfo | null = number ?

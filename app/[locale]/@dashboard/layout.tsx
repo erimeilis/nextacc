@@ -1,5 +1,5 @@
 'use client'
-import React, {useCallback, useEffect, useState, useRef} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useSession} from 'next-auth/react'
 import Show from '@/components/service/Show'
 import Login from '@/components/Login'
@@ -93,6 +93,10 @@ export default function Layout({children}: { children: React.ReactNode }) {
             return 'profile'
         } else {
             const segments = pathName.split('/')
+            // Make the "numbers" tab active for both "numbers" and "waiting-numbers" paths
+            if (segments[2] === 'waiting-numbers') {
+                return 'numbers'
+            }
             return segments[2] ? segments[2] : 'profile'
         }
     }, [pathName])
@@ -184,11 +188,11 @@ export default function Layout({children}: { children: React.ReactNode }) {
             })
 
             // Observe changes to the container and its children
-            observer.observe(container, { 
-                childList: true, 
-                subtree: true, 
+            observer.observe(container, {
+                childList: true,
+                subtree: true,
                 attributes: true,
-                characterData: true 
+                characterData: true
             })
 
             // Clean up
@@ -264,30 +268,31 @@ export default function Layout({children}: { children: React.ReactNode }) {
         <div className="flex flex-col rounded-none sm:rounded-lg w-full border-none sm:border border-border bg-gradient-to-br from-secondary to-background drop-shadow text-foreground
         dark:border-border dark:bg-gradient-to-br dark:from-secondary dark:to-background dark:text-foreground overflow-hidden">
             <div className="relative flex w-full">
-                <button 
+                <button
                     ref={leftArrowRef}
                     className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-muted dark:bg-muted hover:bg-accent dark:hover:bg-accent rounded-r-md p-1.5 shadow-md items-center justify-center ${canScrollLeft ? 'flex' : 'hidden'}`}
                     onClick={() => {
                         if (tabsContainerRef.current) {
-                            tabsContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                            tabsContainerRef.current.scrollBy({left: -200, behavior: 'smooth'})
                             // Check scrollability after scrolling
-                            setTimeout(checkScrollability, 300);
+                            setTimeout(checkScrollability, 300)
                         }
                     }}
                     aria-label="Scroll left"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M15 18l-6-6 6-6" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                         strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
                     </svg>
                 </button>
-                <nav 
+                <nav
                     ref={tabsContainerRef}
-                    id="tabs-container" 
+                    id="tabs-container"
                     className="flex flex-row w-full bg-muted dark:bg-muted overflow-x-auto whitespace-nowrap scrollbar-hide relative"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}
                     onScroll={() => {
                         // Check scrollability on every scroll event
-                        checkScrollability();
+                        checkScrollability()
                     }}
                 >
                     {profileTabs.map(tab =>
@@ -315,20 +320,21 @@ export default function Layout({children}: { children: React.ReactNode }) {
                         </Tab>
                     )}
                 </nav>
-                <button 
+                <button
                     ref={rightArrowRef}
                     className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-muted dark:bg-muted hover:bg-accent dark:hover:bg-accent rounded-l-md p-1.5 shadow-md items-center justify-center ${canScrollRight ? 'flex' : 'hidden'}`}
                     onClick={() => {
                         if (tabsContainerRef.current) {
-                            tabsContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                            tabsContainerRef.current.scrollBy({left: 200, behavior: 'smooth'})
                             // Check scrollability after scrolling
-                            setTimeout(checkScrollability, 300);
+                            setTimeout(checkScrollability, 300)
                         }
                     }}
                     aria-label="Scroll right"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                         strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
                     </svg>
                 </button>
             </div>
