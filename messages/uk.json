@@ -126,6 +126,7 @@
     "numbers": "Мої номери",
     "uploads": "Файли",
     "statistics": "Статистика",
+    "ivr": "IVR",
     "active": "Активні",
     "waiting": "Очікують",
     "pay_sum": "Загальна сума оплати",
@@ -179,7 +180,13 @@
     "max_file_size": "Максимальний розмір файлу",
     "select_files": "Вибрати файли",
     "upload_errors": "Помилки завантаження",
-    "deleting": "Видалення"
+    "deleting": "Видалення",
+    "ivr_voice": "Голос IVR",
+    "ivr_music": "Музика IVR",
+    "ivr_effects": "Ефекти IVR",
+    "select_ivr_voice": "Виберіть голос IVR",
+    "select_ivr_music": "Виберіть музику IVR",
+    "select_ivr_effect": "Виберіть ефект IVR"
   },
   "profile": {
     "signed_in_as": "Вхід як",

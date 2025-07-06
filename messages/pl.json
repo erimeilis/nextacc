@@ -126,6 +126,7 @@
     "numbers": "Moje numery",
     "uploads": "Pliki",
     "statistics": "Statystyki",
+    "ivr": "IVR",
     "active": "Aktywne",
     "waiting": "Oczekujące",
     "pay_sum": "Suma płatności",
@@ -179,7 +180,13 @@
     "max_file_size": "Maksymalny rozmiar pliku",
     "select_files": "Wybierz pliki",
     "upload_errors": "Błędy przesyłania",
-    "deleting": "Usuwanie"
+    "deleting": "Usuwanie",
+    "ivr_voice": "Głos IVR",
+    "ivr_music": "Muzyka IVR",
+    "ivr_effects": "Efekty IVR",
+    "select_ivr_voice": "Wybierz głos IVR",
+    "select_ivr_music": "Wybierz muzykę IVR",
+    "select_ivr_effect": "Wybierz efekt IVR"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",
