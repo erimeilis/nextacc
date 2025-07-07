@@ -40,3 +40,57 @@ export async function redGetIvr(): Promise<IvrResponse | null> {
             return null
         })
 }
+
+export interface OrderIvrParams {
+    ivr: string;
+    ivr_music?: string;
+    ivr_effect?: string;
+    amount: string;
+    duration: string;
+    text: string;
+    comment?: string;
+}
+
+export interface OrderIvrResponse {
+    code: number;
+    message: string;
+}
+
+export async function redOrderIvr(params: OrderIvrParams): Promise<OrderIvrResponse | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') {
+        console.log('redOrderIvr: No valid session, returning null')
+        return null
+    }
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/ivr')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        },
+        body: JSON.stringify(params)
+    }
+
+    return fetch(url.toString(), options)
+        .then(async (res: Response) => {
+            console.log('redOrderIvr: Response status:', res.status)
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redOrderIvr error response: ', errorData)
+                return null
+            }
+            return res.json()
+        })
+        .then(async (data) => {
+            return data
+        })
+        .catch((err) => {
+            console.log('redOrderIvr error: ', err.message)
+            return null
+        })
+}

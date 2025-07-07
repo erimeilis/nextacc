@@ -194,7 +194,20 @@
     "ivr_effects": "IVR Effects",
     "select_ivr_voice": "Select IVR Voice",
     "select_ivr_music": "Select IVR Music",
-    "select_ivr_effect": "Select IVR Effect"
+    "select_ivr_effect": "Select IVR Effect",
+    "ivr_text": "IVR Text",
+    "enter_ivr_text": "Enter text to be read by IVR",
+    "check_grammar": "Check Grammar",
+    "checking_grammar": "Checking grammar...",
+    "grammar_suggestions": "Grammar Suggestions",
+    "word_count": "Word count",
+    "duration": "Approximate duration",
+    "seconds": "seconds",
+    "price": "Price",
+    "grammar_check": "Grammar check",
+    "comment": "Comment",
+    "enter_comment": "Enter additional comments or instructions",
+    "order": "Order"
   },
   "profile": {
     "signed_in_as": "Signed in as",
@@ -304,7 +317,11 @@
     "number_updated_successfully": "Number settings have been updated",
     "save_error": "Failed to save changes",
     "failed_to_save_changes": "Unable to save changes. Please try again.",
-    "failed_to_load_number": "Failed to load number details. Please try again."
+    "failed_to_load_number": "Failed to load number details. Please try again.",
+    "ivr_order_success": "IVR order placed successfully",
+    "ivr_order_low_balance": "Insufficient balance. Please top up your account.",
+    "ivr_order_manual": "Your order will be processed manually. We will contact you about the final price.",
+    "ivr_order_error": "Failed to place IVR order. Please try again."
   },
   "number-edit": {
     "number_not_found": "Number not found",

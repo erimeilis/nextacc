@@ -27,7 +27,11 @@ const Checkbox = React.forwardRef<
     const inputRef = React.useRef<HTMLInputElement>(null)
 
     // Function to handle clicks on the custom checkbox
-    const handleCustomCheckboxClick = () => {
+    const handleCustomCheckboxClick = (e: React.MouseEvent) => {
+        // Prevent event from bubbling up to avoid double toggling
+        e.preventDefault();
+        e.stopPropagation();
+
         if (inputRef.current && !props.disabled) {
             // Toggle the checked state
             const newChecked = !checked

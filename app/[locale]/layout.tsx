@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
 import {Toaster} from '@/components/ui/Toaster'
 import {ubuntu} from '@/app/fonts' // Import from the font file
+import {TooltipProvider} from '@/components/ui/Tooltip'
 
 // Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/nav/Nav'), {
@@ -91,15 +92,17 @@ export default async function RootLayout(
         >
             <AuthProvider>
                 <NextIntlClientProvider messages={messages}>
-                    <Nav/>
-                    <div className="h-full overflow-y-auto pt-0 pb-16 sm:pt-16 sm:pb-0">
-                        <main className="flex items-center justify-center px-0 sm:px-2 pb-0">
-                            <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
-                                {offers}
-                                {dashboard}
-                            </div>
-                        </main>
-                    </div>
+                    <TooltipProvider>
+                        <Nav/>
+                        <div className="h-full overflow-y-auto pt-0 pb-16 sm:pt-16 sm:pb-0">
+                            <main className="flex items-center justify-center px-0 sm:px-2 pb-0">
+                                <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
+                                    {offers}
+                                    {dashboard}
+                                </div>
+                            </main>
+                        </div>
+                    </TooltipProvider>
                 </NextIntlClientProvider>
             </AuthProvider>
             <Toaster/>

@@ -193,7 +193,20 @@
     "ivr_effects": "Efekty IVR",
     "select_ivr_voice": "Wybierz głos IVR",
     "select_ivr_music": "Wybierz muzykę IVR",
-    "select_ivr_effect": "Wybierz efekt IVR"
+    "select_ivr_effect": "Wybierz efekt IVR",
+    "ivr_text": "Tekst IVR",
+    "enter_ivr_text": "Wprowadź tekst do odczytania przez IVR",
+    "check_grammar": "Sprawdź gramatykę",
+    "checking_grammar": "Sprawdzanie gramatyki...",
+    "grammar_suggestions": "Sugestie gramatyczne",
+    "word_count": "Liczba słów",
+    "duration": "Przybliżony czas trwania",
+    "seconds": "sekund",
+    "price": "Cena",
+    "grammar_check": "Sprawdzanie gramatyki",
+    "comment": "Komentarz",
+    "enter_comment": "Wprowadź dodatkowe komentarze lub instrukcje",
+    "order": "Zamów"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",
@@ -303,7 +316,11 @@
     "number_updated_successfully": "Ustawienia numeru zostały zaktualizowane",
     "save_error": "Nie udało się zapisać zmian",
     "failed_to_save_changes": "Nie można zapisać zmian. Spróbuj ponownie.",
-    "failed_to_load_number": "Nie udało się załadować szczegółów numeru. Spróbuj ponownie."
+    "failed_to_load_number": "Nie udało się załadować szczegółów numeru. Spróbuj ponownie.",
+    "ivr_order_success": "Zamówienie IVR zostało pomyślnie złożone",
+    "ivr_order_low_balance": "Niewystarczające saldo. Proszę doładować konto.",
+    "ivr_order_manual": "Twoje zamówienie zostanie przetworzone ręcznie. Skontaktujemy się z Tobą w sprawie ostatecznej ceny.",
+    "ivr_order_error": "Nie udało się złożyć zamówienia IVR. Spróbuj ponownie."
   },
   "number-edit": {
     "number_not_found": "Numer nie został znaleziony",
