@@ -1,8 +1,9 @@
 'use client'
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useMemo, useRef, useState} from 'react'
 import {useTranslations} from 'next-intl'
 import {useIvrStore} from '@/stores/useIvrStore'
-import DropdownSelect from '@/components/shared/DropdownSelect'
+import DropDownSelectAudio from '@/components/shared/DropDownSelectAudio'
+import LanguageSelector from '@/components/shared/LanguageSelector'
 import {Ivr, IvrEffect, IvrMusic} from '@/types/IvrTypes'
 
 export default function IvrPage() {
@@ -13,6 +14,7 @@ export default function IvrPage() {
     const [selectedIvr, setSelectedIvr] = useState<string | null>(null)
     const [selectedIvrMusic, setSelectedIvrMusic] = useState<string | null>(null)
     const [selectedIvrEffect, setSelectedIvrEffect] = useState<string | null>(null)
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
     const {ivr, ivrMusic, ivrEffects, fetchIvr} = useIvrStore()
     const ivrBackgroundFetchDone = useRef(false)
 
@@ -27,7 +29,7 @@ export default function IvrPage() {
         if (ivrEffects) {
             setLocalIvrEffects(ivrEffects)
         }
-        
+
         if (!ivr || !ivrMusic || !ivrEffects || !ivrBackgroundFetchDone.current) {
             ivrBackgroundFetchDone.current = true
             console.log('Fetching IVR data in background')
@@ -42,28 +44,64 @@ export default function IvrPage() {
         }
     }, [ivr, ivrMusic, ivrEffects, fetchIvr])
 
-    // Format data for dropdown selects
-    const formatIvrData = (data: Ivr[] | null) => {
+    // Extract unique languages from ivr data
+    const availableLanguages = useMemo(() => {
+        if (!localIvr) return []
+
+        // Extract unique language values
+        return Array.from(new Set(localIvr.map(item => item.lang)))
+    }, [localIvr])
+
+    // Initialize selected languages with all available languages only once
+    const initializedLanguagesRef = useRef(false)
+    useEffect(() => {
+        if (availableLanguages.length > 0 && !initializedLanguagesRef.current) {
+            setSelectedLanguages(availableLanguages)
+            initializedLanguagesRef.current = true
+        }
+    }, [availableLanguages])
+
+    // Handle language selection change
+    const handleLanguageChange = (languages: string[]) => {
+        setSelectedLanguages(languages)
+    }
+
+    // Filter ivr data based on selected languages
+    const filteredIvrData = useMemo(() => {
+        if (!localIvr) return localIvr
+
+        // If no languages are selected, return an empty array
+        if (selectedLanguages.length === 0) return []
+
+        return localIvr.filter(item => selectedLanguages.includes(item.lang))
+    }, [localIvr, selectedLanguages])
+
+    // Format data for dropdown selects with audio URLs
+    const formatIvrDataWithAudio = (data: Ivr[] | null) => {
         if (!data) return []
         return data.map(item => ({
             id: item.id.toString(),
-            name: item.name
+            name: item.name,
+            fileUrl: item.filelink?.url,
+            geo: item.lang.split('_')[1]?.toLowerCase() // Extract country code from lang field (e.g., 'en_US' -> 'us')
         }))
     }
 
-    const formatIvrMusicData = (data: IvrMusic[] | null) => {
+    const formatIvrMusicWithAudio = (data: IvrMusic[] | null) => {
         if (!data) return []
         return data.map(item => ({
             id: item.id.toString(),
-            name: item.name
+            name: item.name,
+            fileUrl: item.filelink?.url
         }))
     }
 
-    const formatIvrEffectsData = (data: IvrEffect[] | null) => {
+    const formatIvrEffectsWithAudio = (data: IvrEffect[] | null) => {
         if (!data) return []
         return data.map(item => ({
             id: item.id.toString(),
-            name: item.name
+            name: item.name,
+            fileUrl: item.filelink?.url
         }))
     }
 
@@ -82,88 +120,48 @@ export default function IvrPage() {
 
     return (
         <div className="flex flex-col space-y-6">
-            <h1 className="text-2xl font-bold">{t('ivr')}</h1>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Language selector for filtering ivr voices */}
+            {availableLanguages.length > 0 && (
+                <LanguageSelector
+                    languages={availableLanguages}
+                    onChangeAction={handleLanguageChange}
+                    className="mb-2"
+                />
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="flex flex-col space-y-2">
-                    <h2 className="text-lg font-semibold">{t('ivr_voice')}</h2>
-                    <DropdownSelect
+                    <DropDownSelectAudio
                         selectId="ivr-voice"
                         selectTitle={t('select_ivr_voice')}
-                        data={formatIvrData(localIvr)}
+                        data={formatIvrDataWithAudio(filteredIvrData)}
                         onSelectAction={handleIvrSelect}
                         selectedOption={selectedIvr}
                         loading={!localIvr}
-                        showFlags={false}
-                        showLabel={true}
+                        required={true}
+                        showFlags={true}
                     />
-                    {selectedIvr && localIvr && (
-                        <div className="mt-4">
-                            {localIvr.find(item => item.id.toString() === selectedIvr)?.filelink && (
-                                <audio 
-                                    controls 
-                                    src={localIvr.find(item => item.id.toString() === selectedIvr)?.filelink.url}
-                                    className="w-full"
-                                >
-                                    Your browser does not support the audio element.
-                                </audio>
-                            )}
-                        </div>
-                    )}
                 </div>
-                
+
                 <div className="flex flex-col space-y-2">
-                    <h2 className="text-lg font-semibold">{t('ivr_music')}</h2>
-                    <DropdownSelect
+                    <DropDownSelectAudio
                         selectId="ivr-music"
                         selectTitle={t('select_ivr_music')}
-                        data={formatIvrMusicData(localIvrMusic)}
+                        data={formatIvrMusicWithAudio(localIvrMusic)}
                         onSelectAction={handleIvrMusicSelect}
                         selectedOption={selectedIvrMusic}
                         loading={!localIvrMusic}
-                        showFlags={false}
-                        showLabel={true}
                     />
-                    {selectedIvrMusic && localIvrMusic && (
-                        <div className="mt-4">
-                            {localIvrMusic.find(item => item.id.toString() === selectedIvrMusic)?.filelink && (
-                                <audio 
-                                    controls 
-                                    src={localIvrMusic.find(item => item.id.toString() === selectedIvrMusic)?.filelink.url}
-                                    className="w-full"
-                                >
-                                    Your browser does not support the audio element.
-                                </audio>
-                            )}
-                        </div>
-                    )}
                 </div>
-                
+
                 <div className="flex flex-col space-y-2">
-                    <h2 className="text-lg font-semibold">{t('ivr_effects')}</h2>
-                    <DropdownSelect
+                    <DropDownSelectAudio
                         selectId="ivr-effects"
                         selectTitle={t('select_ivr_effect')}
-                        data={formatIvrEffectsData(localIvrEffects)}
+                        data={formatIvrEffectsWithAudio(localIvrEffects)}
                         onSelectAction={handleIvrEffectSelect}
                         selectedOption={selectedIvrEffect}
                         loading={!localIvrEffects}
-                        showFlags={false}
-                        showLabel={true}
                     />
-                    {selectedIvrEffect && localIvrEffects && (
-                        <div className="mt-4">
-                            {localIvrEffects.find(item => item.id.toString() === selectedIvrEffect)?.filelink && (
-                                <audio 
-                                    controls 
-                                    src={localIvrEffects.find(item => item.id.toString() === selectedIvrEffect)?.filelink.url}
-                                    className="w-full"
-                                >
-                                    Your browser does not support the audio element.
-                                </audio>
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

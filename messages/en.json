@@ -121,6 +121,13 @@
     "address-proof-x2": "2 forms of proof of address (a copy of utility bill no older than of 6 months)",
     "photo": "Photo verification (high definition colored photo of you holding your opened on the first page passport)"
   },
+  "ivr": {
+    "locale": "en",
+    "all": "All",
+    "select_deselect_all": "Select/Deselect All",
+    "no_options_available": "No options available",
+    "no_results": "No results found"
+  },
   "dashboard": {
     "profile": "Profile",
     "transactions": "Finance",

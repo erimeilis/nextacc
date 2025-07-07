@@ -120,6 +120,13 @@
     "address-proof-x2": "2 formy potwierdzenia adresu (kopia rachunku za media nie starsza niż 6 miesięcy)",
     "photo": "Weryfikacja fotograficzna (zdjęcie w wysokiej rozdzielczości, na którym trzymasz otwarty na pierwszej stronie paszport)"
   },
+  "ivr": {
+    "locale": "pl",
+    "all": "Wszystkie",
+    "select_deselect_all": "Zaznacz/Odznacz wszystkie",
+    "no_options_available": "Brak dostępnych opcji",
+    "no_results": "Nie znaleziono wyników"
+  },
   "dashboard": {
     "profile": "Profil",
     "transactions": "Finanse",

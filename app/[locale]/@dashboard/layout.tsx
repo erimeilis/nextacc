@@ -299,11 +299,55 @@ export default function Layout({children}: { children: React.ReactNode }) {
                         <Tab
                             key={tab.slug}
                             type="button"
+                            data-tab-slug={tab.slug}
                             onClick={() => {
                                 // Don't allow clicking on the already active tab
                                 if (activeTab === tab.slug) {
                                     return
                                 }
+
+                                // Get the clicked tab element
+                                const tabElement = document.querySelector(`button[data-tab-slug="${tab.slug}"]`) as HTMLElement
+
+                                // If we found the tab element and the tabs container
+                                if (tabElement && tabsContainerRef.current) {
+                                    const container = tabsContainerRef.current
+                                    const tabRect = tabElement.getBoundingClientRect()
+                                    const containerRect = container.getBoundingClientRect()
+
+                                    // Check if the tab is partially visible
+                                    const isPartiallyVisible = 
+                                        (tabRect.left < containerRect.left && tabRect.right > containerRect.left) || 
+                                        (tabRect.left < containerRect.right && tabRect.right > containerRect.right)
+
+                                    // If the tab is partially visible, scroll it into view with a bounce effect
+                                    if (isPartiallyVisible) {
+                                        // Calculate the scroll position to center the tab
+                                        const scrollLeft = tabElement.offsetLeft - (container.clientWidth / 2) + (tabElement.offsetWidth / 2)
+
+                                        // Apply the bounce effect by overshooting and then settling
+                                        const overshoot = 20 // pixels to overshoot
+                                        const direction = tabRect.left < containerRect.left ? -1 : 1
+
+                                        // First scroll with overshoot
+                                        container.scrollTo({
+                                            left: scrollLeft + (direction * overshoot),
+                                            behavior: 'smooth'
+                                        })
+
+                                        // Then settle back to the correct position after a short delay
+                                        setTimeout(() => {
+                                            container.scrollTo({
+                                                left: scrollLeft,
+                                                behavior: 'smooth'
+                                            })
+
+                                            // Check scrollability after animation
+                                            setTimeout(checkScrollability, 500)
+                                        }, 150)
+                                    }
+                                }
+
                                 // Update the active tab state immediately
                                 setActiveTab(tab.slug)
                                 // Set the loading state to true

@@ -18,7 +18,8 @@ export default function Tab({
                                 isLoading = false,
                                 icon,
                                 iconSize = 'h-4 w-4',
-                                children
+                                children,
+                                'data-tab-slug': dataTabSlug,
                             }: {
     type: 'button' | 'submit' | 'reset' | undefined
     className?: string
@@ -28,6 +29,7 @@ export default function Tab({
     icon?: FC<SVGProps<SVGSVGElement>>
     iconSize?: string
     children?: React.ReactNode
+    'data-tab-slug'?: string
 }) {
     // Disable clicking when active tab is loading (showing skeleton)
     const isClickDisabled = active && isLoading
@@ -43,6 +45,7 @@ export default function Tab({
             type={type}
             className={fixedTabClass + ' ' + className + ' ' + (active ? activeTabClass : commonClass) + (isClickDisabled ? ' cursor-not-allowed opacity-75' : '')}
             onClick={handleClick}
+            data-tab-slug={dataTabSlug}
         >
             <div className="relative flex items-center justify-center px-2 sm:px-4">
                 {isLoading && active && (
