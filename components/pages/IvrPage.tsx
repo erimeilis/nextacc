@@ -10,6 +10,7 @@ import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
 import {useToast} from '@/hooks/use-toast'
 import {redOrderIvr} from '@/app/api/redreport/ivr'
+import {calculateSpeechTiming} from '@/utils/calculateSpeechTiming'
 
 // Grammar checker types
 interface GrammarMatch {
@@ -49,8 +50,8 @@ export default function IvrPage() {
     const toastT = useTranslations('toast')
 
     // Constants for calculations
-    const WORDS_PER_MINUTE = 150 // Average speaking rate
-    const PRICE_PER_WORD = 0.01 // Example price per word
+    const COMMON_LANGUAGE_PREFIXES = useMemo(() => ['en', 'de', 'pl', 'fr', 'cz', 'ru'], [])
+    const MAX_DURATION_FOR_AUTO_PRICE = 35
 
     // Set data from the store immediately if available and fetch in the background if needed
     useEffect(() => {
@@ -145,11 +146,13 @@ export default function IvrPage() {
     }
 
     const handleIvrMusicSelect = (id: string) => {
-        setSelectedIvrMusic(id)
+        // If empty string is passed (from "None" option), set to null
+        setSelectedIvrMusic(id === '' ? null : id)
     }
 
     const handleIvrEffectSelect = (id: string) => {
-        setSelectedIvrEffect(id)
+        // If empty string is passed (from "None" option), set to null
+        setSelectedIvrEffect(id === '' ? null : id)
     }
 
     // Debounce timer reference for real-time grammar checking
@@ -478,21 +481,51 @@ export default function IvrPage() {
         }
     }, [])
 
-    // Calculate word count
-    const wordCount = useMemo(() => {
-        if (!ivrText.trim()) return 0
-        return ivrText.trim().split(/\s+/).length
+    // Calculate speech timing metrics
+    const {wordCount, minDurationInSeconds, optDurationInSeconds} = useMemo(() => {
+        if (!ivrText.trim()) return {wordCount: 0, minDurationInSeconds: 0, optDurationInSeconds: 0}
+        return calculateSpeechTiming(ivrText)
     }, [ivrText])
 
-    // Calculate approximate duration in seconds
-    const durationInSeconds = useMemo(() => {
-        return Math.round((wordCount / WORDS_PER_MINUTE) * 60)
-    }, [wordCount, WORDS_PER_MINUTE])
+    // Get the selected Ivr object
+    const selectedIvrObject = useMemo(() => {
+        if (!selectedIvr || !localIvr) return null
+        return localIvr.find(item => item.id.toString() === selectedIvr)
+    }, [selectedIvr, localIvr])
 
-    // Calculate price based on word count
-    const price = useMemo(() => {
-        return (wordCount * PRICE_PER_WORD).toFixed(2)
-    }, [wordCount, PRICE_PER_WORD])
+    // Calculate price based on conditions
+    const {price, isManualCalculation} = useMemo(() => {
+        // Default values
+        let calculatedPrice = 0
+        let needsManualCalculation = false
+
+        // Check if we have all required data
+        if (!selectedIvrObject || !ivrText.trim()) {
+            return {price: calculatedPrice, isManualCalculation: needsManualCalculation}
+        }
+
+        // Condition 1: If optimal duration > MAX_DURATION_FOR_AUTO_PRICE
+        if (optDurationInSeconds > MAX_DURATION_FOR_AUTO_PRICE) {
+            needsManualCalculation = true
+            return {price: 0, isManualCalculation: needsManualCalculation}
+        }
+
+        // Condition 2: If IVR language starts with common prefixes
+        const ivrLang = selectedIvrObject.lang.split('_')[0].toLowerCase()
+        if (!COMMON_LANGUAGE_PREFIXES.some(prefix => ivrLang === prefix)) {
+            needsManualCalculation = true
+            return {price: 0, isManualCalculation: needsManualCalculation}
+        }
+
+        // Condition 3: Calculate price using the formula
+        const hasMusic = !!selectedIvrMusic
+        const hasEffect = !!selectedIvrEffect
+        const musicIncrement = hasMusic || hasEffect ? selectedIvrObject.music_inc : 0
+
+        calculatedPrice = (selectedIvrObject.price + musicIncrement) * selectedIvrObject.multiplier
+
+        return {price: calculatedPrice, isManualCalculation: needsManualCalculation}
+    }, [selectedIvrObject, ivrText, optDurationInSeconds, selectedIvrMusic, selectedIvrEffect, MAX_DURATION_FOR_AUTO_PRICE, COMMON_LANGUAGE_PREFIXES])
 
     // Handle comment text change
     const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -523,12 +556,13 @@ export default function IvrPage() {
         setIsOrdering(true)
 
         try {
+            // For manual calculation cases, we send price as 0
             const response = await redOrderIvr({
                 ivr: selectedIvr,
                 ivr_music: selectedIvrMusic || undefined,
                 ivr_effect: selectedIvrEffect || undefined,
-                amount: price,
-                duration: durationInSeconds.toString(),
+                amount: price.toFixed(2), // Already set to "0.00" for manual calculation cases
+                duration: optDurationInSeconds.toString(),
                 text: ivrText,
                 comment: commentText.trim() || undefined
             })
@@ -690,7 +724,6 @@ export default function IvrPage() {
                                         <>
                                             {grammarMatches.length > 0 ? (
                                                 <>
-                                                    {console.log('Rendering with grammar matches:', grammarMatches.length)}
                                                     {renderTextWithGrammarIssues(ivrText, grammarMatches)}
                                                 </>
                                             ) : (
@@ -713,18 +746,26 @@ export default function IvrPage() {
 
                     {/* Counters and price display */}
                     <div className="flex flex-col sm:flex-row justify-between gap-4 mt-2 text-xs">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-wrap">
                             <div className="flex items-center">
                                 <span className="font-medium mr-1">{t('word_count')}:</span>
                                 <span>{wordCount}</span>
                             </div>
                             <div className="flex items-center">
-                                <span className="font-medium mr-1">{t('duration')}:</span>
-                                <span>{durationInSeconds} {t('seconds')}</span>
+                                <span className="font-medium mr-1">{t('min_duration')}:</span>
+                                <span>{minDurationInSeconds} {t('seconds')}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <span className="font-medium mr-1">{t('opt_duration')}:</span>
+                                <span>{optDurationInSeconds} {t('seconds')}</span>
                             </div>
                             <div className="flex items-center">
                                 <span className="font-medium mr-1">{t('price')}:</span>
-                                <span>${price}</span>
+                                {isManualCalculation ? (
+                                    <span className="text-amber-600 dark:text-amber-400">{t('price_manual')}</span>
+                                ) : (
+                                    <span>${price}</span>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center">

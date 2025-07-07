@@ -125,7 +125,8 @@
     "all": "Wszystkie",
     "select_deselect_all": "Zaznacz/Odznacz wszystkie",
     "no_options_available": "Brak dostępnych opcji",
-    "no_results": "Nie znaleziono wyników"
+    "no_results": "Nie znaleziono wyników",
+    "none": "Brak"
   },
   "dashboard": {
     "profile": "Profil",
@@ -201,8 +202,11 @@
     "grammar_suggestions": "Sugestie gramatyczne",
     "word_count": "Liczba słów",
     "duration": "Przybliżony czas trwania",
+    "min_duration": "Minimalny czas trwania",
+    "opt_duration": "Optymalny czas trwania",
     "seconds": "sekund",
     "price": "Cena",
+    "price_manual": "Będzie obliczana ręcznie",
     "grammar_check": "Sprawdzanie gramatyki",
     "comment": "Komentarz",
     "enter_comment": "Wprowadź dodatkowe komentarze lub instrukcje",

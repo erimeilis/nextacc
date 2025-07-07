@@ -87,7 +87,8 @@ export async function redOrderIvr(params: OrderIvrParams): Promise<OrderIvrRespo
             return res.json()
         })
         .then(async (data) => {
-            return data
+            console.log('redOrderIvr: Response data:', data)
+            return data.data
         })
         .catch((err) => {
             console.log('redOrderIvr error: ', err.message)

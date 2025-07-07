@@ -332,66 +332,95 @@ export default function DropDownSelectAudio({
                             }}
                         >
                             {data && data.length > 0 ? (
-                                data.map(item => {
-                                    // Use the same matching logic as for the selectedItem
-                                    const isSelected =
-                                        item.id === localSelectedOption ||
-                                        (typeof localSelectedOption === 'string' && item.id.toLowerCase() === localSelectedOption.toLowerCase()) ||
-                                        (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
-
-                                    return (
+                                <>
+                                    {/* Add "None" option if not required */}
+                                    {!required && (
                                         <div
-                                            key={item.id}
-                                            ref={isSelected ? selectedItemRef : null}
+                                            key="none-option"
+                                            ref={!localSelectedOption ? selectedItemRef : null}
                                             onClick={(e) => {
                                                 e.stopPropagation()
-                                                handleOptionSelect(item.id)
+                                                setLocalSelectedOption(null)
+                                                setIsOpen(false)
+                                                setTimeout(() => {
+                                                    onSelectAction('')
+                                                }, 0)
                                             }}
                                             className={`dropdown-option px-3 py-2 cursor-pointer flex items-center justify-between hover:bg-accent dark:hover:bg-accent ${
-                                                isSelected ? 'bg-accent/50 dark:bg-accent/50' : ''
+                                                !localSelectedOption ? 'bg-accent/50 dark:bg-accent/50' : ''
                                             }`}
                                         >
-                                            <span className={`text-sm whitespace-nowrap ${isSelected ? 'font-bold' : ''} flex items-center`}>
-                                                {showFlags && item.geo && (
-                                                    <img
-                                                        src={`https://flagcdn.com/w20/${getCountryCode(item)}.png`}
-                                                        alt={`${item.name} flag`}
-                                                        className="mr-2 h-3 w-5 inline-block"
-                                                    />
-                                                )}
-                                                <span>{item.name}</span>
+                                            <span className={`text-sm whitespace-nowrap ${!localSelectedOption ? 'font-bold' : ''} flex items-center`}>
+                                                <span>{t('none')}</span>
                                             </span>
                                             <div className="flex items-center">
-                                                {item.fileUrl && (
-                                                    <div
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            togglePlayPause(e, item.id, item.fileUrl)
-                                                        }}
-                                                        className="mr-2 p-1 rounded-full hover:bg-accent transition-colors cursor-pointer"
-                                                        role="button"
-                                                        tabIndex={0}
-                                                        aria-label={isPlaying && playingItemId === item.id ? 'Pause' : 'Play'}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                                e.preventDefault()
-                                                                e.stopPropagation()
-                                                                togglePlayPause(e as unknown as React.MouseEvent, item.id, item.fileUrl)
-                                                            }
-                                                        }}
-                                                    >
-                                                        {isPlaying && playingItemId === item.id ? (
-                                                            <PauseIcon className="h-4 w-4" weight="bold"/>
-                                                        ) : (
-                                                            <PlayIcon className="h-4 w-4" weight="bold"/>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                {isSelected && <CheckIcon className="pl-1 h-4 w-4 text-foreground"/>}
+                                                {!localSelectedOption && <CheckIcon className="pl-1 h-4 w-4 text-foreground"/>}
                                             </div>
                                         </div>
-                                    )
-                                })
+                                    )}
+
+                                    {/* Regular options */}
+                                    {data.map(item => {
+                                        // Use the same matching logic as for the selectedItem
+                                        const isSelected =
+                                            item.id === localSelectedOption ||
+                                            (typeof localSelectedOption === 'string' && item.id.toLowerCase() === localSelectedOption.toLowerCase()) ||
+                                            (typeof localSelectedOption === 'string' && getSlug(item.name) === localSelectedOption)
+
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                ref={isSelected ? selectedItemRef : null}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleOptionSelect(item.id)
+                                                }}
+                                                className={`dropdown-option px-3 py-2 cursor-pointer flex items-center justify-between hover:bg-accent dark:hover:bg-accent ${
+                                                    isSelected ? 'bg-accent/50 dark:bg-accent/50' : ''
+                                                }`}
+                                            >
+                                                <span className={`text-sm whitespace-nowrap ${isSelected ? 'font-bold' : ''} flex items-center`}>
+                                                    {showFlags && item.geo && (
+                                                        <img
+                                                            src={`https://flagcdn.com/w20/${getCountryCode(item)}.png`}
+                                                            alt={`${item.name} flag`}
+                                                            className="mr-2 h-3 w-5 inline-block"
+                                                        />
+                                                    )}
+                                                    <span>{item.name}</span>
+                                                </span>
+                                                <div className="flex items-center">
+                                                    {item.fileUrl && (
+                                                        <div
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                togglePlayPause(e, item.id, item.fileUrl)
+                                                            }}
+                                                            className="mr-2 p-1 rounded-full hover:bg-accent transition-colors cursor-pointer"
+                                                            role="button"
+                                                            tabIndex={0}
+                                                            aria-label={isPlaying && playingItemId === item.id ? 'Pause' : 'Play'}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault()
+                                                                    e.stopPropagation()
+                                                                    togglePlayPause(e as unknown as React.MouseEvent, item.id, item.fileUrl)
+                                                                }
+                                                            }}
+                                                        >
+                                                            {isPlaying && playingItemId === item.id ? (
+                                                                <PauseIcon className="h-4 w-4" weight="bold"/>
+                                                            ) : (
+                                                                <PlayIcon className="h-4 w-4" weight="bold"/>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {isSelected && <CheckIcon className="pl-1 h-4 w-4 text-foreground"/>}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </>
                             ) : (
                                 <div className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                                     {data.length === 0 ? t('no_options_available') : t('no_results')}

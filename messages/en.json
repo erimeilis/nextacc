@@ -126,7 +126,8 @@
     "all": "All",
     "select_deselect_all": "Select/Deselect All",
     "no_options_available": "No options available",
-    "no_results": "No results found"
+    "no_results": "No results found",
+    "none": "None"
   },
   "dashboard": {
     "profile": "Profile",
@@ -202,8 +203,11 @@
     "grammar_suggestions": "Grammar Suggestions",
     "word_count": "Word count",
     "duration": "Approximate duration",
+    "min_duration": "Minimum duration",
+    "opt_duration": "Optimal duration",
     "seconds": "seconds",
     "price": "Price",
+    "price_manual": "Will be calculated manually",
     "grammar_check": "Grammar check",
     "comment": "Comment",
     "enter_comment": "Enter additional comments or instructions",
