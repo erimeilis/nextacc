@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
-import {signOut, useSession} from 'next-auth/react'
+import {signOut} from 'next-auth/react'
+import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
@@ -10,7 +11,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, 
 import {createHash} from 'crypto'
 
 interface DesktopProfileMenuProps {
-    session: ReturnType<typeof useSession>
+    session: ReturnType<typeof useAuthSession>
     resetClientStoreAction: () => void
     resetCartStoreAction: () => void
     lAction: (key: string) => string

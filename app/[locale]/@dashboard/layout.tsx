@@ -1,6 +1,6 @@
 'use client'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {useSession} from 'next-auth/react'
+import {useAuthSession} from '@/hooks/use-auth-session'
 import Show from '@/components/service/Show'
 import Login from '@/components/Login'
 import Loader from '@/components/service/Loader'
@@ -22,7 +22,7 @@ declare module 'next-auth' {
 }
 
 export default function Layout({children}: { children: React.ReactNode }) {
-    const session = useSession()
+    const session = useAuthSession()
     const router = useRouter()
 
     const t = useTranslations('dashboard')

@@ -66,3 +66,7 @@
 - Logging that should happen on component mount/unmount
 
 Remember that each useEffect should have a single responsibility and clear dependencies.
+
+[[calls]]
+match = "when the user requests code examples, setup or configuration steps, or library/API documentation"
+tool = "context7"

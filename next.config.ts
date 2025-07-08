@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
         serverActions: {
             bodySizeLimit: '50mb' // Set to match your MAX_TOTAL_SIZE
         }
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'red.telecomax.net',
+                pathname: '/payment-methods/**',
+            },
+        ]
     }
 }
 

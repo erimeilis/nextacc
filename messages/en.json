@@ -136,6 +136,7 @@
     "uploads": "Uploads",
     "statistics": "Statistics",
     "ivr": "IVR",
+    "payment_methods": "Payment Methods",
     "active": "Active",
     "waiting": "Waiting",
     "pay_sum": "Total Payment",
@@ -211,7 +212,10 @@
     "grammar_check": "Grammar check",
     "comment": "Comment",
     "enter_comment": "Enter additional comments or instructions",
-    "order": "Order"
+    "order": "Order",
+    "no_payment_methods": "No payment methods available",
+    "payment_type_electron": "Electronic Payment",
+    "payment_type_bank": "Bank Transfer"
   },
   "profile": {
     "signed_in_as": "Signed in as",
@@ -232,7 +236,9 @@
     "payment": "Payment",
     "recommended_topup": "Recommended topup",
     "topup_description": "Top up your balance to purchase numbers and services",
-    "topup_now": "Top up now"
+    "topup_now": "Top up now",
+    "topup_amount": "Payment amount",
+    "min_topup_amount": "Minimum amount is $20"
   },
   "cart": {
     "number": "Number",

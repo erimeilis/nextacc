@@ -135,6 +135,7 @@
     "uploads": "Файли",
     "statistics": "Статистика",
     "ivr": "IVR",
+    "payment_methods": "Методи оплати",
     "active": "Активні",
     "waiting": "Очікують",
     "pay_sum": "Загальна сума оплати",
@@ -210,7 +211,10 @@
     "grammar_check": "Перевірка граматики",
     "comment": "Коментар",
     "enter_comment": "Введіть додаткові коментарі або інструкції",
-    "order": "Замовити"
+    "order": "Замовити",
+    "no_payment_methods": "Немає доступних методів оплати",
+    "payment_type_electron": "Електронний платіж",
+    "payment_type_bank": "Банківський переказ"
   },
   "profile": {
     "signed_in_as": "Вхід як",
@@ -231,7 +235,9 @@
     "payment": "Оплата",
     "recommended_topup": "Рекомендоване поповнення",
     "topup_description": "Поповніть свій баланс для придбання номерів та послуг",
-    "topup_now": "Поповнити зараз"
+    "topup_now": "Поповнити зараз",
+    "topup_amount": "Сума поповнення",
+    "min_topup_amount": "Мінімальна сума $20"
   },
   "cart": {
     "number": "Номер",

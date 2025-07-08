@@ -2,7 +2,7 @@
 import LocaleSwitcher from '@/components/nav/LocaleSwitcher'
 import logoLight from '@/app/[locale]/icon-light.png'
 import logo from '@/app/[locale]/icon.png'
-import {useSession} from 'next-auth/react'
+import {useAuthSession} from '@/hooks/use-auth-session'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
 import React, {useEffect, useRef, useState} from 'react'
@@ -30,7 +30,7 @@ const ClientOnlyNav = ({
                            router,
                            searchParams
                        }: {
-    session: ReturnType<typeof useSession>;
+    session: ReturnType<typeof useAuthSession>;
     balance?: number;
     displayBalance: number;
     resetClientStore: () => void;
@@ -186,7 +186,7 @@ const ClientOnlyNav = ({
 }
 
 export default function Nav() {
-    const session = useSession()
+    const session = useAuthSession()
     const l = useTranslations('login')
     const p = useTranslations('profile')
     const router = useRouter()

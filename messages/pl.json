@@ -135,6 +135,7 @@
     "uploads": "Pliki",
     "statistics": "Statystyki",
     "ivr": "IVR",
+    "payment_methods": "Metody płatności",
     "active": "Aktywne",
     "waiting": "Oczekujące",
     "pay_sum": "Suma płatności",
@@ -210,7 +211,10 @@
     "grammar_check": "Sprawdzanie gramatyki",
     "comment": "Komentarz",
     "enter_comment": "Wprowadź dodatkowe komentarze lub instrukcje",
-    "order": "Zamów"
+    "order": "Zamów",
+    "no_payment_methods": "Brak dostępnych metod płatności",
+    "payment_type_electron": "Płatność elektroniczna",
+    "payment_type_bank": "Przelew bankowy"
   },
   "profile": {
     "signed_in_as": "Zalogowany jako",
@@ -231,7 +235,9 @@
     "payment": "Płatność",
     "recommended_topup": "Zalecane doładowanie",
     "topup_description": "Doładuj swoje konto, aby kupić numery i usługi",
-    "topup_now": "Doładuj teraz"
+    "topup_now": "Doładuj teraz",
+    "topup_amount": "Kwota płatności",
+    "min_topup_amount": "Minimalna kwota to $20"
   },
   "cart": {
     "number": "Numer",

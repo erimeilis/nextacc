@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import {useSession} from 'next-auth/react'
+import {useAuthSession} from '@/hooks/use-auth-session'
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/Avatar'
 import {Button} from '@/components/ui/Button'
 import {Drawer} from '@/components/ui/Drawer'
@@ -8,7 +8,7 @@ import {createHash} from 'crypto'
 import Client from '@/components/drawers/Client'
 
 interface MobileProfileDrawerProps {
-    session: ReturnType<typeof useSession>
+    session: ReturnType<typeof useAuthSession>
     profileDrawerOpen: boolean
     handleProfileDrawerChangeAction: (openState: boolean | ((prevState: boolean) => boolean)) => void
     drawerDirection: 'bottom' | 'right'

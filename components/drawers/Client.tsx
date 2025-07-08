@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
-import {signOut, useSession} from 'next-auth/react'
+import {signOut} from 'next-auth/react'
+import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
@@ -9,7 +10,7 @@ import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} fro
 import MobileSwitchers from '@/components/nav/MobileSwitchers'
 
 interface ProfileDrawerContentProps {
-    session: ReturnType<typeof useSession>
+    session: ReturnType<typeof useAuthSession>
     handleCloseAction: () => void
     resetClientStoreAction: () => void
     resetCartStoreAction: () => void
