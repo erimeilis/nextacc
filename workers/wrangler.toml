@@ -7,4 +7,4 @@ compatibility_date = "2023-10-30"
 [[d1_databases]]
 binding = "DB"
 database_name = "red-offers-store"
-database_id = "12804b0b-6488-45ff-b721-224fc6d0773a" # Replace it with your actual database ID after creation
+database_id = "70893fd7-7f15-4b86-910e-b56994533936"

@@ -1,114 +1,86 @@
-# D1 Storage Worker
+Cloudflare D1 provides a specific API for interacting with the database. The correct methods to use are:
+- `db.prepare()` for preparing SQL statements
+- `.bind()` for binding parameters
+- `.all()` for getting all results
+- `.first()` for getting the first result
+- `.run()` for executing statements without returning results
 
-This directory contains the Cloudflare Worker that handles storage operations for the D1 database. The worker provides a simple API for getting, setting, and removing items from the D1 database.
+By using these methods correctly, we ensure that the worker can properly interact with the D1 database.
 
-## Setup
+## Deployment Instructions
 
-To set up the D1 database and deploy the worker, follow these steps:
+To deploy the updated worker:
 
-1. Install Wrangler CLI:
+1. Navigate to the workers directory:
    ```bash
-   npm install -g wrangler
+   cd workers
    ```
 
-2. Authenticate with your Cloudflare account:
-   ```bash
-   wrangler login
-   ```
-
-3. Create a new D1 database (if you haven't already):
-   ```bash
-   wrangler d1 create red-offers-store
-   ```
-
-4. Update the `database_id` in `wrangler.toml` with the ID from the previous step.
-
-5. Run the setup script:
-   ```bash
-   ./setup-d1.sh
-   ```
-
-   This script will:
-   - Apply the database schema to the D1 database
-   - Deploy the worker
-   - Print the worker URL
-
-6. Update the `NEXT_PUBLIC_D1_WORKER_URL` environment variable in `.env.local` with the worker URL.
-
-## Troubleshooting
-
-If you encounter issues with the D1 storage, try the following:
-
-1. Check if the worker is deployed correctly:
-   ```bash
-   wrangler whoami
-   ```
-
-2. Verify that the D1 database exists:
-   ```bash
-   wrangler d1 list
-   ```
-
-3. Check if the schema is applied correctly:
-   ```bash
-   wrangler d1 execute red-offers-store --command="SELECT name FROM sqlite_master WHERE type='table'"
-   ```
-
-4. Test the worker directly:
-   ```bash
-   curl "https://d1-storage.your-account.workers.dev?method=getItem&key=test"
-   ```
-
-5. If you're still having issues, try redeploying the worker:
+2. Deploy the worker using Wrangler:
    ```bash
    wrangler deploy
    ```
 
-## API
+3. Test the worker to verify the fix:
+   ```bash
+   curl -X GET "https://d1-storage.eri-42e.workers.dev/get?key=test-key"
+   ```
 
-The worker provides the following API endpoints:
+   Expected successful response:
+   ```json
+   {"value":null}
+   ```
 
-### Get Item
+4. Test setting a value:
+   ```bash
+   curl -X POST "https://d1-storage.eri-42e.workers.dev/set?key=test-key" \
+     -H "Content-Type: application/json" \
+     -d '{"test":"value"}'
+   ```
 
-```
-GET /?method=getItem&key=<key>
-```
+   Expected successful response:
+   ```json
+   {"success":true}
+   ```
 
-Returns the value associated with the given key.
+5. Test retrieving the value:
+   ```bash
+   curl -X GET "https://d1-storage.eri-42e.workers.dev/get?key=test-key"
+   ```
 
-### Set Item
+   Expected successful response:
+   ```json
+   {"value":{"test":"value"}}
+   ```
 
-```
-POST /?method=setItem&key=<key>
-Content-Type: application/json
+6. Test deleting the value:
+   ```bash
+   curl -X DELETE "https://d1-storage.eri-42e.workers.dev/remove?key=test-key"
+   ```
 
-{
-  "value": <value>
-}
-```
+   Expected successful response:
+   ```json
+   {"success":true}
+   ```
 
-Sets the value associated with the given key.
+## Troubleshooting
 
-### Remove Item
+If you encounter any issues after deploying the fix:
 
-```
-POST /?method=removeItem&key=<key>
-```
+1. Check the worker logs:
+   ```bash
+   wrangler tail
+   ```
 
-Removes the value associated with the given key.
+2. Make a request to the worker to see the logs in real-time:
+   ```bash
+   curl -X GET "https://d1-storage.eri-42e.workers.dev/get?key=test-key"
+   ```
 
-## Schema
+3. Refer to the main troubleshooting guide in `README-TROUBLESHOOTING.md` for additional help.
 
-The D1 database uses the following schema:
+## Additional Resources
 
-```sql
-CREATE TABLE IF NOT EXISTS store (
-  key TEXT PRIMARY KEY,
-  value TEXT NOT NULL,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX IF NOT EXISTS idx_store_key ON store(key);
-```
-
-This schema defines a simple key-value store with an additional timestamp column to track when each item was last updated.
+For more information about using Cloudflare D1's API, refer to:
+- [Cloudflare D1 Documentation](https://developers.cloudflare.com/d1/)
+- [D1 API Reference](https://developers.cloudflare.com/d1/reference/api/)
