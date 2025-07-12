@@ -24,7 +24,7 @@ export async function redGetMyWaitingDids(): Promise<MyWaitingNumberInfo[] | nul
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetMyWaitingDids: Response status:', res.status)
+            console.log('redGetMyWaitingDids: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetMyWaitingDids error response: ', errorData)

@@ -11,7 +11,7 @@ import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
 import {CheckCircleIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
 import {useToast} from '@/hooks/use-toast'
-import Loader from '@/components/service/Loader'
+import {ProfileSkeleton} from '@/components/service/SkeletonLoader'
 import React, {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
 import {profileFields} from '@/constants/profileFields'
@@ -202,7 +202,7 @@ export default function Profile({
     //todo reset persistentID on logout?
     return <Show
         when={typeof userProfile !== 'undefined' && userProfile !== null}
-        fallback={<Loader height={350}/>}>
+        fallback={<ProfileSkeleton/>}>
         <div id="profile" className="transition duration-300 ease">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 pb-4 border-b border-border dark:border-border drop-shadow-sm">
                 <div className="text-xs sm:text-sm px-2 text-center sm:text-left">{t('signed_in_as')} {userProfile?.email} ({userProfile?.id})

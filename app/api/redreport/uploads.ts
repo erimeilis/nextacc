@@ -18,9 +18,9 @@ export async function redGetMyUploads(): Promise<UploadInfo[] | null> {
             'Authorization': 'Bearer ' + session?.token,
         }
     }
-
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redGetMyUploads: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetMyUploads error response: ', errorData)
@@ -57,6 +57,7 @@ export async function redUploadFile(file: File): Promise<UploadInfo[] | null> {
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redUploadFile: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redUploadFile error response: ', errorData)
@@ -91,6 +92,7 @@ export async function redDeleteUpload(fileId: string): Promise<UploadInfo[] | nu
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redDeleteUpload: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redDeleteUpload error response: ', errorData)
@@ -128,6 +130,7 @@ export async function redRenameFile(fileId: string, name: string): Promise<Uploa
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redRenameFile: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redRenameFile error response: ', errorData)

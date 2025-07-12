@@ -10,6 +10,71 @@ import {FormattedDate} from '@/components/ui/FormattedDate'
 import BooleanDot from '@/components/ui/BooleanDot'
 import DataTable, {ColumnDef, FilterDef} from '@/components/ui/DataTable'
 
+// Skeleton loader for transactions list
+function TransactionsSkeleton() {
+    return (
+        <div className="space-y-4 animate-pulse">
+            {/* Filters section */}
+            <div className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/20 rounded-lg">
+                <div className="flex-1">
+                    <div className="h-4 bg-muted rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-full"></div>
+                </div>
+                <div className="flex-1">
+                    <div className="h-4 bg-muted rounded w-16 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-full"></div>
+                </div>
+                <div className="flex-1">
+                    <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-full"></div>
+                </div>
+            </div>
+
+            {/* DataTable header */}
+            <div className="overflow-x-auto">
+                <div className="min-w-full">
+                    <div className="flex w-full py-3 border-b border-border bg-muted/10">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="flex-1 px-4">
+                                <div className="h-5 bg-muted rounded"></div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* DataTable rows */}
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex w-full py-3 border-b border-border hover:bg-muted/5">
+                            {[...Array(5)].map((_, j) => (
+                                <div key={j} className="flex-1 px-4">
+                                    <div className="h-4 bg-muted rounded"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* DataTable pagination */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+                <div className="flex items-center gap-2">
+                    <div className="h-4 bg-muted rounded w-16"></div>
+                    <div className="h-8 bg-muted rounded w-16"></div>
+                    <div className="h-4 bg-muted rounded w-24"></div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="h-8 bg-muted rounded w-20"></div>
+                    <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-8 bg-muted rounded w-8"></div>
+                        ))}
+                    </div>
+                    <div className="h-8 bg-muted rounded w-20"></div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // Define the filter type for MoneyTransactions
 type MoneyTransactionFilter = {
     startDate: Date | null | { start: Date | null, end: Date | null }
@@ -193,7 +258,7 @@ export default function MoneyTransactionsList({
                 showItemCounts: true
             }}
             emptyMessage={tr('no_transactions')}
-            loadingFallback={options?.length === 0 ? <div>{tr('empty_list')}</div> : undefined}
+            loadingFallback={options === null ? <TransactionsSkeleton /> : options.length === 0 ? <div>{tr('empty_list')}</div> : undefined}
         />
     )
 }

@@ -1,10 +1,10 @@
 'use server'
-import { auth } from '@/auth'
+import {auth} from '@/auth'
 import moment from 'moment'
-import { CallStatistics, SmsStatistics } from '@/types/Statistics'
+import {CallStatistics, SmsStatistics} from '@/types/Statistics'
 
 // Function to get call statistics
-export async function getCallStatistics(from?: string, to?: string, did?: string): Promise<CallStatistics[]> {
+export async function redGetCallStatistics(from?: string, to?: string, did?: string): Promise<CallStatistics[]> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return []
 
@@ -27,9 +27,10 @@ export async function getCallStatistics(from?: string, to?: string, did?: string
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redGetCallStatistics: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('getCallStatistics error response: ', errorData)
+                console.log('redGetCallStatistics error response: ', errorData)
                 return []
             }
             return res.json()
@@ -38,13 +39,13 @@ export async function getCallStatistics(from?: string, to?: string, did?: string
             return data.data || []
         })
         .catch(err => {
-            console.error('getCallStatistics error:', err.message)
+            console.error('redGetCallStatistics error:', err.message)
             return []
         })
 }
 
 // Function to send call statistics to email
-export async function sendCallStatistics(from?: string, to?: string, did?: string): Promise<boolean> {
+export async function redSendCallStatistics(from?: string, to?: string, did?: string): Promise<boolean> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return false
 
@@ -67,21 +68,22 @@ export async function sendCallStatistics(from?: string, to?: string, did?: strin
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redSendCallStatistics: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('sendCallStatistics error response: ', errorData)
+                console.log('redSendCallStatistics error response: ', errorData)
                 return false
             }
             return true
         })
         .catch(err => {
-            console.error('sendCallStatistics error:', err.message)
+            console.error('redSendCallStatistics error:', err.message)
             return false
         })
 }
 
 // Function to get SMS statistics
-export async function getSmsStatistics(from?: string, to?: string, did?: string): Promise<SmsStatistics[]> {
+export async function redGetSmsStatistics(from?: string, to?: string, did?: string): Promise<SmsStatistics[]> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return []
 
@@ -104,9 +106,10 @@ export async function getSmsStatistics(from?: string, to?: string, did?: string)
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redGetSmsStatistics: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('getSmsStatistics error response: ', errorData)
+                console.log('redGetSmsStatistics error response: ', errorData)
                 return []
             }
             return res.json()
@@ -115,13 +118,13 @@ export async function getSmsStatistics(from?: string, to?: string, did?: string)
             return data.data || []
         })
         .catch(err => {
-            console.error('getSmsStatistics error:', err.message)
+            console.error('redGetSmsStatistics error:', err.message)
             return []
         })
 }
 
 // Function to send SMS statistics to email
-export async function sendSmsStatistics(from?: string, to?: string, did?: string): Promise<boolean> {
+export async function redSendSmsStatistics(from?: string, to?: string, did?: string): Promise<boolean> {
     const session = await auth()
     if (!session || !session.user || session.user.provider === 'anonymous') return false
 
@@ -144,15 +147,16 @@ export async function sendSmsStatistics(from?: string, to?: string, did?: string
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redSendSmsStatistics: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('sendSmsStatistics error response: ', errorData)
+                console.log('redSendSmsStatistics error response: ', errorData)
                 return false
             }
             return true
         })
         .catch(err => {
-            console.error('sendSmsStatistics error:', err.message)
+            console.error('redSendSmsStatistics error:', err.message)
             return false
         })
 }

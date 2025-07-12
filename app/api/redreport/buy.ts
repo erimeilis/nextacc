@@ -7,7 +7,7 @@ import {ClientInfo} from '@/types/ClientInfo'
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {MyNumberInfo} from '@/types/MyNumberInfo'
 
-export async function buy(
+export async function redBuy(
     {
         clientInfo,
         uid,
@@ -89,6 +89,7 @@ export async function buy(
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/buy' : '/api/buy'), options)
         .then((res: Response) => {
+            console.log('redBuy: ', res.status)
             if (!res.ok) {
                 // Return error information including status code
                 if (res.status === 404) {

@@ -2,7 +2,7 @@ import {create} from 'zustand'
 
 import {CartItem} from '@/types/CartItem'
 import {getPersistState} from '@/utils/usePersistState'
-import {getCart} from '@/app/api/redreport/cart'
+import {redGetCart} from '@/app/api/redreport/cart'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -55,7 +55,7 @@ export const useCartStore = create<CartStore>()(
             fetchData: async () => {
                 try {
                     if (persistentId !== 'no-id') {
-                        const items: CartItem[] | null = await getCart({uid: persistentId})
+                        const items: CartItem[] | null = await redGetCart({uid: persistentId})
                         if (!items || items.length == 0) {
                             set({
                                 cart: [],

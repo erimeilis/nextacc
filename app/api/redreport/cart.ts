@@ -6,7 +6,7 @@ import {getAppIp} from '@/utils/getAppIp'
 import {ClientInfo} from '@/types/ClientInfo'
 import {CartItem} from '@/types/CartItem'
 
-export async function addToCart(
+export async function redAddToCart(
     {
         clientInfo,
         uid,
@@ -32,7 +32,7 @@ export async function addToCart(
     error?: { status: number, message: string }
 }> {
     if (!uid || !number) {
-        console.log('addToCart: no uid or number')
+        console.log('redAddToCart: no uid or number')
         return {data: []}
     }
 
@@ -84,6 +84,7 @@ export async function addToCart(
     }
     return fetch(process.env.REDREPORT_URL + (!anonymous ? '/api/kc/cart' : '/api/cart'), options)
         .then((res: Response) => {
+            console.log('redAddToCart: ', res.status)
             if (!res.ok) {
                 // Return error information including status code
                 if (res.status === 404) {
@@ -96,7 +97,7 @@ export async function addToCart(
             }))
         })
         .catch((err) => {
-            console.log('addToCart error: ', err.message)
+            console.log('redAddToCart error: ', err.message)
             return {
                 data: null,
                 error: {status: 500, message: 'cart_add_error'}
@@ -104,14 +105,14 @@ export async function addToCart(
         })
 }
 
-export async function getCart(
+export async function redGetCart(
     {
         uid,
     }: {
         uid: string,
     }): Promise<CartItem[] | null> {
     if (!uid) {
-        console.log('getCart: no uid')
+        console.log('redGetCart: no uid')
         return []
     }
     const session = await auth()
@@ -136,9 +137,10 @@ export async function getCart(
     }
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redGetCart: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('getCart error response: ', errorData)
+                console.log('redGetCart error response: ', errorData)
                 return null
             }
             return res.json()
@@ -147,12 +149,12 @@ export async function getCart(
             return data.data
         })
         .catch((err) => {
-            console.log('getCart error: ', err.message)
+            console.log('redGetCart error: ', err.message)
             return null
         })
 }
 
-export async function removeFromCart(
+export async function redRemoveFromCart(
     {
         uid,
         id
@@ -161,7 +163,7 @@ export async function removeFromCart(
         id: number[]
     }): Promise<CartItem[] | null> {
     if (!uid) {
-        console.log('getCart: no uid')
+        console.log('redRemoveFromCart: no uid')
         return []
     }
     const session = await auth()
@@ -189,9 +191,10 @@ export async function removeFromCart(
     }
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
+            console.log('redRemoveFromCart: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
-                console.log('removeFromCart error response: ', errorData)
+                console.log('redRemoveFromCart error response: ', errorData)
                 return null
             }
             return res.json()
@@ -200,7 +203,7 @@ export async function removeFromCart(
             return data.data
         })
         .catch((err) => {
-            console.log('removeFromCart error: ', err.message)
+            console.log('redRemoveFromCart error: ', err.message)
             return null
         })
 }

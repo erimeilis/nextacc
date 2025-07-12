@@ -27,7 +27,7 @@ export default function SkeletonLoader() {
     )
 }
 
-function ProfileSkeleton() {
+export function ProfileSkeleton() {
     return (
         <div className="space-y-4">
             {/* Header with user info */}

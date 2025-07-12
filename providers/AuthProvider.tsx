@@ -1,9 +1,36 @@
 'use client'
-import {SessionProvider} from 'next-auth/react'
-import React, {useEffect} from 'react'
+import {SessionProvider, useSession} from 'next-auth/react'
+import React, {useEffect, useRef, useState} from 'react'
 import usePersistState from '@/utils/usePersistState'
 import {v4 as uuidv4} from 'uuid'
 import {useClientStore} from '@/stores/useClientStore'
+
+// Wrapper component that has access to the session
+const SessionHandler = ({children}: React.PropsWithChildren<object>) => {
+    const {data: session, status} = useSession()
+    const fetchData = useClientStore(state => state.fetchData)
+    const reset = useClientStore(state => state.reset)
+    const [previousStatus, setPreviousStatus] = useState<string | null>(null)
+    const fetchDataCalledRef = useRef(false)
+
+    // Call fetchData when session becomes authenticated
+    // Reset store when session becomes unauthenticated
+    useEffect(() => {
+        if (previousStatus === 'authenticated' && status !== 'authenticated') {
+            console.log('Session no longer authenticated, resetting client store')
+            reset()
+            fetchDataCalledRef.current = false
+        } else if (status === 'authenticated' && session && !fetchDataCalledRef.current) {
+            console.log('Session authenticated, fetching client data')
+            fetchDataCalledRef.current = true
+            fetchData().then()
+        }
+
+        setPreviousStatus(status)
+    }, [status, session, fetchData, reset, previousStatus])
+
+    return <>{children}</>
+}
 
 export const AuthProvider = ({children}: React.PropsWithChildren<object>) => {
     const [persistentId, setPersistentId] = usePersistState<string>('no-id', 'persistentId')
@@ -33,7 +60,11 @@ export const AuthProvider = ({children}: React.PropsWithChildren<object>) => {
         }
     }, [resetClientStore])
 
-    return <SessionProvider>
-        {children}
-    </SessionProvider>
+    return (
+        <SessionProvider>
+            <SessionHandler>
+                {children}
+            </SessionHandler>
+        </SessionProvider>
+    )
 }

@@ -68,6 +68,7 @@ export const useClientStore = create<ClientStore>()(
             uploads: null,
 
             reset: () => {
+                console.log('resetting client store')
                 set({
                     balance: null,
                     profile: null,
@@ -118,41 +119,70 @@ export const useClientStore = create<ClientStore>()(
             },
 
             fetchData: async () => {
-                const profilePromise = redGetUserProfile()
-                const infoPromise = getClientInfo()
-                const transactionsPromise = redGetMoneyTransactionReport()
-                const numbersPromise = redGetMyDids()
-                const uploadsPromise = redGetMyUploads()
+                try {
+                    const profilePromise = redGetUserProfile()
+                    const infoPromise = getClientInfo()
+                    const transactionsPromise = redGetMoneyTransactionReport()
+                    const numbersPromise = redGetMyDids()
+                    const uploadsPromise = redGetMyUploads()
 
-                const [
-                    profile, info, transactions, numbers, uploads
-                ] = await Promise.all([
-                    profilePromise, infoPromise, transactionsPromise, numbersPromise, uploadsPromise
-                ])
-                set({
-                    balance: profile?.balance ?? 0,
-                    profile: profile,
-                    info: info,
-                    transactions: transactions,
-                    numbers: numbers,
-                    uploads: uploads,
-                })
+                    const [
+                        profile, info, transactions, numbers, uploads
+                    ] = await Promise.all([
+                        profilePromise, infoPromise, transactionsPromise, numbersPromise, uploadsPromise
+                    ])
+
+                    // If profile is null, it might indicate an auth issue
+                    if (!profile) {
+                        console.log('Profile fetch returned null, possible auth issue')
+                        get().reset()
+                        return
+                    }
+
+                    set({
+                        balance: profile?.balance ?? 0,
+                        profile: profile,
+                        info: info,
+                        transactions: transactions,
+                        numbers: numbers,
+                        uploads: uploads,
+                    })
+                } catch (error) {
+                    console.error('Error fetching client data:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                }
             },
             fetchProfile: async (): Promise<UserProfile | null> => {
-                const profile = await redGetUserProfile()
-                set(state => {
-                    if (
-                        state.profile === undefined ||
-                        state.profile !== profile
-                    ) {
-                        return {
-                            balance: profile?.balance ?? 0,
-                            profile: profile
-                        }
+                try {
+                    const profile = await redGetUserProfile()
+
+                    // If profile is null, it might indicate an auth issue
+                    if (!profile) {
+                        console.log('Profile fetch returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return profile
+
+                    set(state => {
+                        if (
+                            state.profile === undefined ||
+                            state.profile !== profile
+                        ) {
+                            return {
+                                balance: profile?.balance ?? 0,
+                                profile: profile
+                            }
+                        }
+                        return state
+                    })
+                    return profile
+                } catch (error) {
+                    console.error('Error fetching profile:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
             updateInfo: (info: ClientInfo): ClientInfo | null => {
                 set(state => {
@@ -169,122 +199,227 @@ export const useClientStore = create<ClientStore>()(
                 return info
             },
             fetchTransactions: async (): Promise<MoneyTransaction[] | null> => {
-                const transactions = await redGetMoneyTransactionReport()
-                set(state => {
-                    if (
-                        state.transactions === undefined ||
-                        state.transactions !== transactions
-                    ) {
-                        return {
-                            transactions: transactions
-                        }
+                try {
+                    const transactions = await redGetMoneyTransactionReport()
+
+                    // If transactions is null, it might indicate an auth issue
+                    if (!transactions) {
+                        console.log('Transactions fetch returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return transactions
+
+                    set(state => {
+                        if (
+                            state.transactions === undefined ||
+                            state.transactions !== transactions
+                        ) {
+                            return {
+                                transactions: transactions
+                            }
+                        }
+                        return state
+                    })
+                    return transactions
+                } catch (error) {
+                    console.error('Error fetching transactions:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
             fetchNumbers: async (): Promise<NumberInfo[] | null> => {
-                const numbers = await redGetMyDids()
-                set(state => {
-                    if (
-                        state.numbers === undefined ||
-                        state.numbers !== numbers
-                    ) {
-                        return {
-                            numbers: numbers
-                        }
+                try {
+                    const numbers = await redGetMyDids()
+
+                    // If numbers is null, it might indicate an auth issue
+                    if (!numbers) {
+                        console.log('Numbers fetch returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return numbers
+
+                    set(state => {
+                        if (
+                            state.numbers === undefined ||
+                            state.numbers !== numbers
+                        ) {
+                            return {
+                                numbers: numbers
+                            }
+                        }
+                        return state
+                    })
+                    return numbers
+                } catch (error) {
+                    console.error('Error fetching numbers:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
 
             deleteNumber: async (id: string): Promise<NumberInfo[] | null> => {
-                // Find the number with the given id to get its did
-                const number = get().numbers?.find(n => n.id === id);
-                if (!number) {
-                    console.error(`Number with id ${id} not found`);
-                    return get().numbers;
-                }
-
-                // Use the did to delete the number
-                const numbers = await redDeleteDid(number.did)
-                set(state => {
-                    if (
-                        state.numbers === undefined ||
-                        state.numbers !== numbers
-                    ) {
-                        return {
-                            numbers: numbers
-                        }
+                try {
+                    // Find the number with the given id to get its did
+                    const number = get().numbers?.find(n => n.id === id)
+                    if (!number) {
+                        console.error(`Number with id ${id} not found`)
+                        return get().numbers
                     }
-                    return state
-                })
-                return numbers
+
+                    // Use the did to delete the number
+                    const numbers = await redDeleteDid(number.did)
+
+                    // If numbers is null, it might indicate an auth issue
+                    if (!numbers) {
+                        console.log('Delete number returned null, possible auth issue')
+                        get().reset()
+                        return null
+                    }
+
+                    set(state => {
+                        if (
+                            state.numbers === undefined ||
+                            state.numbers !== numbers
+                        ) {
+                            return {
+                                numbers: numbers
+                            }
+                        }
+                        return state
+                    })
+                    return numbers
+                } catch (error) {
+                    console.error('Error deleting number:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
 
             fetchUploads: async (): Promise<UploadInfo[] | null> => {
-                const uploads = await redGetMyUploads()
-                set(state => {
-                    if (
-                        state.uploads === undefined ||
-                        state.uploads !== uploads
-                    ) {
-                        return {
-                            uploads: uploads
-                        }
+                try {
+                    const uploads = await redGetMyUploads()
+
+                    // If uploads is null, it might indicate an auth issue
+                    if (!uploads) {
+                        console.log('Uploads fetch returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return uploads
+
+                    set(state => {
+                        if (
+                            state.uploads === undefined ||
+                            state.uploads !== uploads
+                        ) {
+                            return {
+                                uploads: uploads
+                            }
+                        }
+                        return state
+                    })
+                    return uploads
+                } catch (error) {
+                    console.error('Error fetching uploads:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
 
             uploadFile: async (file: File): Promise<UploadInfo[] | null> => {
-                const uploads = await redUploadFile(file)
-                set(state => {
-                    if (
-                        state.uploads === undefined ||
-                        state.uploads !== uploads
-                    ) {
-                        return {
-                            uploads: uploads
-                        }
+                try {
+                    const uploads = await redUploadFile(file)
+
+                    // If uploads is null, it might indicate an auth issue
+                    if (!uploads) {
+                        console.log('Upload file returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return uploads
+
+                    set(state => {
+                        if (
+                            state.uploads === undefined ||
+                            state.uploads !== uploads
+                        ) {
+                            return {
+                                uploads: uploads
+                            }
+                        }
+                        return state
+                    })
+                    return uploads
+                } catch (error) {
+                    console.error('Error uploading file:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
 
             deleteUpload: async (fileId: string): Promise<UploadInfo[] | null> => {
-                const uploads = await redDeleteUpload(fileId)
-                set(state => {
-                    if (
-                        state.uploads === undefined ||
-                        state.uploads !== uploads
-                    ) {
-                        return {
-                            uploads: uploads
-                        }
+                try {
+                    const uploads = await redDeleteUpload(fileId)
+
+                    // If uploads is null, it might indicate an auth issue
+                    if (!uploads) {
+                        console.log('Delete upload returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return uploads
+
+                    set(state => {
+                        if (
+                            state.uploads === undefined ||
+                            state.uploads !== uploads
+                        ) {
+                            return {
+                                uploads: uploads
+                            }
+                        }
+                        return state
+                    })
+                    return uploads
+                } catch (error) {
+                    console.error('Error deleting upload:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             },
 
             renameFile: async (filename: string, name: string): Promise<UploadInfo[] | null> => {
-                const uploads = await redRenameFile(filename, name)
-                set(state => {
-                    if (
-                        state.uploads === undefined ||
-                        state.uploads !== uploads
-                    ) {
-                        return {
-                            uploads: uploads
-                        }
+                try {
+                    const uploads = await redRenameFile(filename, name)
+
+                    // If uploads is null, it might indicate an auth issue
+                    if (!uploads) {
+                        console.log('Rename file returned null, possible auth issue')
+                        get().reset()
+                        return null
                     }
-                    return state
-                })
-                return uploads
+
+                    set(state => {
+                        if (
+                            state.uploads === undefined ||
+                            state.uploads !== uploads
+                        ) {
+                            return {
+                                uploads: uploads
+                            }
+                        }
+                        return state
+                    })
+                    return uploads
+                } catch (error) {
+                    console.error('Error renaming file:', error)
+                    // Reset store on fetch error as it might be auth-related
+                    get().reset()
+                    return null
+                }
             }
 
         }),

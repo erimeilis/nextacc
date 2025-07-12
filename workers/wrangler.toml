@@ -1,0 +1,10 @@
+# Wrangler configuration for D1 storage worker
+name = "d1-storage"
+main = "d1-storage.js"
+compatibility_date = "2023-10-30"
+
+# D1 database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "red-offers-store"
+database_id = "12804b0b-6488-45ff-b721-224fc6d0773a" # Replace it with your actual database ID after creation

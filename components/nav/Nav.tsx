@@ -204,12 +204,20 @@ export default function Nav() {
     const animationRef = useRef<NodeJS.Timeout | null>(null)
     const targetBalanceRef = useRef<number>(0)
 
+    // Ref to track if fetchProfile has been called
+    const fetchProfileCalledRef = useRef(false)
+
     // Fix hydration issues by only rendering on the client-side
     useEffect(() => {
         setIsClient(true)
 
-        // Fetch profile data on component mount
-        fetchProfile().then()
+        // Fetch profile data on component mount, but only once
+        if (!fetchProfileCalledRef.current) {
+            fetchProfileCalledRef.current = true
+            console.log('Nav: Fetching profile data')
+            fetchProfile().then()
+        }
+
         return () => {
             // Clean up animation timeout on unmounting
             if (animationRef.current) {

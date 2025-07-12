@@ -8,7 +8,7 @@ import DataTable, {ColumnDef, FilterDef} from '@/components/ui/DataTable'
 import moment from 'moment'
 import ActionButton from '@/components/shared/ActionButton'
 import Loader from '@/components/service/Loader'
-import {getCallStatistics, sendCallStatistics} from '@/app/api/redreport/statistics'
+import {redGetCallStatistics, redSendCallStatistics} from '@/app/api/redreport/statistics'
 import {useToast} from '@/hooks/use-toast'
 
 // Define the filter type for Call Statistics
@@ -50,7 +50,7 @@ export default function CallsList({did}: CallsListProps) {
         try {
             const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
             const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
-            const stats = await getCallStatistics(fromDate, toDate, did)
+            const stats = await redGetCallStatistics(fromDate, toDate, did)
             setCallStatistics(stats)
         } catch (error: unknown) {
             console.error(`${t('error_fetching_statistics')}:`, error)
@@ -68,7 +68,7 @@ export default function CallsList({did}: CallsListProps) {
             const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
             const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
 
-            const success = await sendCallStatistics(fromDate, toDate, did)
+            const success = await redSendCallStatistics(fromDate, toDate, did)
 
             if (success) {
                 toast({

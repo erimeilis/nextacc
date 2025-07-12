@@ -29,7 +29,7 @@ export async function redGetPaymentsMethods(sum?: number): Promise<PaymentRegion
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetPaymentsMethods: Response status:', res.status)
+            console.log('redGetPaymentsMethods: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetPaymentsMethods error response: ', errorData)

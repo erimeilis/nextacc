@@ -15,14 +15,19 @@ export default function ProfilePage() {
         if (profile) {
             setLocalProfile(profile)
         }
-        if (!profile || !backgroundFetchDone.current) {
+
+        // Only fetch once when the component mounts or if profile is null
+        if (!backgroundFetchDone.current) {
             backgroundFetchDone.current = true
+            console.log('ProfilePage: Fetching profile in background')
             fetchProfile()
                 .then((fetchedProfile) => {
-                    setLocalProfile(fetchedProfile)
+                    if (fetchedProfile) {
+                        setLocalProfile(fetchedProfile)
+                    }
                 })
         }
-    }, [profile, fetchProfile])
+    }, [fetchProfile, profile])
 
     return <Profile
         profile={localProfile}

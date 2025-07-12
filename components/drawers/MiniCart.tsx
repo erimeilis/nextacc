@@ -9,7 +9,7 @@ import Show from '@/components/service/Show'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
 import {getPersistState} from '@/utils/usePersistState'
-import {removeFromCart} from '@/app/api/redreport/cart'
+import {redRemoveFromCart} from '@/app/api/redreport/cart'
 import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 
 interface MiniCartProps {
@@ -49,7 +49,7 @@ export default function MiniCart({
         setLoadingButton('remove')
         try {
             if (selectedItems && selectedItems.length > 0) {
-                const data = await removeFromCart({
+                const data = await redRemoveFromCart({
                     uid: persistentId,
                     id: selectedItems
                 })
@@ -64,7 +64,7 @@ export default function MiniCart({
 
     const handleRemoveSingleItem = async (itemId: number) => {
         try {
-            const data = await removeFromCart({
+            const data = await redRemoveFromCart({
                 uid: persistentId,
                 id: [itemId]
             })

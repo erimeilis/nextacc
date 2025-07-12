@@ -208,10 +208,10 @@ export default function MyWaitingNumbersList({
     }
 
     return (
-        <Show when={displayOptions !== null}
-              fallback={displayOptions?.length == 0 ?
-                  <div>{t('no_waiting_numbers')}</div> :
-                  <WaitingNumbersSkeleton/>}>
+        <Show when={displayOptions !== null && displayOptions.length > 0}
+              fallback={displayOptions === null ? 
+                  <WaitingNumbersSkeleton/> : 
+                  <div>{t('no_waiting_numbers')}</div>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">

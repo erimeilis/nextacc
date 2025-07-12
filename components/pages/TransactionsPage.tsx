@@ -5,7 +5,7 @@ import {useEffect, useRef, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 
 export default function TransactionsPage() {
-    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>([])
+    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>(null)
     const {getTransactions, fetchTransactions} = useClientStore()
     const transactions = getTransactions()
     const backgroundFetchDone = useRef(false)
@@ -15,14 +15,19 @@ export default function TransactionsPage() {
         if (transactions) {
             setLocalTransactions(transactions)
         }
-        if (!transactions || !backgroundFetchDone.current) {
+
+        // Only fetch once when the component mounts
+        if (!backgroundFetchDone.current) {
             backgroundFetchDone.current = true
+            console.log('TransactionsPage: Fetching transactions in background')
             fetchTransactions()
                 .then((fetchedTransactions) => {
-                    setLocalTransactions(fetchedTransactions)
+                    if (fetchedTransactions) {
+                        setLocalTransactions(fetchedTransactions)
+                    }
                 })
         }
-    }, [transactions, fetchTransactions])
+    }, [fetchTransactions, transactions])
 
     return (
         <MoneyTransactionsList

@@ -4,7 +4,7 @@ import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
 import {fetchWithCache} from '@/utils/fetchCache'
 
-export async function getCountries({type}: { type: string }): Promise<CountryInfo[]> {
+export async function redGetCountries({type}: { type: string }): Promise<CountryInfo[]> {
     const url = new URL(process.env.REDREPORT_URL + '/api/offers/countries')
     url.searchParams.append('type', type)
     //const ttl = 60 * 60 * 1000 // 1 hour
@@ -29,7 +29,7 @@ export async function getCountries({type}: { type: string }): Promise<CountryInf
     return []
 }
 
-export async function getAreas({type, country}: { type: string, country: number }): Promise<AreaInfo[]> {
+export async function redGetAreas({type, country}: { type: string, country: number }): Promise<AreaInfo[]> {
     const url = new URL(process.env.REDREPORT_URL + '/api/offers/areas')
     url.searchParams.append('type', type)
     url.searchParams.append('country_id', country.toString())
@@ -55,7 +55,7 @@ export async function getAreas({type, country}: { type: string, country: number 
     return []
 }
 
-export async function getNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
+export async function redGetNumbers({type, country, area}: { type: string, country: number, area: number }): Promise<NumberInfo[]> {
     const url = new URL(process.env.REDREPORT_URL + '/api/offers/numbers')
     url.searchParams.append('type', type)
     url.searchParams.append('country_id', country.toString())
@@ -113,7 +113,7 @@ export async function getNumbers({type, country, area}: { type: string, country:
     return []
 }
 
-export async function getDiscounts() {
+export async function redGetDiscounts() {
     const url = process.env.REDREPORT_URL + '/api/offers/discounts'
 
     //const ttl = 30 * 24 * 60 * 60 * 1000 // 30 days

@@ -15,8 +15,8 @@ export default function NumbersPage() {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>([])
-    const [localWaitingNumbers, setLocalWaitingNumbers] = useState<MyWaitingNumberInfo[] | null>([])
+    const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>(null)
+    const [localWaitingNumbers, setLocalWaitingNumbers] = useState<MyWaitingNumberInfo[] | null>(null)
     const [showWaiting, setShowWaiting] = useState<boolean>(pathname?.includes('/waiting-numbers') || false)
     const {getNumbers, fetchNumbers} = useClientStore()
     const {waitingNumbers, fetchWaitingNumbers} = useWaitingStore()
@@ -30,30 +30,38 @@ export default function NumbersPage() {
         if (numbers) {
             setLocalNumbers(numbers)
         }
-        if (!numbers || !numbersBackgroundFetchDone.current) {
+
+        // Only fetch once when the component mounts
+        if (!numbersBackgroundFetchDone.current) {
             numbersBackgroundFetchDone.current = true
-            console.log('Fetching numbers in background')
+            console.log('NumbersPage: Fetching numbers in background')
             fetchNumbers()
                 .then((fetchedNumbers) => {
-                    setLocalNumbers(fetchedNumbers)
+                    if (fetchedNumbers) {
+                        setLocalNumbers(fetchedNumbers)
+                    }
                 })
         }
-    }, [numbers, fetchNumbers])
+    }, [fetchNumbers, numbers])
 
     // Set waiting data from the store immediately if available and fetch in the background if needed
     useEffect(() => {
         if (waitingNumbers) {
             setLocalWaitingNumbers(waitingNumbers)
         }
-        if (!waitingNumbers || !waitingNumbersBackgroundFetchDone.current) {
+
+        // Only fetch once when the component mounts
+        if (!waitingNumbersBackgroundFetchDone.current) {
             waitingNumbersBackgroundFetchDone.current = true
-            console.log('Fetching waiting numbers in background')
+            console.log('NumbersPage: Fetching waiting numbers in background')
             fetchWaitingNumbers()
                 .then(() => {
-                    setLocalWaitingNumbers(waitingNumbers)
+                    if (waitingNumbers) {
+                        setLocalWaitingNumbers(waitingNumbers)
+                    }
                 })
         }
-    }, [waitingNumbers, fetchWaitingNumbers])
+    }, [fetchWaitingNumbers, waitingNumbers])
 
     // Handle switch change
     const handleSwitchChange = (checked: boolean) => {

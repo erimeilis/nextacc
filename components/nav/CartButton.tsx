@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Button} from '@/components/ui/Button'
 import {ShoppingBagIcon} from '@phosphor-icons/react'
 import {Drawer} from '@/components/ui/Drawer'
@@ -17,8 +17,14 @@ export default function CartButton() {
     const searchParams = useSearchParams()
     const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
 
+    const fetchDataCalledRef = useRef(false)
+
     useEffect(() => {
-        fetchData().then()
+        if (!fetchDataCalledRef.current) {
+            fetchDataCalledRef.current = true
+            console.log('CartButton: Fetching cart data')
+            fetchData().then()
+        }
     }, [fetchData])
 
     useEffect(() => {
@@ -27,13 +33,13 @@ export default function CartButton() {
         setTotalPriceState(totalPrice)
     }, [cart, totalItems, totalPrice])
 
-    // Effect to handle responsive direction
+    // Effect to handle a responsive direction
     useEffect(() => {
         const handleResize = () => {
             setDrawerDirection(window.innerWidth < 640 ? 'bottom' : 'right')
         }
 
-        // Set initial direction
+        // Set the initial direction
         handleResize()
 
         // Add event listener for window resize

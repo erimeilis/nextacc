@@ -26,7 +26,7 @@ export async function redGetCallStatisticsReport(): Promise<MoneyTransaction[]> 
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            //console.log('redGetMoneyTransactionReport: ', res.status)
+            console.log('redGetCallStatisticsReport: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetCallStatisticsReport error response: ', errorData)

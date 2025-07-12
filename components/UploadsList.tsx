@@ -2,7 +2,6 @@
 import React, {useState} from 'react'
 import Show from '@/components/service/Show'
 import {UploadInfo} from '@/types/UploadInfo'
-import Loader from '@/components/service/Loader'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
 import {CircleNotchIcon, DownloadIcon, FileIcon, MagnifyingGlassIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
@@ -57,6 +56,76 @@ const isImageFile = (filename: string): boolean => {
 const getImagePreviewUrl = (url: string): string => {
     // Return the original URL as the server might not support query parameters
     return url
+}
+
+// Skeleton loader for uploads list
+function UploadsSkeleton() {
+    return (
+        <div className="flex flex-col w-full animate-pulse">
+            {/* Total section */}
+            <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">
+                <div className="h-4 bg-muted rounded w-32"></div>
+                <div className="h-4 bg-muted rounded w-40"></div>
+            </div>
+
+            {/* Header with search and upload */}
+            <div className="flex flex-col sm:flex-row items-center p-2 border-b border-border mb-1 gap-2">
+                <div className="flex items-center flex-1">
+                    <div className="h-8 bg-muted rounded w-full sm:w-64"></div>
+                </div>
+                <div className="h-8 bg-muted rounded w-24"></div>
+            </div>
+
+            {/* Upload list */}
+            <div className="overflow-x-auto">
+                <div className="space-y-1">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className={`flex flex-row items-center w-full py-2 px-2 gap-2 ${i % 2 !== 0 ? 'bg-secondary/50 dark:bg-secondary/40' : ''}`}>
+                            {/* Checkbox */}
+                            <div className="w-8">
+                                <div className="h-4 bg-muted rounded w-4"></div>
+                            </div>
+
+                            {/* File icon and info */}
+                            <div className="flex items-center flex-1 gap-2">
+                                <div className="h-8 bg-muted rounded w-8"></div>
+                                <div className="flex flex-col flex-1 gap-1">
+                                    <div className="h-4 bg-muted rounded w-48"></div>
+                                    <div className="h-3 bg-muted rounded w-24"></div>
+                                </div>
+                            </div>
+
+                            {/* File size */}
+                            <div className="w-20 hidden sm:block">
+                                <div className="h-4 bg-muted rounded w-16"></div>
+                            </div>
+
+                            {/* Date */}
+                            <div className="w-24 hidden sm:block">
+                                <div className="h-4 bg-muted rounded w-20"></div>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex items-center justify-end space-x-1 w-20">
+                                {[...Array(3)].map((_, j) => (
+                                    <div key={j} className="h-6 bg-muted rounded w-6"></div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex flex-col sm:flex-row items-center justify-between p-2 border-t border-border mt-2 gap-2">
+                <div className="flex items-center gap-2">
+                    <div className="h-4 bg-muted rounded w-4"></div>
+                    <div className="h-4 bg-muted rounded w-20"></div>
+                </div>
+                <div className="h-8 bg-muted rounded w-32"></div>
+            </div>
+        </div>
+    )
 }
 
 export default function UploadsList({
@@ -198,10 +267,10 @@ export default function UploadsList({
     }
 
     return (
-        <Show when={options !== null}
-              fallback={options?.length === 0 ?
-                  <div className="text-center py-8">{t('no_uploads')}</div> :
-                  <Loader height={32}/>}>
+        <Show when={options !== null && options.length > 0}
+              fallback={options === null ? 
+                  <UploadsSkeleton/> : 
+                  <div className="text-center py-8">{t('no_uploads')}</div>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">

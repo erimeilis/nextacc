@@ -8,7 +8,7 @@ import DataTable, {ColumnDef, FilterDef} from '@/components/ui/DataTable'
 import moment from 'moment'
 import ActionButton from '@/components/shared/ActionButton'
 import Loader from '@/components/service/Loader'
-import {getSmsStatistics, sendSmsStatistics} from '@/app/api/redreport/statistics'
+import {redGetSmsStatistics, redSendSmsStatistics} from '@/app/api/redreport/statistics'
 import {useToast} from '@/hooks/use-toast'
 
 // Define the filter type for SMS Statistics
@@ -51,7 +51,7 @@ export default function SmsList({did}: SmsListProps) {
         try {
             const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
             const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
-            const stats = await getSmsStatistics(fromDate, toDate, did)
+            const stats = await redGetSmsStatistics(fromDate, toDate, did)
             setSmsStatistics(stats)
         } catch (error: unknown) {
             console.error(`${t('error_fetching_statistics')}:`, error)
@@ -69,7 +69,7 @@ export default function SmsList({did}: SmsListProps) {
             const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
             const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
 
-            const success = await sendSmsStatistics(fromDate, toDate, did)
+            const success = await redSendSmsStatistics(fromDate, toDate, did)
 
             if (success) {
                 toast({

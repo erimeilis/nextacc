@@ -5,7 +5,7 @@ import {useEffect, useRef, useState} from 'react'
 import {useClientStore} from '@/stores/useClientStore'
 
 export default function UploadsPage() {
-    const [localUploads, setLocalUploads] = useState<UploadInfo[] | null>([])
+    const [localUploads, setLocalUploads] = useState<UploadInfo[] | null>(null)
     const {getUploads, fetchUploads} = useClientStore()
     const uploads = getUploads()
     const backgroundFetchDone = useRef(false)
@@ -15,11 +15,16 @@ export default function UploadsPage() {
         if (uploads && uploads.length > 0) {
             setLocalUploads(uploads)
         }
-        if (!uploads || uploads.length == 0 || !backgroundFetchDone.current) {
+
+        // Only fetch once when the component mounts
+        if (!backgroundFetchDone.current) {
             backgroundFetchDone.current = true
+            console.log('UploadsPage: Fetching uploads in background')
             fetchUploads()
                 .then((fetchedUploads) => {
-                    setLocalUploads(fetchedUploads)
+                    if (fetchedUploads) {
+                        setLocalUploads(fetchedUploads)
+                    }
                 })
         }
     }, [fetchUploads, uploads])

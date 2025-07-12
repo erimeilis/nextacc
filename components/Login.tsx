@@ -22,8 +22,7 @@ import {useTranslations} from 'next-intl'
 import {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
 import {useSearchParams} from 'next/navigation'
-import {useClientStore} from '@/stores/useClientStore'
-
+// No longer need useClientStore since fetchData is handled by AuthProvider
 const loginFieldsState: { [index: string]: string } = {}
 loginFields.forEach((field: InputField) => loginFieldsState[field.id] = '')
 const signupFieldsState: { [index: string]: string } = {}
@@ -37,7 +36,6 @@ export default function Login() {
 
     const t = useTranslations('login')
     const c = useTranslations('common')
-    const {fetchData} = useClientStore()
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
@@ -88,8 +86,8 @@ export default function Login() {
                     setOpenWarningVerifyModal(true)
                 }
             } else if (data && !data.error) {
-                // Fetch user data in the background after successful login
-                fetchData().then()
+                // Session change will trigger fetchData in AuthProvider
+                console.log('Login successful, session change will trigger data fetch')
             }
         }
     }

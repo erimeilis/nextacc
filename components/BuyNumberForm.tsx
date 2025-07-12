@@ -16,8 +16,8 @@ import {schemaHttps} from '@/schemas/https.schema'
 import {z} from 'zod'
 import {ChatTextIcon, PhoneTransferIcon} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/Table'
-import {addToCart} from '@/app/api/redreport/cart'
-import {buy} from '@/app/api/redreport/buy'
+import {redAddToCart} from '@/app/api/redreport/cart'
+import {redBuy} from '@/app/api/redreport/buy'
 import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
 import {useCartStore} from '@/stores/useCartStore'
@@ -180,7 +180,7 @@ export default function BuyNumberForm({
 
                 // Determine which action to take based on the button clicked
                 if (buttonId === 'buy') {
-                    const response = await buy(commonParams)
+                    const response = await redBuy(commonParams)
 
                     if (response.error) {
                         // Handle specific error cases
@@ -245,7 +245,7 @@ export default function BuyNumberForm({
                         })
                     }
                 } else {
-                    const response = await addToCart(commonParams)
+                    const response = await redAddToCart(commonParams)
 
                     if (response.error) {
                         // Handle specific error cases

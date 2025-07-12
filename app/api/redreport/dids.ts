@@ -25,7 +25,7 @@ export async function redGetMyDids(): Promise<NumberInfo[] | null> {
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetMyDids: Response status:', res.status)
+            console.log('redGetMyDids: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetMyDids error response: ', errorData)

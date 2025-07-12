@@ -24,7 +24,7 @@ export async function redGetIvr(): Promise<IvrResponse | null> {
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redGetIvr: Response status:', res.status)
+            console.log('redGetIvr: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redGetIvr error response: ', errorData)
@@ -78,7 +78,7 @@ export async function redOrderIvr(params: OrderIvrParams): Promise<OrderIvrRespo
 
     return fetch(url.toString(), options)
         .then(async (res: Response) => {
-            console.log('redOrderIvr: Response status:', res.status)
+            console.log('redOrderIvr: ', res.status)
             if (!res.ok) {
                 const errorData = await res.json()
                 console.log('redOrderIvr error response: ', errorData)
