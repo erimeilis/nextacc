@@ -49,5 +49,7 @@ env:
     value: https://keycloak.telecomax.net/auth/admin/realms/blabla
   - name: SLACK_WEBHOOK
     value: https://hooks.slack.com/services/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
+  - name: NEXTAUTH_SECRET
+    value: yvvmm3JA9ZR5DNPy4UwIcxqtVacKLPuUiiIhQT/z7BI=
   - name: NEXT_PUBLIC_D1_WORKER_URL
     value: https://d1-storage.eri-42e.workers.dev
