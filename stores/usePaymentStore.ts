@@ -60,10 +60,17 @@ export const usePaymentStore = create<PaymentStore>()(
         }), {
             name: 'payment-storage', // unique name
             storage: idbStorage,
-            version: 1,
+            version: 2,
             migrate: (persistedState: unknown, version: number): PersistedPaymentState => {
-                // For any version mismatches or invalid state, return a clean state
+                // Handle migration from version 0 to version 2
                 if (version === 0 && isValidPersistedPaymentState(persistedState)) {
+                    return {
+                        paymentMethods: persistedState.paymentMethods ?? null,
+                    }
+                }
+
+                // Handle migration from version 1 to version 2
+                if (version === 1 && isValidPersistedPaymentState(persistedState)) {
                     return {
                         paymentMethods: persistedState.paymentMethods ?? null,
                     }
