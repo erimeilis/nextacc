@@ -4,11 +4,13 @@ import {ClientInfo} from '@/types/ClientInfo'
 import {MoneyTransaction} from '@/types/MoneyTransaction'
 import {NumberInfo} from '@/types/NumberInfo'
 import {UploadInfo} from '@/types/UploadInfo'
+import {PaymentRegion} from '@/types/PaymentTypes'
 import {redGetUserProfile} from '@/app/api/redreport/profile'
 import {getClientInfo} from '@/app/api/other/ipinfo'
 import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
 import {redDeleteDid, redGetMyDids} from '@/app/api/redreport/dids'
 import {redDeleteUpload, redGetMyUploads, redRenameFile, redUploadFile} from '@/app/api/redreport/uploads'
+import {redGetPaymentsMethods} from '@/app/api/redreport/payments'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -19,6 +21,7 @@ interface ClientStore {
     transactions: MoneyTransaction[] | null
     numbers: NumberInfo[] | null
     uploads: UploadInfo[] | null
+    paymentMethods: PaymentRegion[] | null
     fetchData: () => Promise<void>
     fetchProfile: () => Promise<UserProfile | null>
     updateInfo: (info: ClientInfo) => ClientInfo | null
@@ -32,6 +35,8 @@ interface ClientStore {
     uploadFile: (file: File) => Promise<UploadInfo[] | null>
     renameFile: (filename: string, name: string) => Promise<UploadInfo[] | null>
     deleteUpload: (fileId: string) => Promise<UploadInfo[] | null>
+    //payments
+    fetchPaymentMethods: (sum?: number) => Promise<PaymentRegion[] | null>
 
     reset: () => void
     isUserLoggedIn: () => boolean
@@ -42,6 +47,7 @@ interface ClientStore {
     getTransactions: () => MoneyTransaction[] | null
     getNumbers: () => NumberInfo[] | null
     getUploads: () => UploadInfo[] | null
+    getPaymentMethods: () => PaymentRegion[] | null
 }
 
 // Define the persisted state type (only the data that gets stored)
@@ -51,6 +57,7 @@ type PersistedClientState = {
     transactions: MoneyTransaction[] | null
     numbers: NumberInfo[] | null
     uploads: UploadInfo[] | null
+    paymentMethods: PaymentRegion[] | null
 }
 
 // Type guard to check if the persisted state has the expected shape
@@ -67,6 +74,7 @@ export const useClientStore = create<ClientStore>()(
             transactions: null,
             numbers: null,
             uploads: null,
+            paymentMethods: null,
 
             reset: () => {
                 console.log('resetting client store')
@@ -77,6 +85,7 @@ export const useClientStore = create<ClientStore>()(
                     transactions: null,
                     numbers: null,
                     uploads: null,
+                    paymentMethods: null,
                 })
             },
 
@@ -117,6 +126,10 @@ export const useClientStore = create<ClientStore>()(
 
             getUploads: () => {
                 return get().isUserLoggedIn() ? get().uploads : null
+            },
+
+            getPaymentMethods: () => {
+                return get().isUserLoggedIn() ? get().paymentMethods : null
             },
 
             fetchData: async () => {
@@ -427,11 +440,37 @@ export const useClientStore = create<ClientStore>()(
                 set({numbers})
             },
 
+            fetchPaymentMethods: async (sum?: number): Promise<PaymentRegion[] | null> => {
+                console.log('useClientStore: fetchPaymentMethods called with sum:', sum)
+                const response = await redGetPaymentsMethods(sum)
+                console.log('useClientStore: redGetPaymentsMethods response:', response)
+                if (!response) {
+                    console.log('useClientStore: response is null')
+                    return null
+                }
+
+                // Use the response directly as it's already been processed in redGetPaymentsMethods
+                const paymentMethods = response
+
+                set(state => {
+                    if (state.paymentMethods !== paymentMethods) {
+                        console.log('useClientStore: updating state with paymentMethods')
+                        return {
+                            paymentMethods
+                        }
+                    }
+                    console.log('useClientStore: state unchanged')
+                    return state
+                })
+
+                return paymentMethods
+            },
+
         }),
         {
             name: 'client-storage',
             storage: idbStorage,
-            version: 2,
+            version: 3,
             migrate: (persistedState: unknown, version: number): PersistedClientState => {
                 // Handle migration from version 1 to version 2
                 if (version === 1 && isValidPersistedState(persistedState)) {
@@ -442,6 +481,7 @@ export const useClientStore = create<ClientStore>()(
                         transactions: persistedState.transactions ?? null,
                         numbers: persistedState.numbers ?? null,
                         uploads: persistedState.uploads ?? null,
+                        paymentMethods: null,
                     }
                 }
 
@@ -452,6 +492,7 @@ export const useClientStore = create<ClientStore>()(
                     transactions: null,
                     numbers: null,
                     uploads: null,
+                    paymentMethods: null,
                 }
             },
             partialize: (state: ClientStore): PersistedClientState => ({
@@ -460,6 +501,7 @@ export const useClientStore = create<ClientStore>()(
                 numbers: state.numbers,
                 uploads: state.uploads,
                 balance: state.balance,
+                paymentMethods: state.paymentMethods,
             }),
         }
     )

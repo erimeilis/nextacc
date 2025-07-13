@@ -5,7 +5,6 @@ import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} fro
 import {useTranslations} from 'next-intl'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
-import {usePaymentStore} from '@/stores/usePaymentStore'
 import {PaymentMethod, PaymentRegion} from '@/types/PaymentTypes'
 import {CaretDownIcon, CaretRightIcon, WalletIcon} from '@phosphor-icons/react'
 import Image from 'next/image'
@@ -41,7 +40,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const t = useTranslations('cart')
     const p = useTranslations('profile')
     const d = useTranslations('dashboard')
-    const {getBalance} = useClientStore()
+    const {getBalance, getPaymentMethods, fetchPaymentMethods} = useClientStore()
     const {cart} = useCartStore()
     const balance = getBalance() || 0
 
@@ -69,7 +68,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const [localPaymentMethods, setLocalPaymentMethods] = useState<PaymentRegion[]>([])
     const [expandedRegions, setExpandedRegions] = useState<string[]>([])
     const [expandedSubregions, setExpandedSubregions] = useState<string[]>([])
-    const {paymentMethods, fetchPaymentMethods} = usePaymentStore()
+    const paymentMethods = getPaymentMethods()
     const paymentMethodsBackgroundFetchDone = useRef(false)
 
     // Set data from the store immediately if available and fetch in the background if needed
