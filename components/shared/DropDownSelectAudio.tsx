@@ -37,6 +37,7 @@ export default function DropDownSelectAudio({
     showFlags?: boolean
 }) {
     const t = useTranslations('ivr')
+    const offersT = useTranslations('offers')
     const [localSelectedOption, setLocalSelectedOption] = useState<string | null>(selectedOption || null)
     const [isOpen, setIsOpen] = useState(false)
     const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0, isMobile: false})
@@ -431,6 +432,9 @@ export default function DropDownSelectAudio({
                     document.body
                 )}
             </div>
+            {required && !selectedItem && (
+                <div className="text-destructive text-xs mt-1">{offersT('required')}</div>
+            )}
         </div>
     )
 }

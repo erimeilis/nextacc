@@ -215,9 +215,9 @@ export default function MyNumbersList({
 
     return (
         <Show when={displayOptions !== null && displayOptions.length > 0}
-              fallback={displayOptions === null ? 
-                  <NumbersSkeleton/> : 
-                  <div>{t('no_numbers')}</div>}>
+              fallback={displayOptions === null ?
+                  <NumbersSkeleton/> :
+                  <div className="text-sm text-center">{t('no_numbers')}</div>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col text-xs sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">

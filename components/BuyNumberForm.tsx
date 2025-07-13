@@ -58,6 +58,7 @@ export default function BuyNumberForm({
 
     const {updateData: updateCartData} = useCartStore()
     const {updateWaitingNumbers} = useWaitingStore()
+    const {updateNumbers} = useClientStore()
 
     const {toast} = useToast()
     const getClientInfo = async () => {
@@ -92,6 +93,8 @@ export default function BuyNumberForm({
                     voiceDestination: voiceDestinationState,
                     smsType: smsTypeState,
                     smsDestination: smsDestinationState,
+                    // Include document type selection if document requirements are present
+                    ...(numberInfo.docs_personal?.length > 0 || numberInfo.docs_business?.length > 0 ? {docType: selectedDocType || ''} : {}),
                     // Include document uploads based on the selected type
                     ...(selectedDocType === 'personal' ? personalDocUploads :
                         selectedDocType === 'business' ? businessDocUploads : {})
@@ -223,7 +226,12 @@ export default function BuyNumberForm({
                     } else {
                         // Update waiting-dids data
                         if (response.data) {
-                            await updateWaitingNumbers(response.data as MyWaitingNumberInfo[])
+                            if (response.type === 'manual') {
+                                await updateWaitingNumbers(response.data as MyWaitingNumberInfo[])
+                            } else {
+                                updateNumbers(response.data as NumberInfo[])
+                            }
+
                         }
 
                         // Show success toast with the appropriate message
@@ -236,10 +244,12 @@ export default function BuyNumberForm({
                             onDismiss: () => {
                                 setSelectedDocType(null)
                                 // If the type is manual, update waiting DIDs and redirect to number page with waiting tab selected
+                                const url = new URL(window.location.href)
                                 if (response.type === 'manual') {
                                     // Open minicart when toast is dismissed
-                                    const url = new URL(window.location.href)
                                     router.push('/waiting-numbers' + url.search)
+                                } else {
+                                    router.push('/numbers' + url.search)
                                 }
                             }
                         })
@@ -521,23 +531,41 @@ export default function BuyNumberForm({
             })
             : z.object({})
 
-        // Add document uploads validation if a document type is selected
+        // Add document type validation if document requirements are present
         let docsSchema = z.object({})
 
-        if (selectedDocType === 'personal' && numberInfo.docs_personal && numberInfo.docs_personal.length > 0) {
-            // Create a dynamic schema for each document in docs_personal
-            const docFields: Record<string, z.ZodString> = {}
-            numberInfo.docs_personal.forEach(doc => {
-                docFields[`doc_${doc}`] = z.string().min(1, {message: 'upload_required'})
-            })
-            docsSchema = z.object(docFields)
-        } else if (selectedDocType === 'business' && numberInfo.docs_business && numberInfo.docs_business.length > 0) {
-            // Create a dynamic schema for each document in docs_business
-            const docFields: Record<string, z.ZodString> = {}
-            numberInfo.docs_business.forEach(doc => {
-                docFields[`doc_${doc}`] = z.string().min(1, {message: 'upload_required'})
-            })
-            docsSchema = z.object(docFields)
+        // Check if document requirements are present
+        const hasDocRequirements = (numberInfo.docs_personal && numberInfo.docs_personal.length > 0) ||
+            (numberInfo.docs_business && numberInfo.docs_business.length > 0)
+
+        if (hasDocRequirements) {
+            // Require document type selection if document requirements are present
+            docsSchema = docsSchema.merge(z.object({
+                docType: z.string({
+                    required_error: 'document_type_required'
+                }).min(1, {message: 'document_type_required'})
+            }))
+
+            // Add validation for the selected document type
+            if (selectedDocType === 'personal' && numberInfo.docs_personal && numberInfo.docs_personal.length > 0) {
+                // Create a dynamic schema for each document in docs_personal
+                const docFields: Record<string, z.ZodString> = {}
+                numberInfo.docs_personal.forEach(doc => {
+                    docFields[`doc_${doc}`] = z.string({
+                        required_error: 'document_upload_required'
+                    }).min(1, {message: 'document_upload_required'})
+                })
+                docsSchema = docsSchema.merge(z.object(docFields))
+            } else if (selectedDocType === 'business' && numberInfo.docs_business && numberInfo.docs_business.length > 0) {
+                // Create a dynamic schema for each document in docs_business
+                const docFields: Record<string, z.ZodString> = {}
+                numberInfo.docs_business.forEach(doc => {
+                    docFields[`doc_${doc}`] = z.string({
+                        required_error: 'document_upload_required'
+                    }).min(1, {message: 'document_upload_required'})
+                })
+                docsSchema = docsSchema.merge(z.object(docFields))
+            }
         }
 
         // Merge all schemas
@@ -621,6 +649,22 @@ export default function BuyNumberForm({
 
     const voiceDestination = voiceDestinationsFields.find(i => i.id === voiceTypeState)
     const smsDestination = smsDestinationsFields.find(i => i.id === smsTypeState)
+
+    const getCardClassName = (docType: 'personal' | 'business') => {
+        const isSelected = selectedDocType === docType
+        const hasGeneralDocTypeError = formErrors.docType && formErrors.docType.length > 0
+        const hasSpecificDocError = isSelected && Object.keys(formErrors).some(key =>
+            key.startsWith('doc_') && formErrors[key] && formErrors[key]!.length > 0
+        )
+
+        if (isSelected) {
+            return 'border-primary bg-primary/5'
+        } else if (hasGeneralDocTypeError || hasSpecificDocError) {
+            return 'border-destructive bg-destructive/5'
+        } else {
+            return 'border-muted bg-background hover:bg-muted/50'
+        }
+    }
 
     return numberInfo ? (
         <form
@@ -724,19 +768,24 @@ export default function BuyNumberForm({
                     {/* Document selection section */}
                     {(GetDocsPersonal(numberInfo) || GetDocsBusiness(numberInfo)) && (
                         <div className="space-y-4 mt-4">
-                            <div className="font-medium text-sm">{t('required_documents')}:</div>
+                            <div className="font-medium text-sm">{t('required_documents')}</div>
 
                             <div className="flex flex-col gap-4">
                                 {/* Personal Documents Card */}
                                 {GetDocsPersonal(numberInfo) && (
                                     <Card
-                                        className={`p-4 border cursor-pointer transition-all ${selectedDocType === 'personal' ? 'border-primary bg-primary/5' : 'border-muted bg-background'}`}
+                                        className={`p-4 border cursor-pointer transition-all ${getCardClassName('personal')}`}
                                         onClick={() => {
                                             setSelectedDocType('personal')
+                                            // Clear form errors when switching document types
+                                            setFormErrors(prev => ({
+                                                ...prev,
+                                                docType: undefined
+                                            }))
                                         }}
                                     >
                                         <div className="font-medium text-sm mb-2">{t('personal_docs')}</div>
-
+                                        
                                         {selectedDocType === 'personal' ? (
                                             <div className="space-y-2">
                                                 {numberInfo?.docs_personal?.map((docKey, index) => {
@@ -788,9 +837,14 @@ export default function BuyNumberForm({
                                 {/* Business Documents Card */}
                                 {GetDocsBusiness(numberInfo) && (
                                     <Card
-                                        className={`p-4 border cursor-pointer transition-all ${selectedDocType === 'business' ? 'border-primary bg-primary/5' : 'border-muted bg-background'}`}
+                                        className={`p-4 border cursor-pointer transition-all ${getCardClassName('business')}`}
                                         onClick={() => {
                                             setSelectedDocType('business')
+                                            // Clear form errors when switching document types
+                                            setFormErrors(prev => ({
+                                                ...prev,
+                                                docType: undefined
+                                            }))
                                         }}
                                     >
                                         <div className="font-medium text-sm mb-2">{t('business_docs')}</div>

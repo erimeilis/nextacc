@@ -268,9 +268,9 @@ export default function UploadsList({
 
     return (
         <Show when={options !== null && options.length > 0}
-              fallback={options === null ? 
-                  <UploadsSkeleton/> : 
-                  <div className="text-center py-8">{t('no_uploads')}</div>}>
+              fallback={options === null ?
+                  <UploadsSkeleton/> :
+                  <div className="text-sm text-center">{t('no_uploads')}</div>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">

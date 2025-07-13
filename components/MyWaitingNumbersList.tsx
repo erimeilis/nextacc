@@ -198,7 +198,7 @@ export default function MyWaitingNumbersList({
                 const res = await deleteWaitingNumber(id)
                 if (res) options = res
             } catch (error) {
-                console.error(errorsT('error_deleting_waiting_number_id', { id }), error)
+                console.error(errorsT('error_deleting_waiting_number_id', {id}), error)
             }
         }
 
@@ -209,9 +209,9 @@ export default function MyWaitingNumbersList({
 
     return (
         <Show when={displayOptions !== null && displayOptions.length > 0}
-              fallback={displayOptions === null ? 
-                  <WaitingNumbersSkeleton/> : 
-                  <div>{t('no_waiting_numbers')}</div>}>
+              fallback={displayOptions === null ?
+                  <WaitingNumbersSkeleton/> :
+                  <div className="text-sm text-center">{t('no_waiting_numbers')}</div>}>
             <div className="flex flex-col w-full">
                 {/* Total section */}
                 <div className="flex flex-col sm:flex-row justify-between py-2 px-3 bg-muted/30 border-b border-border mb-2">

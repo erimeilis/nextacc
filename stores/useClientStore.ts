@@ -25,6 +25,7 @@ interface ClientStore {
     fetchTransactions: () => Promise<MoneyTransaction[] | null>
     //numbers
     fetchNumbers: () => Promise<NumberInfo[] | null>
+    updateNumbers: (numbers: NumberInfo[]) => void
     deleteNumber: (id: string) => Promise<NumberInfo[] | null>
     //uploads
     fetchUploads: () => Promise<UploadInfo[] | null>
@@ -395,7 +396,7 @@ export const useClientStore = create<ClientStore>()(
                 try {
                     const uploads = await redRenameFile(filename, name)
 
-                    // If uploads is null, it might indicate an auth issue
+                    // If uploads are null, it might indicate an auth issue
                     if (!uploads) {
                         console.log('Rename file returned null, possible auth issue')
                         get().reset()
@@ -420,7 +421,11 @@ export const useClientStore = create<ClientStore>()(
                     get().reset()
                     return null
                 }
-            }
+            },
+
+            updateNumbers: (numbers: NumberInfo[]) => {
+                set({numbers})
+            },
 
         }),
         {
