@@ -8,6 +8,7 @@ import {useClientStore} from '@/stores/useClientStore'
 import {PaymentMethod, PaymentRegion} from '@/types/PaymentTypes'
 import {CaretDownIcon, CaretRightIcon, WalletIcon} from '@phosphor-icons/react'
 import Image from 'next/image'
+import {redMakePayment} from '@/app/api/redreport/payments'
 
 interface PaymentProps {
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
@@ -159,6 +160,17 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     // Check if a subregion is expanded
     const isSubregionExpanded = (subregion: string) => expandedSubregions.includes(subregion)
 
+    // Handle payment method selection
+    const handlePaymentMethodClick = async (methodId: string, methodValue: string) => {
+        console.log(`Selected payment method: ${methodId}, method value: ${methodValue}, amount: ${paymentAmount}`)
+        try {
+            const response = await redMakePayment(paymentAmount, methodValue)
+            console.log('Payment response:', response)
+        } catch (error) {
+            console.error('Error making payment:', error)
+        }
+    }
+
     // Render payment methods for a subregion
     const renderPaymentMethods = (methods: Record<string, PaymentMethod>) => {
         return Object.entries(methods)
@@ -166,6 +178,10 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
                 <div
                     key={id}
                     className="pl-8 py-2 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        handlePaymentMethodClick(id, method.method).then()
+                    }}
                 >
                     <div className="flex items-center justify-between">
                         <div>

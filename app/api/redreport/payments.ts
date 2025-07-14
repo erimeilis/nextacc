@@ -46,3 +46,47 @@ export async function redGetPaymentsMethods(sum?: number): Promise<PaymentRegion
             return null
         })
 }
+
+export async function redMakePayment(amount: number, paymentMethod: string): Promise<Record<string, unknown> | null> {
+    const session = await auth()
+    if (!session || !session.user || session.user.provider === 'anonymous') {
+        console.log('redMakePayment: No valid session, returning null')
+        return null
+    }
+
+    const url = new URL(process.env.REDREPORT_URL + '/api/kc/payment-methods')
+    url.searchParams.append('site_id', process.env.SITE_ID || '')
+
+    const options: RequestInit = {
+        cache: 'reload',
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization': 'Bearer ' + session?.token,
+        },
+        body: JSON.stringify({
+            amount: amount,
+            payment_method: paymentMethod
+        })
+    }
+
+    return fetch(url.toString(), options)
+        .then(async (res: Response) => {
+            console.log('redMakePayment: ', res.status)
+            if (!res.ok) {
+                const errorData = await res.json()
+                console.log('redMakePayment error response: ', errorData)
+                return null
+            }
+            return res.json()
+        })
+        .then(async (data) => {
+            console.log('redMakePayment: Response data:', data)
+            return data
+        })
+        .catch((err) => {
+            console.log('redMakePayment error: ', err.message)
+            return null
+        })
+}
