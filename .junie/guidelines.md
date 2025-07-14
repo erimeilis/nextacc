@@ -67,6 +67,11 @@
 
 Remember that each useEffect should have a single responsibility and clear dependencies.
 
+### Follow App design pattern
+- If we already have table, the new one has to be styled same way
+- If we use some loader or sceletons, - you should use exactly same ones!
+- If it's explicitely said "do as...", - most likely you have to copy structure and design from src
+
 [[calls]]
 match = "when the user requests code examples, setup or configuration steps, or library/API documentation"
 tool = "context7"

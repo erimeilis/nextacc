@@ -33,6 +33,38 @@ export type IvrEffect = {
     filelink: FileLink
 }
 
+export type IvrOrder = {
+    client_id: string
+    amount: string
+    duration: string
+    ivr_id: string
+    ivr_music_id?: string
+    ivr_effect_id?: string
+    text: string
+    comment?: string
+    paid: boolean
+    created_at?: string
+}
+
+export type IvrOrdersResponse = {
+    orders: IvrOrder[]
+}
+
+export type OrderIvrParams = {
+    ivr: string
+    ivr_music?: string
+    ivr_effect?: string
+    amount: string
+    duration: string
+    text: string
+    comment?: string
+}
+
+export type OrderIvrResponse = {
+    code: number
+    message: string
+}
+
 export type IvrResponse = {
     data: {
         ivr: Ivr[]

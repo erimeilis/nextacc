@@ -11,6 +11,8 @@ import {redGetMoneyTransactionReport} from '@/app/api/redreport/transactions'
 import {redDeleteDid, redGetMyDids} from '@/app/api/redreport/dids'
 import {redDeleteUpload, redGetMyUploads, redRenameFile, redUploadFile} from '@/app/api/redreport/uploads'
 import {redGetPaymentsMethods} from '@/app/api/redreport/payments'
+import {redGetMyIvr} from '@/app/api/redreport/ivr'
+import {IvrOrder} from '@/types/IvrTypes'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 
@@ -22,6 +24,7 @@ interface ClientStore {
     numbers: NumberInfo[] | null
     uploads: UploadInfo[] | null
     paymentMethods: PaymentRegion[] | null
+    myIvr: IvrOrder[] | null
     fetchData: () => Promise<void>
     fetchProfile: () => Promise<UserProfile | null>
     updateInfo: (info: ClientInfo) => ClientInfo | null
@@ -48,6 +51,8 @@ interface ClientStore {
     getNumbers: () => NumberInfo[] | null
     getUploads: () => UploadInfo[] | null
     getPaymentMethods: () => PaymentRegion[] | null
+    getMyIvr: () => IvrOrder[] | null
+    fetchMyIvr: () => Promise<IvrOrder[] | null>
 }
 
 // Define the persisted state type (only the data that gets stored)
@@ -58,6 +63,7 @@ type PersistedClientState = {
     numbers: NumberInfo[] | null
     uploads: UploadInfo[] | null
     paymentMethods: PaymentRegion[] | null
+    myIvr: IvrOrder[] | null
 }
 
 // Type guard to check if the persisted state has the expected shape
@@ -75,6 +81,7 @@ export const useClientStore = create<ClientStore>()(
             numbers: null,
             uploads: null,
             paymentMethods: null,
+            myIvr: null,
 
             reset: () => {
                 console.log('resetting client store')
@@ -86,6 +93,7 @@ export const useClientStore = create<ClientStore>()(
                     numbers: null,
                     uploads: null,
                     paymentMethods: null,
+                    myIvr: null,
                 })
             },
 
@@ -132,6 +140,10 @@ export const useClientStore = create<ClientStore>()(
                 return get().isUserLoggedIn() ? get().paymentMethods : null
             },
 
+            getMyIvr: () => {
+                return get().isUserLoggedIn() ? get().myIvr : null
+            },
+
             fetchData: async () => {
                 try {
                     const profilePromise = redGetUserProfile()
@@ -139,11 +151,12 @@ export const useClientStore = create<ClientStore>()(
                     const transactionsPromise = redGetMoneyTransactionReport()
                     const numbersPromise = redGetMyDids()
                     const uploadsPromise = redGetMyUploads()
+                    const myIvrPromise = redGetMyIvr()
 
                     const [
-                        profile, info, transactions, numbers, uploads
+                        profile, info, transactions, numbers, uploads, myIvr
                     ] = await Promise.all([
-                        profilePromise, infoPromise, transactionsPromise, numbersPromise, uploadsPromise
+                        profilePromise, infoPromise, transactionsPromise, numbersPromise, uploadsPromise, myIvrPromise
                     ])
 
                     // If profile is null, it might indicate an auth issue
@@ -160,6 +173,7 @@ export const useClientStore = create<ClientStore>()(
                         transactions: transactions,
                         numbers: numbers,
                         uploads: uploads,
+                        myIvr: myIvr,
                     })
                 } catch (error) {
                     console.error('Error fetching client data:', error)
@@ -440,6 +454,26 @@ export const useClientStore = create<ClientStore>()(
                 set({numbers})
             },
 
+            fetchMyIvr: async (): Promise<IvrOrder[] | null> => {
+                try {
+                    if (!get().ensureUserLoggedIn()) {
+                        return null
+                    }
+
+                    const myIvr = await redGetMyIvr()
+
+                    set((state) => ({
+                        ...state,
+                        myIvr: myIvr
+                    }))
+
+                    return myIvr
+                } catch (error) {
+                    console.error('Error fetching my IVR orders:', error)
+                    return null
+                }
+            },
+
             fetchPaymentMethods: async (sum?: number): Promise<PaymentRegion[] | null> => {
                 console.log('useClientStore: fetchPaymentMethods called with sum:', sum)
                 const response = await redGetPaymentsMethods(sum)
@@ -482,6 +516,21 @@ export const useClientStore = create<ClientStore>()(
                         numbers: persistedState.numbers ?? null,
                         uploads: persistedState.uploads ?? null,
                         paymentMethods: null,
+                        myIvr: null,
+                    }
+                }
+
+                // Handle migration from version 2 to version 3
+                if (version === 2 && isValidPersistedState(persistedState)) {
+                    // If migrating from version 2, ensure all required fields exist
+                    return {
+                        balance: persistedState.balance ?? null,
+                        profile: persistedState.profile ?? null,
+                        transactions: persistedState.transactions ?? null,
+                        numbers: persistedState.numbers ?? null,
+                        uploads: persistedState.uploads ?? null,
+                        paymentMethods: persistedState.paymentMethods ?? null,
+                        myIvr: null,
                     }
                 }
 
@@ -493,6 +542,7 @@ export const useClientStore = create<ClientStore>()(
                     numbers: null,
                     uploads: null,
                     paymentMethods: null,
+                    myIvr: null,
                 }
             },
             partialize: (state: ClientStore): PersistedClientState => ({
@@ -502,6 +552,7 @@ export const useClientStore = create<ClientStore>()(
                 uploads: state.uploads,
                 balance: state.balance,
                 paymentMethods: state.paymentMethods,
+                myIvr: state.myIvr,
             }),
         }
     )

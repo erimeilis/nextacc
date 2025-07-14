@@ -10,6 +10,7 @@ import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
 import {useToast} from '@/hooks/use-toast'
 import {redOrderIvr} from '@/app/api/redreport/ivr'
+import MyIvrList from '@/components/pages/MyIvrList'
 import {calculateSpeechTiming} from '@/utils/calculateSpeechTiming'
 
 // Grammar checker types
@@ -44,6 +45,7 @@ export default function IvrPage() {
     const [isCheckingGrammar, setIsCheckingGrammar] = useState<boolean>(false)
     const [isGrammarCheckEnabled, setIsGrammarCheckEnabled] = useState<boolean>(false)
     const [isOrdering, setIsOrdering] = useState<boolean>(false)
+    // IVR orders are now handled by the MyIvrList component
     const {ivr, ivrMusic, ivrEffects, fetchIvr} = useIvrStore()
     const ivrBackgroundFetchDone = useRef(false)
     const {toast} = useToast()
@@ -52,6 +54,8 @@ export default function IvrPage() {
     // Constants for calculations
     const COMMON_LANGUAGE_PREFIXES = useMemo(() => ['en', 'de', 'pl', 'fr', 'cz', 'ru'], [])
     const MAX_DURATION_FOR_AUTO_PRICE = 35
+
+    // IVR orders are now handled by the MyIvrList component
 
     // Set data from the store immediately if available and fetch in the background if needed
     useEffect(() => {
@@ -78,6 +82,8 @@ export default function IvrPage() {
                 })
         }
     }, [ivr, ivrMusic, ivrEffects, fetchIvr])
+
+    // IVR orders are now handled by the MyIvrList component
 
     // Extract unique languages from ivr data
     const availableLanguages = useMemo(() => {
@@ -818,6 +824,15 @@ export default function IvrPage() {
                         t('order')
                     )}
                 </Button>
+            </div>
+
+            {/* IVR Orders Table */}
+            <div className="mt-8">
+                <MyIvrList 
+                    localIvr={localIvr}
+                    localIvrMusic={localIvrMusic}
+                    localIvrEffects={localIvrEffects}
+                />
             </div>
         </div>
     )
