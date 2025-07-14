@@ -164,7 +164,7 @@ export default function Login() {
                         leftLabel={t('signin')}
                         rightLabel={t('register')}
                         checked={modeLogin}
-                        onToggle={handleToggle}
+                        onToggleAction={handleToggle}
                     />
                 </div>
                 <form

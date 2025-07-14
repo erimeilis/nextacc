@@ -7,14 +7,14 @@ interface ToggleProps {
     leftLabel: string;
     rightLabel: string;
     checked: boolean;
-    onToggle: (checked: boolean) => void; // Renamed from handleToggle to onToggle
+    onToggleAction: (checked: boolean) => void; // Renamed from onToggle to onToggleAction
 }
 
 export default function Toggle({
                                    leftLabel,
                                    rightLabel,
                                    checked,
-                                   onToggle
+                                   onToggleAction
                                }: ToggleProps) {
     return (
         <div className="inline-flex items-center gap-2">
@@ -25,10 +25,10 @@ export default function Toggle({
                     onChange={(e) => {
                         // With our updated ToggleSwitch component, we can now access e.target.checked
                         if (typeof e === 'object' && e !== null && 'target' in e && e.target && 'checked' in e.target) {
-                            onToggle(e.target.checked as boolean)
+                            onToggleAction(e.target.checked as boolean)
                         } else {
                             // Fallback to the previous behavior
-                            onToggle(!checked)
+                            onToggleAction(!checked)
                         }
                     }}
                     checked={checked}

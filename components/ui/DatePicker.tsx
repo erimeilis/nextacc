@@ -7,7 +7,7 @@ import {CalendarIcon, CaretLeftIcon, CaretRightIcon, XIcon} from '@phosphor-icon
 import clsx from 'clsx'
 import {DatePickerProps} from '@/types/DatePickerTypes'
 
-export default function DatePicker({value, onChange, placeholder = 'Select date...', className = ''}: DatePickerProps) {
+export default function DatePicker({value, onChangeAction, placeholder = 'Select date...', className = ''}: DatePickerProps) {
     const [open, setOpen] = useState(false)
     const [currentMonth, setCurrentMonth] = useState(moment().startOf('month'))
     const [selectedDate, setSelectedDate] = useState<moment.Moment | null>(value ? moment(value) : null)
@@ -22,13 +22,13 @@ export default function DatePicker({value, onChange, placeholder = 'Select date.
 
     const handleDateSelect = (date: moment.Moment) => {
         setSelectedDate(date)
-        onChange(date.toDate())
+        onChangeAction(date.toDate())
         setOpen(false)
     }
 
     const handleClear = () => {
         setSelectedDate(null)
-        onChange(null)
+        onChangeAction(null)
         setOpen(false)
     }
 
