@@ -83,7 +83,7 @@ export async function redMakePayment(amount: number, paymentMethod: string): Pro
         })
         .then(async (data) => {
             console.log('redMakePayment: Response data:', data)
-            return data
+            return data.data
         })
         .catch((err) => {
             console.log('redMakePayment error: ', err.message)

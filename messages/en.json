@@ -345,7 +345,9 @@
     "ivr_order_success": "IVR order placed successfully",
     "ivr_order_low_balance": "Insufficient balance. Please top up your account.",
     "ivr_order_manual": "Your order will be processed manually. We will contact you about the final price.",
-    "ivr_order_error": "Failed to place IVR order. Please try again."
+    "ivr_order_error": "Failed to place IVR order. Please try again.",
+    "payment_error": "Payment processing error. Please try again later.",
+    "payment_processing": "Processing your payment. Please wait..."
   },
   "number-edit": {
     "number_not_found": "Number not found",

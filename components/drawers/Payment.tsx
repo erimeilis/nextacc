@@ -9,6 +9,7 @@ import {PaymentMethod, PaymentRegion} from '@/types/PaymentTypes'
 import {CaretDownIcon, CaretRightIcon, WalletIcon} from '@phosphor-icons/react'
 import Image from 'next/image'
 import {redMakePayment} from '@/app/api/redreport/payments'
+import {useToast} from '@/hooks/use-toast'
 
 interface PaymentProps {
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
@@ -37,13 +38,69 @@ const PaymentMethodImage = ({methodCode}: { methodCode: string }) => {
     )
 }
 
+/**
+ * Submits a payment form based on the response from redMakePayment
+ * 
+ * @param response The response from redMakePayment
+ * @returns An object with success status and any error message
+ */
+function submitPaymentForm(response: Record<string, unknown> | null): { success: boolean, error?: string } {
+    if (!response) {
+        return { success: false, error: 'No response data' }
+    }
+
+    try {
+        // Get form action URL
+        const formAction = response.FormAction as string
+        if (!formAction) {
+            return { success: false, error: 'No form action URL provided' }
+        }
+
+        // Get form method (default to POST if not provided)
+        const formMethod = (response.FormMethod as string) || 'POST'
+
+        // Create a form element
+        const form = document.createElement('form')
+        form.method = formMethod
+        form.action = formAction
+        form.target = '_blank'
+
+        // Add fields if provided
+        if (response.Fields && typeof response.Fields === 'object') {
+            const fields = response.Fields as Record<string, string>
+            Object.entries(fields).forEach(([key, value]) => {
+                const input = document.createElement('input')
+                input.type = 'hidden'
+                input.name = key
+                input.value = value
+                form.appendChild(input)
+            })
+        }
+
+        // Append form to body, submit it, and remove it
+        document.body.appendChild(form)
+        form.submit()
+        document.body.removeChild(form)
+
+        return { success: true }
+    } catch (error) {
+        console.error('Error submitting payment form:', error)
+        return { 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Unknown error submitting payment form'
+        }
+    }
+}
+
 export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const t = useTranslations('cart')
     const p = useTranslations('profile')
     const d = useTranslations('dashboard')
+    const toastT = useTranslations('toast')
     const {getBalance, getPaymentMethods, fetchPaymentMethods} = useClientStore()
     const {cart} = useCartStore()
     const balance = getBalance() || 0
+    const {toast} = useToast()
 
     // Payment amount state
     const [paymentAmount, setPaymentAmount] = useState<number>(20) // Initial value is $20 (minimum)
@@ -163,11 +220,61 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     // Handle payment method selection
     const handlePaymentMethodClick = async (methodId: string, methodValue: string) => {
         console.log(`Selected payment method: ${methodId}, method value: ${methodValue}, amount: ${paymentAmount}`)
+        
+        // Show processing toast
+        toast({
+            title: toastT('payment_processing'),
+            duration: 5000,
+        })
+        
         try {
             const response = await redMakePayment(paymentAmount, methodValue)
+            
+            if (!response) {
+                // Show error toast if no response
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('payment_error'),
+                })
+                return
+            }
+            
+            // Log the full response for debugging
             console.log('Payment response:', response)
+            
+            // Check if FormAction exists in the response
+            if (!response.FormAction) {
+                console.error('Payment response missing FormAction property:', response)
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('payment_error'),
+                })
+                return
+            }
+            
+            // Submit the payment form
+            const result = submitPaymentForm(response)
+            
+            if (!result.success) {
+                // Show error toast if form submission failed
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: toastT('payment_error'),
+                })
+                console.error('Payment form submission error:', result.error)
+            }
         } catch (error) {
             console.error('Error making payment:', error)
+            
+            // Show error toast
+            toast({
+                variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('payment_error'),
+            })
         }
     }
 

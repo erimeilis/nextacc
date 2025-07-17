@@ -344,7 +344,9 @@
     "ivr_order_success": "Zamówienie IVR zostało pomyślnie złożone",
     "ivr_order_low_balance": "Niewystarczające saldo. Proszę doładować konto.",
     "ivr_order_manual": "Twoje zamówienie zostanie przetworzone ręcznie. Skontaktujemy się z Tobą w sprawie ostatecznej ceny.",
-    "ivr_order_error": "Nie udało się złożyć zamówienia IVR. Spróbuj ponownie."
+    "ivr_order_error": "Nie udało się złożyć zamówienia IVR. Spróbuj ponownie.",
+    "payment_error": "Błąd przetwarzania płatności. Spróbuj ponownie później.",
+    "payment_processing": "Przetwarzanie płatności. Proszę czekać..."
   },
   "number-edit": {
     "number_not_found": "Numer nie został znaleziony",
