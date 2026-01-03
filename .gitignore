@@ -28,6 +28,9 @@ node_modules
 .junie/
 CLAUDE.md
 
+# Documentation (local)
+docs/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
