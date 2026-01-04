@@ -1,16 +1,17 @@
 import createNextIntlPlugin from 'next-intl/plugin'
-import type {NextConfig} from 'next'
+import type { NextConfig } from 'next'
 
 const withNextIntl = createNextIntlPlugin()
 
-/** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
     output: 'standalone',
+
     experimental: {
         serverActions: {
-            bodySizeLimit: '50mb' // Set to match your MAX_TOTAL_SIZE
-        }
+            bodySizeLimit: '50mb',
+        },
     },
+
     images: {
         remotePatterns: [
             {
@@ -18,8 +19,8 @@ const nextConfig: NextConfig = {
                 hostname: 'red.telecomax.net',
                 pathname: '/payment-methods/**',
             },
-        ]
-    }
+        ],
+    },
 }
 
 export default withNextIntl(nextConfig)

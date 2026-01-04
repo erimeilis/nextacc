@@ -2,7 +2,7 @@ import {create} from 'zustand'
 
 import {CartItem} from '@/types/CartItem'
 import {getPersistState} from '@/utils/usePersistState'
-import {redGetCart} from '@/app/api/redreport/cart'
+import {redGetCart} from '@/app/api/backend/cart'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 

@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import {signOut} from 'next-auth/react'
+import {signOut} from '@/lib/auth-client'
 import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
@@ -72,10 +72,10 @@ export default function DesktopProfileMenu({
                     <DropdownMenuItem className="cursor-pointer transition-all duration-200" onClick={() => {
                         resetClientStoreAction()
                         resetCartStoreAction()
-                        signOut({redirectTo: '/' + search})
-                            .then(() => {
-                                resetPersistentId()
-                            })
+                        signOut().then(() => {
+                            resetPersistentId()
+                            window.location.href = '/' + search
+                        })
                     }}>
                         {lAction('signout')}
                     </DropdownMenuItem>

@@ -1,7 +1,7 @@
 'use client'
 import ActionButton from '@/components/shared/ActionButton'
-import {redSetUserProfile} from '@/app/api/redreport/profile'
-import {signOut} from 'next-auth/react'
+import {redSetUserProfile} from '@/app/api/backend/profile'
+import {signOut} from '@/lib/auth-client'
 import {useTranslations} from 'next-intl'
 import {UserProfile} from '@/types/UserProfile'
 import {resetPersistentId} from '@/utils/resetPersistentId'
@@ -220,10 +220,10 @@ export default function Profile({
                         onClick={() => {
                             resetClientStore()
                             resetCartStore()
-                            signOut({redirectTo: '/' + search})
-                                .then(() => {
-                                    resetPersistentId()
-                                })
+                            signOut().then(() => {
+                                resetPersistentId()
+                                window.location.href = '/' + search
+                            })
                         }}
                         type="button"
                         className="text-xs sm:text-sm"

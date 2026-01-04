@@ -9,7 +9,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/compon
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Button} from '@/components/ui/Button'
 import {useToast} from '@/hooks/use-toast'
-import {redOrderIvr} from '@/app/api/redreport/ivr'
+import {redOrderIvr} from '@/app/api/backend/ivr'
 import MyIvrList from '@/components/pages/MyIvrList'
 import {calculateSpeechTiming} from '@/utils/calculateSpeechTiming'
 
