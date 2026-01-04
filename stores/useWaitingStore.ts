@@ -1,7 +1,7 @@
 import {create} from 'zustand'
 
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
-import {redDeleteWaitingDid, redGetMyWaitingDids} from '@/app/api/redreport/waiting-dids'
+import {redDeleteWaitingDid, redGetMyWaitingDids} from '@/app/api/backend/waiting-dids'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 

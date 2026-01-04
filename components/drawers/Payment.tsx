@@ -8,7 +8,7 @@ import {useClientStore} from '@/stores/useClientStore'
 import {PaymentMethod, PaymentRegion} from '@/types/PaymentTypes'
 import {CaretDownIcon, CaretRightIcon, WalletIcon} from '@phosphor-icons/react'
 import Image from 'next/image'
-import {redMakePayment} from '@/app/api/redreport/payments'
+import {redMakePayment} from '@/app/api/backend/payments'
 import {useToast} from '@/hooks/use-toast'
 
 interface PaymentProps {

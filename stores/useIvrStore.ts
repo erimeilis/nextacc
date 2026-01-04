@@ -3,7 +3,7 @@ import {create} from 'zustand'
 import {persist} from 'zustand/middleware'
 import {idbStorage} from '@/stores/idbStorage'
 import {Ivr, IvrEffect, IvrMusic} from '@/types/IvrTypes'
-import {redGetIvr} from '@/app/api/redreport/ivr'
+import {redGetIvr} from '@/app/api/backend/ivr'
 
 interface IvrStore {
     ivr: Ivr[] | null

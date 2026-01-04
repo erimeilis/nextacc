@@ -8,7 +8,7 @@ import DataTable, {ColumnDef, FilterDef} from '@/components/ui/DataTable'
 import moment from 'moment'
 import ActionButton from '@/components/shared/ActionButton'
 import Loader from '@/components/service/Loader'
-import {redGetCallStatistics, redSendCallStatistics} from '@/app/api/redreport/statistics'
+import {redGetCallStatistics, redSendCallStatistics} from '@/app/api/backend/statistics'
 import {useToast} from '@/hooks/use-toast'
 
 // Define the filter type for Call Statistics

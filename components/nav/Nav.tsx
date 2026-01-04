@@ -112,7 +112,7 @@ const ClientOnlyNav = ({
                 session.status === 'authenticated' &&
                 session.data &&
                 session.data.user &&
-                (session.data.user.provider !== 'anonymous') ? (
+                !session.data.user.isAnonymous ? (
                     <>
                         {/* For mobile - without label */}
                         <span className="sm:hidden text-xs font-bold text-white">
@@ -142,7 +142,7 @@ const ClientOnlyNav = ({
                     session.status === 'authenticated' &&
                     session.data &&
                     session.data.user &&
-                    (session.data.user.provider !== 'anonymous')
+                    !session.data.user.isAnonymous
                 ) ? (
                     <div className={`sm:hidden transition-opacity duration-500 ${showMobileSwitchers ? 'opacity-100' : 'opacity-0'}`}>
                         <MobileSwitchers/>
@@ -153,7 +153,7 @@ const ClientOnlyNav = ({
                     session.status === 'authenticated' &&
                     session.data &&
                     session.data.user &&
-                    (session.data.user.provider !== 'anonymous')
+                    !session.data.user.isAnonymous
                 ) ? (
                     <>
                         {/* Desktop: DropdownMenu */}

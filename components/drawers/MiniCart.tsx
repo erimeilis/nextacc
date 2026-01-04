@@ -9,7 +9,7 @@ import Show from '@/components/service/Show'
 import {useCartStore} from '@/stores/useCartStore'
 import {useClientStore} from '@/stores/useClientStore'
 import {getPersistState} from '@/utils/usePersistState'
-import {redRemoveFromCart} from '@/app/api/redreport/cart'
+import {redRemoveFromCart} from '@/app/api/backend/cart'
 import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
 
 interface MiniCartProps {

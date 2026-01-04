@@ -12,12 +12,13 @@ import {schemaSignup} from '@/schemas/signup.schema'
 import {schemaVerify} from '@/schemas/verify.schema'
 import usePersistState from '@/utils/usePersistState'
 import {validateFormData} from '@/utils/validation'
-import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
+// Keycloak functions removed during BetterAuth migration
+// import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
 import {Card} from '@/components/ui/Card'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Label} from '@/components/ui/Label'
 import {Modal} from '@/components/ui/Dialog'
-import {signIn} from 'next-auth/react'
+import {signIn} from '@/lib/auth-client'
 import {useTranslations} from 'next-intl'
 import {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
@@ -35,7 +36,6 @@ verifyFields.forEach((field: InputField) => verifyFieldsState[field.id] = '')
 export default function Login() {
 
     const t = useTranslations('login')
-    const c = useTranslations('common')
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
@@ -69,26 +69,10 @@ export default function Login() {
         const {errors} = validateFormData(schemaLogin, loginState)
         setLoginErrors(errors ?? {})
         if (!errors) {
-            const rem = document.getElementById('rememberMe') as HTMLInputElement
-            const data = await signIn('kccreds', {
-                username: loginState['loginEmail'],
-                password: loginState['loginPassword'],
-                rememberMe: rem.checked,
-                redirect: false,
-                redirectTo: '/profile/' + search
-            })
-            if (data && data.error) {
-                setGlobalError(data.error)
-                if (data.error === 'email_unverified') {
-                    setVerifyState({
-                        'verifyEmail': loginState['loginEmail'],
-                    })
-                    setOpenWarningVerifyModal(true)
-                }
-            } else if (data && !data.error) {
-                // Session change will trigger fetchData in AuthProvider
-                console.log('Login successful, session change will trigger data fetch')
-            }
+            // Email/password auth is not available in this version
+            // Use Google OAuth instead
+            setGlobalError('credentials_not_available')
+            console.log('Email/password login not available. Please use Google OAuth.')
         }
     }
 
@@ -99,22 +83,10 @@ export default function Login() {
         const {errors} = validateFormData(schemaSignup, signupState)
         setSignupErrors(errors ?? {})
         if (!errors) {
-            const data = await registerUser({
-                username: signupState['signupEmail'],
-                password: signupState['signupPassword'],
-                phone: signupState['signupPhone'],
-                locale: c('locale')
-            })
-            if (data && data.error) {
-                setGlobalError(data.error)
-                if (data.error === 'email_verify_sent') {
-                    setVerifyState({
-                        'verifyEmail': loginState['loginEmail'],
-                    })
-                    setWarningVerifyModalSent(true)
-                    setOpenWarningVerifyModal(true)
-                }
-            }
+            // Email/password signup is not available in this version
+            // Use Google OAuth instead
+            setGlobalError('signup_not_available')
+            console.log('Email/password signup not available. Please use Google OAuth.')
         }
     }
 
@@ -125,13 +97,9 @@ export default function Login() {
         const {errors} = validateFormData(schemaForgot, forgotState)
         setForgotErrors(errors ?? {})
         if (!errors) {
-            const data = await kcSendServiceEmail({
-                email: forgotState['forgotEmail'],
-                reason: 'UPDATE_PASSWORD'
-            })
-            if (data) {
-                setGlobalError('email_restore_sent')
-            }
+            // Password reset is not available in this version
+            setGlobalError('feature_not_available')
+            console.log('Password reset not available in current version.')
         }
     }
 
@@ -142,15 +110,9 @@ export default function Login() {
         const {errors} = validateFormData(schemaVerify, verifyState)
         setVerifyErrors(errors ?? {})
         if (!errors) {
-            const data = await kcSendServiceEmail({
-                email: verifyState['verifyEmail'],
-                reason: 'VERIFY_EMAIL'
-            })
-            if (data) {
-                setGlobalError('email_verify_sent')
-            } else {
-                setWarningVerifyModalSent(true)
-            }
+            // Email verification is not available in this version
+            setGlobalError('feature_not_available')
+            console.log('Email verification not available in current version.')
         }
     }
 
@@ -231,8 +193,9 @@ export default function Login() {
                         </div>
                         <ActionButton
                             type="button"
-                            onClick={() => signIn('google', {
-                                redirectTo: '/profile/' + search
+                            onClick={() => signIn.social({
+                                provider: 'google',
+                                callbackURL: '/profile/' + search
                             })}
                         >
                             {t('google')}
@@ -282,8 +245,9 @@ export default function Login() {
                         </div>
                         <ActionButton
                             type="button"
-                            onClick={() => signIn('google', {
-                                redirectTo: '/profile/' + search
+                            onClick={() => signIn.social({
+                                provider: 'google',
+                                callbackURL: '/profile/' + search
                             })}
                         >
                             {t('google')}

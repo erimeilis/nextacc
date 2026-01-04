@@ -3,7 +3,7 @@ import {persist} from 'zustand/middleware'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
-import {redGetAreas, redGetCountries, redGetDiscounts, redGetNumbers} from '@/app/api/redreport/offers'
+import {redGetAreas, redGetCountries, redGetDiscounts, redGetNumbers} from '@/app/api/backend/offers'
 import {d1Storage} from '@/stores/d1Storage'
 
 interface OffersStore {

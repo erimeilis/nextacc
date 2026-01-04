@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import {signOut} from 'next-auth/react'
+import {signOut} from '@/lib/auth-client'
 import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
@@ -112,10 +112,10 @@ export default function Client({
 
                             // Delay signOut to ensure drawer is closed first
                             setTimeout(() => {
-                                signOut({redirectTo: '/' + targetSearch})
-                                    .then(() => {
-                                        resetPersistentId()
-                                    })
+                                signOut().then(() => {
+                                    resetPersistentId()
+                                    window.location.href = '/' + targetSearch
+                                })
                             }, 100)
                         }}
                     >

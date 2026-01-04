@@ -1,38 +1,51 @@
 'use client'
-import {SessionProvider, useSession} from 'next-auth/react'
-import React, {useEffect, useRef, useState} from 'react'
+
+import React, { useEffect, useRef, useState } from 'react'
+import { useSession } from '@/lib/auth-client'
 import usePersistState from '@/utils/usePersistState'
-import {v4 as uuidv4} from 'uuid'
-import {useClientStore} from '@/stores/useClientStore'
+import { v4 as uuidv4 } from 'uuid'
+import { useClientStore } from '@/stores/useClientStore'
 
 // Wrapper component that has access to the session
-const SessionHandler = ({children}: React.PropsWithChildren<object>) => {
-    const {data: session, status} = useSession()
+const SessionHandler = ({ children }: React.PropsWithChildren<object>) => {
+    const { data: session, isPending, error } = useSession()
     const fetchData = useClientStore(state => state.fetchData)
     const reset = useClientStore(state => state.reset)
-    const [previousStatus, setPreviousStatus] = useState<string | null>(null)
+    const [wasAuthenticated, setWasAuthenticated] = useState(false)
     const fetchDataCalledRef = useRef(false)
+
+    // Determine authentication status
+    const isAuthenticated = !isPending && !!session?.user
 
     // Call fetchData when session becomes authenticated
     // Reset store when session becomes unauthenticated
     useEffect(() => {
-        if (previousStatus === 'authenticated' && status !== 'authenticated') {
+        if (wasAuthenticated && !isAuthenticated && !isPending) {
             console.log('Session no longer authenticated, resetting client store')
             reset()
             fetchDataCalledRef.current = false
-        } else if (status === 'authenticated' && session && !fetchDataCalledRef.current) {
+        } else if (isAuthenticated && !fetchDataCalledRef.current) {
             console.log('Session authenticated, fetching client data')
             fetchDataCalledRef.current = true
             fetchData().then()
         }
 
-        setPreviousStatus(status)
-    }, [status, session, fetchData, reset, previousStatus])
+        if (!isPending) {
+            setWasAuthenticated(isAuthenticated)
+        }
+    }, [isAuthenticated, isPending, fetchData, reset, wasAuthenticated])
+
+    // Log any auth errors
+    useEffect(() => {
+        if (error) {
+            console.error('Auth error:', error)
+        }
+    }, [error])
 
     return <>{children}</>
 }
 
-export const AuthProvider = ({children}: React.PropsWithChildren<object>) => {
+export const AuthProvider = ({ children }: React.PropsWithChildren<object>) => {
     const [persistentId, setPersistentId] = usePersistState<string>('no-id', 'persistentId')
     const resetClientStore = useClientStore(state => state.reset)
 
@@ -43,10 +56,9 @@ export const AuthProvider = ({children}: React.PropsWithChildren<object>) => {
     // Add error event listener to handle auth errors
     useEffect(() => {
         const handleError = (event: ErrorEvent) => {
-            // Check if it's a ClientFetchError from next-auth
-            if (event.error?.name === 'ClientFetchError' || 
-                (event.message && event.message.includes('ClientFetchError')) ||
-                (event.error?.message && event.error.message.includes('Failed to fetch'))) {
+            // Check if it's an auth-related fetch error
+            if (event.error?.message?.includes('Failed to fetch') ||
+                event.message?.includes('auth')) {
                 console.log('Auth error detected, flushing clientStore')
                 resetClientStore()
             }
@@ -60,11 +72,10 @@ export const AuthProvider = ({children}: React.PropsWithChildren<object>) => {
         }
     }, [resetClientStore])
 
+    // BetterAuth doesn't need a SessionProvider wrapper like next-auth
     return (
-        <SessionProvider>
-            <SessionHandler>
-                {children}
-            </SessionHandler>
-        </SessionProvider>
+        <SessionHandler>
+            {children}
+        </SessionHandler>
     )
 }
