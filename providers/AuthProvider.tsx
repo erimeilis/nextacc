@@ -11,29 +11,47 @@ const SessionHandler = ({ children }: React.PropsWithChildren<object>) => {
     const { data: session, isPending, error } = useSession()
     const fetchData = useClientStore(state => state.fetchData)
     const reset = useClientStore(state => state.reset)
+    const isDemoSession = useClientStore(state => state.isDemoSession)
+    const profile = useClientStore(state => state.profile)
     const [wasAuthenticated, setWasAuthenticated] = useState(false)
     const fetchDataCalledRef = useRef(false)
 
-    // Determine authentication status
-    const isAuthenticated = !isPending && !!session?.user
+    // Demo profile ID for comparison (must match DEMO_PROFILE.id in useClientStore)
+    const DEMO_PROFILE_ID = 999999
+
+    // Determine authentication status - either BetterAuth session OR demo session
+    // Also check if profile exists (indicates active session even during hydration)
+    const hasBetterAuthSession = !isPending && !!session?.user
+    const hasProfileData = !!profile?.id
+    const isDemoProfile = profile?.id === DEMO_PROFILE_ID
+    const isAuthenticated = hasBetterAuthSession || isDemoSession || isDemoProfile || hasProfileData
 
     // Call fetchData when session becomes authenticated
     // Reset store when session becomes unauthenticated
+    // Skip fetchData for demo session - it has mock data already
     useEffect(() => {
-        if (wasAuthenticated && !isAuthenticated && !isPending) {
+        // Only reset if truly unauthenticated AND no profile data exists AND not demo profile
+        // This prevents reset during Zustand hydration race conditions
+        if (wasAuthenticated && !isAuthenticated && !isPending && !hasProfileData && !isDemoProfile) {
             console.log('Session no longer authenticated, resetting client store')
             reset()
             fetchDataCalledRef.current = false
         } else if (isAuthenticated && !fetchDataCalledRef.current) {
-            console.log('Session authenticated, fetching client data')
-            fetchDataCalledRef.current = true
-            fetchData().then()
+            // Only fetch real data for non-demo sessions
+            if (!isDemoSession && !isDemoProfile && !hasProfileData) {
+                console.log('Session authenticated, fetching client data')
+                fetchDataCalledRef.current = true
+                fetchData().then()
+            } else {
+                console.log('Demo session active or profile exists, using existing data')
+                fetchDataCalledRef.current = true
+            }
         }
 
         if (!isPending) {
             setWasAuthenticated(isAuthenticated)
         }
-    }, [isAuthenticated, isPending, fetchData, reset, wasAuthenticated])
+    }, [isAuthenticated, isPending, fetchData, reset, wasAuthenticated, isDemoSession, isDemoProfile, hasProfileData])
 
     // Log any auth errors
     useEffect(() => {

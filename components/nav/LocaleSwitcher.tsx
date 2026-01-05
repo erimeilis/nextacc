@@ -1,7 +1,8 @@
 'use client'
-import {routing} from '@/i18n/routing'
+import {routing, usePathname, useRouter} from '@/i18n/routing'
 import {useTranslations} from 'next-intl'
-import {usePathname, useSearchParams} from 'next/navigation'
+import {useSearchParams} from 'next/navigation'
+import {useTransition} from 'react'
 import {Button} from '@/components/ui/Button'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
 
@@ -14,18 +15,23 @@ const localeFlags: Record<string, string> = {
 
 export default function LocaleSwitcher() {
     const t = useTranslations('common')
-    const pathName = usePathname()
+    const pathname = usePathname()
+    const router = useRouter()
     const searchParams = useSearchParams()
-    const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const [isPending, startTransition] = useTransition()
 
-    const redirectedPathName = (locale: string) => {
-        if (!pathName) {
-            return '/'
-        } else {
-            const segments = pathName.split('/')
-            segments[1] = locale
-            return segments.join('/')
-        }
+    const handleLocaleChange = (locale: string) => {
+        startTransition(() => {
+            // Build query string from searchParams
+            const query = searchParams && searchParams.size > 0
+                ? Object.fromEntries(searchParams.entries())
+                : undefined
+
+            router.replace(
+                query ? {pathname, query} : pathname,
+                {locale}
+            )
+        })
     }
 
     return (
@@ -34,6 +40,7 @@ export default function LocaleSwitcher() {
                 <Button
                     variant="navIcon"
                     className="flex items-center gap-2"
+                    disabled={isPending}
                 >
                     {t('locale')}
                 </Button>
@@ -43,7 +50,7 @@ export default function LocaleSwitcher() {
                     <DropdownMenuItem
                         key={locale}
                         className="flex items-center gap-2"
-                        onClick={() => window.location.href = redirectedPathName(locale) + search}
+                        onClick={() => handleLocaleChange(locale)}
                     >
                         <span className="text-base">{localeFlags[locale]}</span>
                         <span>{locale}</span>

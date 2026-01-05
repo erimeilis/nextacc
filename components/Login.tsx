@@ -23,7 +23,9 @@ import {useTranslations} from 'next-intl'
 import {ChangeEvent, SyntheticEvent, useState} from 'react'
 import {InputField} from '@/types/InputField'
 import {useSearchParams} from 'next/navigation'
-// No longer need useClientStore since fetchData is handled by AuthProvider
+import {useClientStore} from '@/stores/useClientStore'
+import {useRouter} from '@/i18n/routing'
+
 const loginFieldsState: { [index: string]: string } = {}
 loginFields.forEach((field: InputField) => loginFieldsState[field.id] = '')
 const signupFieldsState: { [index: string]: string } = {}
@@ -36,9 +38,22 @@ verifyFields.forEach((field: InputField) => verifyFieldsState[field.id] = '')
 export default function Login() {
 
     const t = useTranslations('login')
+    const setDemoSession = useClientStore(state => state.setDemoSession)
+    const router = useRouter()
 
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
+    const query = searchParams && searchParams.size > 0
+        ? Object.fromEntries(searchParams.entries())
+        : undefined
+
+    const handleDemoLogin = () => {
+        setDemoSession(true)
+        // Small delay to allow Zustand persist to write to IndexedDB before navigation
+        setTimeout(() => {
+            router.push(query ? { pathname: '/profile', query } : '/profile')
+        }, 100)
+    }
 
     const [modeLogin, setModeLogin] = usePersistState(false, 'loginMode')
     const handleToggle = () => {
@@ -193,6 +208,13 @@ export default function Login() {
                         </div>
                         <ActionButton
                             type="button"
+                            className="opacity-50"
+                            onClick={handleDemoLogin}
+                        >
+                            {t('demo')}
+                        </ActionButton>
+                        <ActionButton
+                            type="button"
                             onClick={() => signIn.social({
                                 provider: 'google',
                                 callbackURL: '/profile/' + search
@@ -243,6 +265,13 @@ export default function Login() {
                         bg-red-500 dark:bg-red-600" style={{display: globalError === null ? 'none' : 'block'}}>
                             {globalError ? t(globalError) : ''}
                         </div>
+                        <ActionButton
+                            type="button"
+                            className="opacity-50"
+                            onClick={handleDemoLogin}
+                        >
+                            {t('demo')}
+                        </ActionButton>
                         <ActionButton
                             type="button"
                             onClick={() => signIn.social({

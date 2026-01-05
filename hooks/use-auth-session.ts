@@ -1,31 +1,43 @@
 'use client'
 
 import { useSession } from '@/lib/auth-client'
-import { useEffect } from 'react'
 import { useClientStore } from '@/stores/useClientStore'
 
 /**
- * Custom hook that wraps BetterAuth's useSession hook and adds error handling
- * to flush the clientStore when an auth error occurs.
+ * Custom hook that wraps BetterAuth's useSession hook.
+ * Also checks for demo session state from Zustand store.
+ * Note: Store reset is handled by AuthProvider, not here.
  *
  * @returns The session data from BetterAuth's useSession hook
  */
 export function useAuthSession() {
     const session = useSession()
-    const resetClientStore = useClientStore(state => state.reset)
+    const isDemoSession = useClientStore(state => state.isDemoSession)
+    const profile = useClientStore(state => state.profile)
 
-    useEffect(() => {
-        // If there's an error with the session or user is not authenticated, flush the clientStore
-        if (!session.isPending && !session.data?.user) {
-            console.log('User not authenticated, flushing clientStore')
-            resetClientStore()
-        }
-    }, [session.isPending, session.data?.user, resetClientStore])
+    // Demo profile ID for comparison (must match DEMO_PROFILE.id in useClientStore)
+    const DEMO_PROFILE_ID = 999999
+    const isDemoProfile = profile?.id === DEMO_PROFILE_ID
+
+    // Check if authenticated via BetterAuth OR demo session OR demo profile (for hydration race conditions)
+    const isAuthenticated = !!session.data?.user || isDemoSession || isDemoProfile
 
     // Return a compatible interface for existing components
+    // Demo user object needs all properties that BetterAuth user has
+    const demoUser = (isDemoSession || isDemoProfile) && profile ? {
+        id: String(profile.id),
+        email: profile.email,
+        name: `${profile.firstname} ${profile.lastname}`,
+        image: null,
+        isAnonymous: false,
+        emailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    } : null
+
     return {
-        data: session.data,
-        status: session.isPending ? 'loading' : session.data?.user ? 'authenticated' : 'unauthenticated',
+        data: demoUser ? { user: demoUser } : session.data,
+        status: session.isPending ? 'loading' : isAuthenticated ? 'authenticated' : 'unauthenticated',
         isPending: session.isPending,
         error: session.error,
     }

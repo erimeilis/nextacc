@@ -25,6 +25,7 @@ interface ClientStore {
     uploads: UploadInfo[] | null
     paymentMethods: PaymentRegion[] | null
     myIvr: IvrOrder[] | null
+    isDemoSession: boolean
     fetchData: () => Promise<void>
     fetchProfile: () => Promise<UserProfile | null>
     updateInfo: (info: ClientInfo) => ClientInfo | null
@@ -40,9 +41,12 @@ interface ClientStore {
     deleteUpload: (fileId: string) => Promise<UploadInfo[] | null>
     //payments
     fetchPaymentMethods: (sum?: number) => Promise<PaymentRegion[] | null>
+    //demo session
+    setDemoSession: (isDemo: boolean) => void
 
     reset: () => void
     isUserLoggedIn: () => boolean
+    isDemoMode: () => boolean
     ensureUserLoggedIn: () => boolean
     getBalance: () => number | null
     getProfile: () => UserProfile | null
@@ -64,6 +68,24 @@ type PersistedClientState = {
     uploads: UploadInfo[] | null
     paymentMethods: PaymentRegion[] | null
     myIvr: IvrOrder[] | null
+    isDemoSession: boolean
+}
+
+// Demo user profile for client-side demo session
+const DEMO_PROFILE: UserProfile = {
+    id: 999999,
+    email: 'demo@example.com',
+    email_confirm: true,
+    phone: 12025551234,
+    firstname: 'Demo',
+    lastname: 'User',
+    company: 'Demo Company',
+    address: '123 Demo Street',
+    country: 'US',
+    low_balance_notification: true,
+    low_balance_edge: 10,
+    subscribe_news: false,
+    balance: 100.00,
 }
 
 // Type guard to check if the persisted state has the expected shape
@@ -82,6 +104,7 @@ export const useClientStore = create<ClientStore>()(
             uploads: null,
             paymentMethods: null,
             myIvr: null,
+            isDemoSession: false,
 
             reset: () => {
                 console.log('resetting client store')
@@ -94,13 +117,33 @@ export const useClientStore = create<ClientStore>()(
                     uploads: null,
                     paymentMethods: null,
                     myIvr: null,
+                    isDemoSession: false,
                 })
+            },
+
+            setDemoSession: (isDemo: boolean) => {
+                if (isDemo) {
+                    console.log('Setting demo session with mock profile')
+                    set({
+                        isDemoSession: true,
+                        profile: DEMO_PROFILE,
+                        balance: DEMO_PROFILE.balance,
+                    })
+                } else {
+                    console.log('Clearing demo session')
+                    get().reset()
+                }
+            },
+
+            isDemoMode: () => {
+                return get().isDemoSession
             },
 
             // Add a new method for checking login status without side effects
             isUserLoggedIn: () => {
                 const profile = get().profile
-                return !!(profile && profile.id !== undefined && profile.id !== null)
+                const isDemoSession = get().isDemoSession
+                return isDemoSession || !!(profile && profile.id !== undefined && profile.id !== null)
             },
 
             ensureUserLoggedIn: () => {
@@ -504,11 +547,10 @@ export const useClientStore = create<ClientStore>()(
         {
             name: 'client-storage',
             storage: idbStorage,
-            version: 3,
+            version: 4,
             migrate: (persistedState: unknown, version: number): PersistedClientState => {
-                // Handle migration from version 1 to version 2
+                // Handle migration from version 1 to version 4
                 if (version === 1 && isValidPersistedState(persistedState)) {
-                    // If migrating from version 1, ensure all required fields exist
                     return {
                         balance: persistedState.balance ?? null,
                         profile: persistedState.profile ?? null,
@@ -517,12 +559,12 @@ export const useClientStore = create<ClientStore>()(
                         uploads: persistedState.uploads ?? null,
                         paymentMethods: null,
                         myIvr: null,
+                        isDemoSession: false,
                     }
                 }
 
-                // Handle migration from version 2 to version 3
+                // Handle migration from version 2 to version 4
                 if (version === 2 && isValidPersistedState(persistedState)) {
-                    // If migrating from version 2, ensure all required fields exist
                     return {
                         balance: persistedState.balance ?? null,
                         profile: persistedState.profile ?? null,
@@ -531,6 +573,21 @@ export const useClientStore = create<ClientStore>()(
                         uploads: persistedState.uploads ?? null,
                         paymentMethods: persistedState.paymentMethods ?? null,
                         myIvr: null,
+                        isDemoSession: false,
+                    }
+                }
+
+                // Handle migration from version 3 to version 4
+                if (version === 3 && isValidPersistedState(persistedState)) {
+                    return {
+                        balance: persistedState.balance ?? null,
+                        profile: persistedState.profile ?? null,
+                        transactions: persistedState.transactions ?? null,
+                        numbers: persistedState.numbers ?? null,
+                        uploads: persistedState.uploads ?? null,
+                        paymentMethods: persistedState.paymentMethods ?? null,
+                        myIvr: persistedState.myIvr ?? null,
+                        isDemoSession: false,
                     }
                 }
 
@@ -543,6 +600,7 @@ export const useClientStore = create<ClientStore>()(
                     uploads: null,
                     paymentMethods: null,
                     myIvr: null,
+                    isDemoSession: false,
                 }
             },
             partialize: (state: ClientStore): PersistedClientState => ({
@@ -553,6 +611,7 @@ export const useClientStore = create<ClientStore>()(
                 balance: state.balance,
                 paymentMethods: state.paymentMethods,
                 myIvr: state.myIvr,
+                isDemoSession: state.isDemoSession,
             }),
         }
     )
