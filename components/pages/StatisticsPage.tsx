@@ -1,13 +1,14 @@
 'use client'
-import React, {useEffect, useState} from 'react'
-import {useTranslations} from 'next-intl'
-import {useParams, useRouter, useSearchParams} from 'next/navigation'
-import {ChatTextIcon, PhoneIcon} from '@phosphor-icons/react'
-import {Switch} from '@/components/ui/Switch'
+
+import React, { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { ChatTextIcon, PhoneIcon } from '@phosphor-icons/react'
+import { Switch } from '@/components/ui/Switch'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import CallsList from '@/components/CallsList'
 import SmsList from '@/components/SmsList'
-import {useClientStore} from '@/stores/useClientStore'
+import { useDids } from '@/hooks/queries/use-dids'
 
 export default function StatisticsPage() {
     const t = useTranslations('Statistics')
@@ -18,9 +19,8 @@ export default function StatisticsPage() {
     // State
     const [statisticsType, setStatisticsType] = useState<'calls' | 'sms'>('calls')
 
-    // Get numbers from the client store
-    const {getNumbers} = useClientStore()
-    const numbers = getNumbers()
+    // Get numbers from TanStack Query
+    const { data: numbers } = useDids()
 
     // Get the selected number from the URL params
     const selectedNumberDid = params?.number as string

@@ -83,6 +83,9 @@
     "total_price": "Cena całkowita:"
   },
   "docs": {
+    "passport": "Kopia paszportu",
+    "utility_bill": "Rachunek za media (potwierdzenie adresu)",
+    "registration": "Certyfikat rejestracji firmy",
     "name_lastname": "Imię, nazwisko",
     "name-lastname": "Imię, nazwisko",
     "birth": "Data urodzenia, miejsce urodzenia",

@@ -1,6 +1,5 @@
 'use client'
 import ActionButton from '@/components/shared/ActionButton'
-import {redSetUserProfile} from '@/app/api/backend/profile'
 import {signOut} from '@/lib/auth-client'
 import {useTranslations} from 'next-intl'
 import {UserProfile} from '@/types/UserProfile'
@@ -9,6 +8,7 @@ import LineInput from '@/components/shared/LineInput'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
+import {useUpdateProfile} from '@/hooks/queries/use-profile'
 import {CheckCircleIcon, PenNibIcon, XIcon} from '@phosphor-icons/react'
 import {useToast} from '@/hooks/use-toast'
 import {ProfileSkeleton} from '@/components/service/SkeletonLoader'
@@ -45,15 +45,15 @@ export default function Profile({
     const searchParams = useSearchParams()
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
-    const {reset: resetClientStore, fetchProfile: updateStoreProfile} = useClientStore()
+    const {reset: resetClientStore} = useClientStore()
     const {reset: resetCartStore} = useCartStore()
+    const updateProfile = useUpdateProfile()
 
     const [modeEditProfile, setModeEditProfile] = useState(false)
     const handleToggle = () => {
         setModeEditProfile(!modeEditProfile)
         setAbleButtonEditProfile(false)
     }
-    const [modeButtonEditProfile, setModeButtonEditProfile] = useState(false)
     const [ableButtonEditProfile, setAbleButtonEditProfile] = useState(false)
 
     const [profileState, setProfileState] = useState(profileFieldsState)
@@ -82,58 +82,38 @@ export default function Profile({
 
     const handleProfileSubmit = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         e.preventDefault()
-        setModeButtonEditProfile(true)
-        //const {errors} = validateFormData(schemaLogin, profileState)
-        //setProfileErrors(errors ?? {})
-        //if (!errors) {
-        //const rem = document.getElementById('rememberMe') as HTMLInputElement
-        const data = await redSetUserProfile(
-            {
-                phone: Number(profileState['profilePhone']),
-                firstname: profileState['profileFirstname'],
-                lastname: profileState['profileLastname'],
-                company: profileState['profileCompany'],
-                country: profileState['profileCountry'],
-                address: profileState['profileAddress'],
-                low_balance_notification: profileState['profileLowBalanceNotification'] === 'true',
-                low_balance_edge: Number(profileState['profileLowBalanceEdge']),
-                subscribe_news: profileState['profileSubscribeNews'] === 'true',
-            })
-        /*if (data && data.error) {
-            setGlobalError(data.error)
-            if (data.error === 'email_unverified') {
-                setVerifyState({
-                    'verifyEmail': loginState['loginEmail'],
-                })
-                setOpenWarningVerifyModal(true)
-            }
-        }*/
-        //}
-        if (data) {
-            // Update profile in store
-            await updateStoreProfile()
 
-            // Show success toast
-            toast({
-                variant: 'success',
-                title: toastT('success_title'),
-                description: toastT('save_success'),
-                duration: 5000, // 5 seconds
-            })
-
-            setModeEditProfile(!modeEditProfile)
-            setModeButtonEditProfile(false)
-        } else {
-            // Show error toast
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('save_error'),
-                duration: 5000, // 5 seconds
-            })
-
-            setModeButtonEditProfile(false)
+        const profileData = {
+            phone: Number(profileState['profilePhone']),
+            firstname: profileState['profileFirstname'],
+            lastname: profileState['profileLastname'],
+            company: profileState['profileCompany'],
+            country: profileState['profileCountry'],
+            address: profileState['profileAddress'],
+            low_balance_notification: profileState['profileLowBalanceNotification'] === 'true',
+            low_balance_edge: Number(profileState['profileLowBalanceEdge']),
+            subscribe_news: profileState['profileSubscribeNews'] === 'true',
         }
+
+        updateProfile.mutate(profileData, {
+            onSuccess: () => {
+                toast({
+                    variant: 'success',
+                    title: toastT('success_title'),
+                    description: toastT('save_success'),
+                    duration: 5000,
+                })
+                setModeEditProfile(false)
+            },
+            onError: (error) => {
+                toast({
+                    variant: 'destructive',
+                    title: toastT('error_title'),
+                    description: error.message || toastT('save_error'),
+                    duration: 5000,
+                })
+            },
+        })
     }
 
     // Use useEffect to update profileState when profile changes
@@ -348,7 +328,7 @@ export default function Profile({
                                     className="flex text-nowrap text-xs sm:mb-2"
                                     disabled={!ableButtonEditProfile}
                                     icon={CheckCircleIcon}
-                                    loading={modeButtonEditProfile}
+                                    loading={updateProfile.isPending}
                                 >
                                     {t('update_profile')}
                                 </ActionButton>

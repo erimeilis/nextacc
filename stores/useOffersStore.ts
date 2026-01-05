@@ -3,8 +3,8 @@ import {persist} from 'zustand/middleware'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
 import {NumberInfo} from '@/types/NumberInfo'
-import {redGetAreas, redGetCountries, redGetDiscounts, redGetNumbers} from '@/app/api/backend/offers'
-import {d1Storage} from '@/stores/d1Storage'
+import {getCountries, getAreas, getAvailableNumbers, getDiscounts} from '@/lib/api'
+import {idbStorage} from '@/stores/idbStorage'
 
 interface OffersStore {
     countriesMap: {
@@ -55,7 +55,7 @@ export const useOffersStore = create<OffersStore>()(
             },
 
             fetchCountries: async (type): Promise<CountryInfo[]> => {
-                const countries = await redGetCountries({type})
+                const countries = await getCountries(type)
                 set(state => {
                     if (
                         state.countriesMap[type] === undefined ||
@@ -74,7 +74,7 @@ export const useOffersStore = create<OffersStore>()(
             },
 
             fetchAreas: async (type, countryId): Promise<AreaInfo[]> => {
-                const areas = await redGetAreas({type, country: countryId})
+                const areas = await getAreas(type, countryId)
                 set(state => {
                     const key = `${type}_${countryId}`
                     if (
@@ -94,7 +94,7 @@ export const useOffersStore = create<OffersStore>()(
             },
 
             fetchNumbers: async (type, countryId, areaPrefix): Promise<NumberInfo[]> => {
-                const numbers = await redGetNumbers({type, country: countryId, area: areaPrefix})
+                const numbers = await getAvailableNumbers(type, countryId, areaPrefix)
                 set(state => {
                     const key = `${type}_${countryId}_${areaPrefix}`
                     if (
@@ -114,7 +114,7 @@ export const useOffersStore = create<OffersStore>()(
             },
 
             fetchDiscounts: async (): Promise<{ id: string, name: string }[]> => {
-                const discounts = await redGetDiscounts()
+                const discounts = await getDiscounts()
                 set(state => {
                     if (
                         state.discounts.length === 0 ||
@@ -131,7 +131,7 @@ export const useOffersStore = create<OffersStore>()(
         }),
         {
             name: 'offers-storage',
-            storage: d1Storage, // Use D1 storage instead of IndexedDB
+            storage: idbStorage,
             version: 2,
             migrate: (persistedState: unknown, version: number): PersistedOffersState => {
                 // Handle migration from version 1 to version 2

@@ -5,8 +5,7 @@ import {useTranslations} from 'next-intl'
 import {Button} from '@/components/ui/Button'
 import {Input} from '@/components/ui/Input'
 import {Checkbox} from '@/components/ui/Checkbox'
-import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FadersHorizontalIcon, FloppyDiskIcon} from '@phosphor-icons/react'
-import {redGetDidSettings, redUpdateDidSettings} from '@/app/api/backend/dids'
+import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FloppyDiskIcon, FadersHorizontalIcon} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
 import {MyNumberInfo} from '@/types/MyNumberInfo'
 import ExtManSettings from '../ExtManSettings'
@@ -19,6 +18,7 @@ import {schemaPhone} from '@/schemas/phone.schema'
 import {schemaHttps} from '@/schemas/https.schema'
 import {schemaTelegram} from '@/schemas/telegram.schema'
 import {schemaSip} from '@/schemas/sip.schema'
+import {useDidSettings, useUpdateDidSettings} from '@/hooks/queries/use-dids'
 
 export default function NumberEditPage() {
     const params = useParams()
@@ -29,38 +29,30 @@ export default function NumberEditPage() {
     const toastT = useTranslations('toast')
     const {toast} = useToast()
 
-    const [numberData, setNumberData] = useState<MyNumberInfo | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
+    // TanStack Query hooks
+    const {data: numberData, isLoading: loading, error} = useDidSettings(number)
+    const updateDidMutation = useUpdateDidSettings()
+
     const [formData, setFormData] = useState<Partial<MyNumberInfo>>({})
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-    // Load number details on component mount
+    // Sync form data when numberData loads
     useEffect(() => {
-        const loadNumberDetails = async () => {
-            if (!number) return
-
-            setLoading(true)
-            try {
-                const data = await redGetDidSettings(number)
-                if (data) {
-                    setNumberData(data)
-                    setFormData(data)
-                }
-            } catch (error) {
-                console.error('Failed to load number details:', error)
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('failed_to_load_number'),
-                })
-            } finally {
-                setLoading(false)
-            }
+        if (numberData) {
+            setFormData(numberData)
         }
+    }, [numberData])
 
-        loadNumberDetails().then()
-    }, [number, toast, toastT])
+    // Show error toast if loading fails
+    useEffect(() => {
+        if (error) {
+            toast({
+                variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('failed_to_load_number'),
+            })
+        }
+    }, [error, toast, toastT])
 
     // Handle form field changes
     const handleInputChange = (field: keyof MyNumberInfo, value: string | number | boolean | null) => {
@@ -256,37 +248,26 @@ export default function NumberEditPage() {
             return
         }
 
-        console.log('[DEBUG_LOG] Validation passed, proceeding to save...')
-        setSaving(true)
-        try {
-            console.log('[DEBUG_LOG] Calling API to update number details...')
-            const updatedData = await redUpdateDidSettings(number, dataToSubmit)
-            console.log('[DEBUG_LOG] API response received:', updatedData)
-            if (updatedData) {
-                setNumberData(updatedData)
-                console.log('[DEBUG_LOG] Save successful, showing success toast')
-
-                // Show success toast
-                toast({
-                    variant: 'success',
-                    title: toastT('success_title'),
-                    description: toastT('number_updated_successfully'),
-                })
-            } else {
-                console.log('[DEBUG_LOG] API returned no data')
+        updateDidMutation.mutate(
+            { number, data: dataToSubmit },
+            {
+                onSuccess: () => {
+                    toast({
+                        variant: 'success',
+                        title: toastT('success_title'),
+                        description: toastT('number_updated_successfully'),
+                    })
+                },
+                onError: (mutationError) => {
+                    console.error('Failed to save number details:', mutationError)
+                    toast({
+                        variant: 'destructive',
+                        title: toastT('error_title'),
+                        description: toastT('failed_to_save_changes'),
+                    })
+                }
             }
-        } catch (error) {
-            console.error('[DEBUG_LOG] Failed to save number details:', error)
-
-            // Show error toast
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('failed_to_save_changes'),
-            })
-        } finally {
-            setSaving(false)
-        }
+        )
     }
 
     // Handle back navigation
@@ -294,6 +275,8 @@ export default function NumberEditPage() {
         const backUrl = `/numbers/?${searchParams?.toString()}`
         router.push(backUrl)
     }
+
+    const saving = updateDidMutation.isPending
 
     if (loading) {
         return (

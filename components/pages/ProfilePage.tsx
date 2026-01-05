@@ -1,35 +1,26 @@
 'use client'
+
 import Profile from '@/components/Profile'
-import {useClientStore} from '@/stores/useClientStore'
-import {useEffect, useRef, useState} from 'react'
-import {UserProfile} from '@/types/UserProfile'
+import { useProfile } from '@/hooks/queries/use-profile'
+import { ProfileSkeleton } from '@/components/service/SkeletonLoader'
 
 export default function ProfilePage() {
-    const [localProfile, setLocalProfile] = useState<UserProfile | null>(null)
-    const {getProfile, fetchProfile} = useClientStore()
-    const profile = getProfile()
-    const backgroundFetchDone = useRef(false)
+    const { data: profile, isLoading, error } = useProfile()
 
-    // Set data from the store immediately if available and fetch in background if needed
-    useEffect(() => {
-        if (profile) {
-            setLocalProfile(profile)
-        }
+    // Show skeleton while loading
+    if (isLoading) {
+        return <ProfileSkeleton />
+    }
 
-        // Only fetch once when the component mounts or if profile is null
-        if (!backgroundFetchDone.current) {
-            backgroundFetchDone.current = true
-            console.log('ProfilePage: Fetching profile in background')
-            fetchProfile()
-                .then((fetchedProfile) => {
-                    if (fetchedProfile) {
-                        setLocalProfile(fetchedProfile)
-                    }
-                })
-        }
-    }, [fetchProfile, profile])
+    // Show error state
+    if (error) {
+        return (
+            <div className="text-center py-8 text-destructive">
+                <p>Failed to load profile: {error.message}</p>
+            </div>
+        )
+    }
 
-    return <Profile
-        profile={localProfile}
-    />
+    // Profile component handles null case with its own fallback
+    return <Profile profile={profile ?? null} />
 }

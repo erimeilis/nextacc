@@ -84,6 +84,9 @@
     "total_price": "Total price:"
   },
   "docs": {
+    "passport": "Passport copy",
+    "utility_bill": "Utility bill (proof of address)",
+    "registration": "Business registration certificate",
     "name_lastname": "First name, last name",
     "name-lastname": "First name, last name",
     "birth": "Date of birth, place of birth",

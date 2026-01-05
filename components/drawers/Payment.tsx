@@ -1,15 +1,16 @@
 'use client'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useState} from 'react'
 import ActionButton from '@/components/shared/ActionButton'
 import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
 import {useTranslations} from 'next-intl'
-import {useCartStore} from '@/stores/useCartStore'
-import {useClientStore} from '@/stores/useClientStore'
 import {PaymentMethod, PaymentRegion} from '@/types/PaymentTypes'
 import {CaretDownIcon, CaretRightIcon, WalletIcon} from '@phosphor-icons/react'
 import Image from 'next/image'
-import {redMakePayment} from '@/app/api/backend/payments'
 import {useToast} from '@/hooks/use-toast'
+import {usePaymentMethods, useMakePayment} from '@/hooks/queries/use-payments'
+import {useCart} from '@/hooks/queries/use-cart'
+import {useProfile} from '@/hooks/queries/use-profile'
+import {getPersistState} from '@/utils/usePersistState'
 
 interface PaymentProps {
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
@@ -97,14 +98,21 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     const p = useTranslations('profile')
     const d = useTranslations('dashboard')
     const toastT = useTranslations('toast')
-    const {getBalance, getPaymentMethods, fetchPaymentMethods} = useClientStore()
-    const {cart} = useCartStore()
-    const balance = getBalance() || 0
     const {toast} = useToast()
+    const persistentId = getPersistState<string>('persistentId', 'no-id')
+
+    // TanStack Query hooks
+    const {data: profile} = useProfile()
+    const {data: cartItems = []} = useCart(persistentId)
+    const makePaymentMutation = useMakePayment()
+    const balance = profile?.balance ?? 0
 
     // Payment amount state
     const [paymentAmount, setPaymentAmount] = useState<number>(20) // Initial value is $20 (minimum)
     const [amountError, setAmountError] = useState<string>('')
+
+    // Fetch payment methods based on amount
+    const {data: paymentMethodsData = []} = usePaymentMethods(paymentAmount)
 
     // Handle payment amount change
     const handlePaymentAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,68 +130,9 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
         }
     }
 
-    // Payment methods state
-    const [localPaymentMethods, setLocalPaymentMethods] = useState<PaymentRegion[]>([])
+    // Payment methods UI state
     const [expandedRegions, setExpandedRegions] = useState<string[]>([])
     const [expandedSubregions, setExpandedSubregions] = useState<string[]>([])
-    const paymentMethods = getPaymentMethods()
-    const paymentMethodsBackgroundFetchDone = useRef(false)
-
-    // Set data from the store immediately if available and fetch in the background if needed
-    useEffect(() => {
-        console.log('Payment drawer: paymentMethods from store:', paymentMethods)
-        if (paymentMethods && paymentMethods.length > 0) {
-            console.log('Payment drawer: setting localPaymentMethods from store')
-            setLocalPaymentMethods(paymentMethods)
-        }
-
-        if (!paymentMethods || !paymentMethodsBackgroundFetchDone.current) {
-            paymentMethodsBackgroundFetchDone.current = true
-            console.log('Fetching payment methods data in background')
-            fetchPaymentMethods(paymentAmount)
-                .then((result) => {
-                    console.log('Payment drawer: fetchPaymentMethods result:', result)
-                    if (result && result.length > 0) {
-                        console.log('Payment drawer: setting localPaymentMethods from fetch result')
-                        setLocalPaymentMethods(result)
-                    } else {
-                        console.log('Payment drawer: fetch result is null, undefined, or empty array')
-                        // Ensure localPaymentMethods is an empty array if the result is null, undefined, or empty
-                        setLocalPaymentMethods([])
-                    }
-                })
-                .catch(error => {
-                    console.error('Payment drawer: error fetching payment methods:', error)
-                    // Ensure localPaymentMethods is an empty array if there's an error
-                    setLocalPaymentMethods([])
-                })
-        }
-    }, [paymentMethods, fetchPaymentMethods, paymentAmount])
-
-    // Reload payment methods when the payment amount changes
-    useEffect(() => {
-        // Skip the initial render
-        if (paymentMethodsBackgroundFetchDone.current) {
-            console.log('Reloading payment methods with new amount:', paymentAmount)
-            fetchPaymentMethods(paymentAmount)
-                .then((result) => {
-                    console.log('Payment drawer (reload): fetchPaymentMethods result:', result)
-                    if (result && result.length > 0) {
-                        console.log('Payment drawer (reload): setting localPaymentMethods from fetch result')
-                        setLocalPaymentMethods(result)
-                    } else {
-                        console.log('Payment drawer (reload): fetch result is null, undefined, or empty array')
-                        // Ensure localPaymentMethods is an empty array if the result is null, undefined, or empty
-                        setLocalPaymentMethods([])
-                    }
-                })
-                .catch(error => {
-                    console.error('Payment drawer (reload): error fetching payment methods:', error)
-                    // Ensure localPaymentMethods is an empty array if there's an error
-                    setLocalPaymentMethods([])
-                })
-        }
-    }, [paymentAmount, fetchPaymentMethods])
 
     // Toggle region expansion
     const toggleRegion = (e: React.MouseEvent, region: string) => {
@@ -220,62 +169,59 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
     // Handle payment method selection
     const handlePaymentMethodClick = async (methodId: string, methodValue: string) => {
         console.log(`Selected payment method: ${methodId}, method value: ${methodValue}, amount: ${paymentAmount}`)
-        
+
         // Show processing toast
         toast({
             title: toastT('payment_processing'),
             duration: 5000,
         })
-        
-        try {
-            const response = await redMakePayment(paymentAmount, methodValue)
-            
-            if (!response) {
-                // Show error toast if no response
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('payment_error'),
-                })
-                return
+
+        makePaymentMutation.mutate(
+            { amount: paymentAmount, paymentMethod: methodValue },
+            {
+                onSuccess: (response) => {
+                    if (!response) {
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('payment_error'),
+                        })
+                        return
+                    }
+
+                    console.log('Payment response:', response)
+
+                    if (!response.FormAction) {
+                        console.error('Payment response missing FormAction property:', response)
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('payment_error'),
+                        })
+                        return
+                    }
+
+                    const result = submitPaymentForm(response as Record<string, unknown>)
+
+                    if (!result.success) {
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('payment_error'),
+                        })
+                        console.error('Payment form submission error:', result.error)
+                    }
+                },
+                onError: (error) => {
+                    console.error('Error making payment:', error)
+                    toast({
+                        variant: 'destructive',
+                        title: toastT('error_title'),
+                        description: toastT('payment_error'),
+                    })
+                }
             }
-            
-            // Log the full response for debugging
-            console.log('Payment response:', response)
-            
-            // Check if FormAction exists in the response
-            if (!response.FormAction) {
-                console.error('Payment response missing FormAction property:', response)
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('payment_error'),
-                })
-                return
-            }
-            
-            // Submit the payment form
-            const result = submitPaymentForm(response)
-            
-            if (!result.success) {
-                // Show error toast if form submission failed
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('payment_error'),
-                })
-                console.error('Payment form submission error:', result.error)
-            }
-        } catch (error) {
-            console.error('Error making payment:', error)
-            
-            // Show error toast
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('payment_error'),
-            })
-        }
+        )
     }
 
     // Render payment methods for a subregion
@@ -309,7 +255,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
 
     // Calculate total sum in cart
     const calculateCartTotal = () => {
-        return cart.reduce((total, item) => total + (item.sum || 0), 0)
+        return cartItems.reduce((total, item) => total + (item.sum || 0), 0)
     }
 
     const cartTotal = calculateCartTotal()
@@ -365,11 +311,8 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
 
     // Render payment methods list
     const renderPaymentMethodsList = () => {
-        console.log('renderPaymentMethodsList: localPaymentMethods:', localPaymentMethods)
-
         // Empty state
-        if (!localPaymentMethods || localPaymentMethods.length === 0) {
-            console.log('renderPaymentMethodsList: localPaymentMethods is empty or null')
+        if (!paymentMethodsData || paymentMethodsData.length === 0) {
             return (
                 <div className="flex justify-center items-center h-32">
                     <p className="text-gray-500 dark:text-gray-400">{d('no_payment_methods')}</p>
@@ -378,7 +321,7 @@ export default function Payment({setSidebarOpenAction}: PaymentProps) {
         }
 
         // Group payment methods by region and handle subregion merging
-        const groupedMethods = groupPaymentMethodsByRegion(localPaymentMethods)
+        const groupedMethods = groupPaymentMethodsByRegion(paymentMethodsData)
 
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg">

@@ -10,7 +10,7 @@ import {useTranslations} from 'next-intl'
 import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
-import {useWaitingStore} from '@/stores/useWaitingStore'
+import {useWaitingDids, useDeleteWaitingDid} from '@/hooks/queries/use-waiting-dids'
 
 // Skeleton loader for a waiting numbers list
 function WaitingNumbersSkeleton() {
@@ -81,11 +81,11 @@ export default function MyWaitingNumbersList({
                                              }: {
     options: MyWaitingNumberInfo[] | null
 }) {
-    // Get waiting numbers directly from the store to ensure we always have the latest data
-    const {waitingNumbers} = useWaitingStore()
+    // Get waiting numbers from TanStack Query - always use query data, fallback to props
+    const {data: waitingNumbers} = useWaitingDids()
+    const deleteWaitingDidMutation = useDeleteWaitingDid()
 
-    // Always use store waiting numbers if they exist, otherwise use options prop
-    // This ensures we always have the latest data from the store
+    // Always use query waiting numbers if they exist, otherwise use options prop
     const displayOptions = waitingNumbers || options
     const t = useTranslations('dashboard')
     const errorsT = useTranslations('errors')
@@ -97,7 +97,6 @@ export default function MyWaitingNumbersList({
     const [loadingEdit, setLoadingEdit] = useState<string | null>(null)
     const [loadingDelete, setLoadingDelete] = useState<string | null>(null)
     const {countriesMap} = useOffersStore()
-    const {deleteWaitingNumber} = useWaitingStore()
 
     // Get all countries from all types
     const allCountries = Object.values(countriesMap).flat()
@@ -173,17 +172,15 @@ export default function MyWaitingNumbersList({
         // Set the loading state for this number
         setLoadingDelete(number.id)
 
-        try {
-            // Call the API to delete the number
-            // The deleteWaitingNumber function already updates the store with the new list
-            const res = await deleteWaitingNumber(number.id)
-            if (res) options = res
-        } catch (error) {
-            console.error(errorsT('error_deleting_waiting_number'), error)
-        } finally {
-            // Clear loading state
-            setLoadingDelete(null)
-        }
+        deleteWaitingDidMutation.mutate(number.id, {
+            onSuccess: () => {
+                setLoadingDelete(null)
+            },
+            onError: (error) => {
+                console.error(errorsT('error_deleting_waiting_number'), error)
+                setLoadingDelete(null)
+            }
+        })
     }
 
     // Handle deletes the selected button click
@@ -193,13 +190,11 @@ export default function MyWaitingNumbersList({
         // Delete each selected number one by one
         for (const id of selectedNumbers) {
             setLoadingDelete(id)
-            try {
-                // The deleteWaitingNumber function already updates the store with the new list
-                const res = await deleteWaitingNumber(id)
-                if (res) options = res
-            } catch (error) {
-                console.error(errorsT('error_deleting_waiting_number_id', {id}), error)
-            }
+            deleteWaitingDidMutation.mutate(id, {
+                onError: (error) => {
+                    console.error(errorsT('error_deleting_waiting_number_id', {id}), error)
+                }
+            })
         }
 
         // Clear selected numbers and loading state

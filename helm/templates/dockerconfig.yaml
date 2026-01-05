@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  .dockerconfigjson: {{ .Values.image.secretCr }}
-kind: Secret
-metadata:
-  name: {{ .Values.image.secretName }}
-type: kubernetes.io/dockerconfigjson

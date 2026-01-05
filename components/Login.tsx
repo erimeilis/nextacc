@@ -12,8 +12,6 @@ import {schemaSignup} from '@/schemas/signup.schema'
 import {schemaVerify} from '@/schemas/verify.schema'
 import usePersistState from '@/utils/usePersistState'
 import {validateFormData} from '@/utils/validation'
-// Keycloak functions removed during BetterAuth migration
-// import {kcSendServiceEmail, registerUser} from '@/app/api/auth/[...nextauth]/requests'
 import {Card} from '@/components/ui/Card'
 import {Checkbox} from '@/components/ui/Checkbox'
 import {Label} from '@/components/ui/Label'

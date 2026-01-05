@@ -1,14 +1,14 @@
 'use client'
-import React, {useEffect, useState} from 'react'
-import {useTranslations} from 'next-intl'
-import {Button} from '@/components/ui/Button'
-import {Ivr, IvrEffect, IvrMusic, IvrOrder} from '@/types/IvrTypes'
-import {useClientStore} from '@/stores/useClientStore'
-import {useIvrStore} from '@/stores/useIvrStore'
-import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
-import {InfoIcon} from '@phosphor-icons/react'
-import {Boolean} from '@/components/ui/Boolean'
-import {FormattedDate} from '@/components/ui/FormattedDate'
+
+import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { Button } from '@/components/ui/Button'
+import { Ivr, IvrEffect, IvrMusic } from '@/types/IvrTypes'
+import { useIvrOrders } from '@/hooks/queries/use-ivr'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/Table'
+import { InfoIcon } from '@phosphor-icons/react'
+import { Boolean } from '@/components/ui/Boolean'
+import { FormattedDate } from '@/components/ui/FormattedDate'
 
 interface MyIvrListProps {
     localIvr: Ivr[] | null
@@ -16,56 +16,12 @@ interface MyIvrListProps {
     localIvrEffects: IvrEffect[] | null
 }
 
-export default function MyIvrList({localIvr, localIvrMusic, localIvrEffects}: MyIvrListProps) {
+export default function MyIvrList({ localIvr, localIvrMusic, localIvrEffects }: MyIvrListProps) {
     const t = useTranslations('dashboard')
-    const [ivrOrders, setIvrOrders] = useState<IvrOrder[]>([])
-    const [isLoadingOrders, setIsLoadingOrders] = useState<boolean>(true)
     const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null)
-    const {myIvr, fetchMyIvr} = useClientStore()
-    const {ivr: storeIvr} = useIvrStore()
 
-    useEffect(() => {
-        const loadOrders = async () => {
-            setIsLoadingOrders(true)
-            try {
-                await fetchMyIvr()
-            } catch (error) {
-                console.error('Error fetching IVR orders:', error)
-            } finally {
-                setIsLoadingOrders(false)
-            }
-        }
-
-        loadOrders()
-    }, [fetchMyIvr])
-
-    useEffect(() => {
-        if (myIvr) {
-            setIvrOrders(myIvr)
-        }
-    }, [myIvr])
-
-    // Debug logging for IVR data
-    useEffect(() => {
-        console.log('storeIvr:', storeIvr)
-        console.log('localIvr:', localIvr)
-        if (ivrOrders.length > 0) {
-            const firstOrderId = ivrOrders[0].ivr_id
-            console.log('First order ivr_id:', firstOrderId, 'Type:', typeof firstOrderId)
-
-            // Log all IVR IDs from store and local for comparison
-            console.log('Store IVR IDs:', storeIvr?.map(ivr => ({id: ivr.id, idType: typeof ivr.id, name: ivr.name})))
-            console.log('Local IVR IDs:', localIvr?.map(ivr => ({id: ivr.id, idType: typeof ivr.id, name: ivr.name})))
-
-            // Try different comparison methods
-            if (storeIvr) {
-                const exactMatch = storeIvr.find(ivr => ivr.id.toString() === firstOrderId)
-                const numberMatch = storeIvr.find(ivr => ivr.id === parseInt(firstOrderId))
-                console.log('Store exact string match:', exactMatch)
-                console.log('Store number match:', numberMatch)
-            }
-        }
-    }, [storeIvr, localIvr, ivrOrders])
+    // TanStack Query hook for IVR orders
+    const { data: ivrOrders, isLoading: isLoadingOrders } = useIvrOrders()
 
     return (
         <div className="flex flex-col w-full">
@@ -122,7 +78,7 @@ export default function MyIvrList({localIvr, localIvrMusic, localIvrEffects}: My
                         </div>
                     </div>
                 </div>
-            ) : ivrOrders.length === 0 ? (
+            ) : !ivrOrders || ivrOrders.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                     {t('no_ivr_orders')}
                 </div>
@@ -131,24 +87,16 @@ export default function MyIvrList({localIvr, localIvrMusic, localIvrEffects}: My
                     <Table striped className="[&_td]:py-0.5 [&_td]:px-2 [&_td]:text-xs [&_td]:sm:text-sm">
                         <TableBody>
                             {ivrOrders.map((order) => {
-                                // Find the IVR name from the store first, then fall back to local IVR data, then to ID
-                                // Try both string comparison and number comparison
+                                // Find the IVR name from local IVR data
                                 const orderId = order.ivr_id.toString()
                                 const orderIdNum = parseInt(orderId)
 
                                 // Try to find a match using both string and number comparison
-                                const storeMatch = storeIvr?.find(ivr =>
-                                    ivr.id.toString() === orderId || ivr.id === orderIdNum
-                                )
-
                                 const localMatch = localIvr?.find(ivr =>
                                     ivr.id.toString() === orderId || ivr.id === orderIdNum
                                 )
 
-                                // Log the matching process for debugging
-                                console.log(`Order ${orderId} - Store match:`, storeMatch, 'Local match:', localMatch)
-
-                                const ivrName = storeMatch?.name || localMatch?.name || orderId
+                                const ivrName = localMatch?.name || orderId
                                 // Get a preview of the text (first 30 characters)
                                 const textPreview = order.text.length > 30 ? `${order.text.substring(0, 30)}...` : order.text
                                 const orderKey = `${order.client_id}-${order.ivr_id}${order.created_at ? `-${order.created_at}` : ''}`

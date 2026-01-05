@@ -22,13 +22,19 @@ export default function LocaleSwitcher() {
 
     const handleLocaleChange = (locale: string) => {
         startTransition(() => {
-            // Build query string from searchParams
+            // Build query object from searchParams, filtering out empty keys
             const query = searchParams && searchParams.size > 0
-                ? Object.fromEntries(searchParams.entries())
+                ? Object.fromEntries(
+                    Array.from(searchParams.entries())
+                        .filter(([key]) => key !== '') // Remove empty keys
+                )
                 : undefined
 
+            // Only pass query if it has actual entries
+            const hasValidQuery = query && Object.keys(query).length > 0
+
             router.replace(
-                query ? {pathname, query} : pathname,
+                hasValidQuery ? {pathname, query} : pathname,
                 {locale}
             )
         })

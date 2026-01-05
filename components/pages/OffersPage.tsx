@@ -10,10 +10,11 @@ import CreateQueryString from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
 import Show from '@/components/service/Show'
 import dynamic from 'next/dynamic'
-import {useCartStore} from '@/stores/useCartStore'
-import {useWaitingStore} from '@/stores/useWaitingStore'
-import {useClientStore} from '@/stores/useClientStore'
 import {numberTypes} from '@/constants/numberTypes'
+import {useCart} from '@/hooks/queries/use-cart'
+import {useWaitingDids} from '@/hooks/queries/use-waiting-dids'
+import {useAuthSession} from '@/hooks/use-auth-session'
+import {getPersistState} from '@/utils/usePersistState'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
@@ -40,10 +41,14 @@ export default function OffersPage() {
     const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>([])
     const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
     const {countriesMap, areasMap, numbersMap, fetchCountries, fetchAreas, fetchNumbers} = useOffersStore()
-    const {cart} = useCartStore()
-    const {waitingNumbers} = useWaitingStore()
-    const {isUserLoggedIn} = useClientStore()
+    const persistentId = getPersistState<string>('persistentId', 'no-id')
+    const {data: cart = []} = useCart(persistentId)
+    const {data: waitingNumbers = []} = useWaitingDids()
+    const {status: authStatus} = useAuthSession()
+    const isUserLoggedIn = () => authStatus === 'authenticated'
     const buyForm = useRef<HTMLDivElement>(null)
+    const latestTypeRequestRef = useRef<string | null>(null)
+    const latestCountryRequestRef = useRef<number | null>(null)
 
     useEffect(() => {
         if (searchParams && !searchParams.has('type')) {
@@ -74,7 +79,7 @@ export default function OffersPage() {
                     })))
         ) {
             // If the number is not in the localNumbersMap (not available), redirect to a path without a number
-            router.push(pathName + '?' + CreateQueryString('', '', searchParams, ['number']))
+            router.push(pathName + '?' + CreateQueryString(null, null, searchParams, ['number']))
         }
     }, [searchParams, pathName, router, localNumbersMap, cart, waitingNumbers, isUserLoggedIn])
 
@@ -232,38 +237,86 @@ export default function OffersPage() {
     const handleCountry = useCallback((country: number | string) => {
         const slug = countries?.find(e => e.id == country)
         const countryParam = slug ? getSlug(slug.name) : country
-        if (type) {
-            const newCountry = (searchParams && searchParams.has('country')) ?
-                (!isNaN(+(searchParams.get('country') || '')) ?
-                    Number(searchParams.get('country')) :
-                    (countryBySlug ?
-                        Number(countryBySlug.id) :
-                        null)) :
-                null
-            if (newCountry) {
-                fetchAreas(type!, newCountry)
-                    .then((fetchedAreas) => {
-                        setLocalAreasMap(fetchedAreas)
-                        // Handle auto-selection of area when there's only one option
-                        if (fetchedAreas.length === 1 &&
-                            !searchParams?.has('area') &&
-                            fetchedAreas.at(0) !== undefined
-                        ) {
-                            handleArea(fetchedAreas.at(0)!.areaprefix)
-                        }
-                    })
-            }
+
+        // Get the actual country ID being selected (not from searchParams!)
+        const selectedCountryId = typeof country === 'number'
+            ? country
+            : (localCountriesMap?.find(c => getSlug(c.countryname) === country || c.id.toString() === country)?.id ?? null)
+
+        // Clear areas immediately to prevent showing stale data
+        setLocalAreasMap(null)
+        setLocalNumbersMap(null)
+
+        if (type && selectedCountryId) {
+            // Track this request to handle race conditions
+            latestCountryRequestRef.current = selectedCountryId
+
+            fetchAreas(type, selectedCountryId)
+                .then((fetchedAreas) => {
+                    // Ignore stale response if user switched to another country
+                    if (latestCountryRequestRef.current !== selectedCountryId) return
+
+                    setLocalAreasMap(fetchedAreas)
+                    // Handle auto-selection of area when there's only one option
+                    if (fetchedAreas.length === 1 &&
+                        !searchParams?.has('area') &&
+                        fetchedAreas.at(0) !== undefined
+                    ) {
+                        handleArea(fetchedAreas.at(0)!.areaprefix)
+                    }
+                })
         }
         router.push(pathName + '?' + CreateQueryString('country', countryParam, searchParams, ['area', 'number']))
-    }, [countries, countryBySlug, handleArea, pathName, router, searchParams, type, fetchAreas])
+    }, [countries, localCountriesMap, handleArea, pathName, router, searchParams, type, fetchAreas])
 
-    const handleType = useCallback((t: string) => {
-        fetchCountries(t)
-            .then((fetchedCountries) => {
-                setLocalCountriesMap(fetchedCountries)
-            })
-        router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
-    }, [pathName, router, searchParams, fetchCountries])
+    const handleType = useCallback(async (t: string) => {
+        // Track this request to handle race conditions
+        const requestId = t
+        latestTypeRequestRef.current = requestId
+
+        const fetchedCountries = await fetchCountries(t)
+
+        // Ignore stale response if user switched to another type
+        if (latestTypeRequestRef.current !== requestId) return
+
+        setLocalCountriesMap(fetchedCountries)
+
+        // Get current country and area from URL
+        const currentCountrySlug = searchParams?.get('country')
+        const currentAreaParam = searchParams?.get('area')
+
+        // Check if current country exists in the new type's countries
+        const countryMatch = currentCountrySlug ? fetchedCountries.find(c =>
+            getSlug(c.countryname) === currentCountrySlug ||
+            c.id.toString() === currentCountrySlug
+        ) : null
+
+        if (countryMatch && currentAreaParam) {
+            // Country exists, now check if area exists for this country in new type
+            const fetchedAreas = await fetchAreas(t, countryMatch.id)
+
+            // Ignore stale response if user switched to another type
+            if (latestTypeRequestRef.current !== requestId) return
+
+            setLocalAreasMap(fetchedAreas)
+
+            const areaMatch = fetchedAreas.find(a =>
+                getSlug(a.areaname) === currentAreaParam ||
+                a.areaprefix.toString() === currentAreaParam
+            )
+
+            if (areaMatch) {
+                // Both country and area exist - keep both, just clear number
+                router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['number']))
+            } else {
+                // Country exists but area doesn't - keep country, clear area and number
+                router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
+            }
+        } else {
+            // Country doesn't exist or no area selected - clear area and number
+            router.push(pathName + '?' + CreateQueryString('type', t, searchParams, ['area', 'number']))
+        }
+    }, [pathName, router, searchParams, fetchCountries, fetchAreas])
 
     const areas = localAreasMap ?
         localAreasMap.map(area => ({

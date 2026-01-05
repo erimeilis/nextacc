@@ -16,6 +16,7 @@ import {useClientStore} from '@/stores/useClientStore'
 import {useCartStore} from '@/stores/useCartStore'
 import MobileClientButton from '@/components/nav/MobileClientButton'
 import DesktopProfileMenu from '@/components/nav/DesktopProfileMenu'
+import {useProfile} from '@/hooks/queries/use-profile'
 
 // Component that only renders client-side to avoid hydration issues
 const ClientOnlyNav = ({
@@ -198,25 +199,16 @@ export default function Nav() {
     const [displayBalance, setDisplayBalance] = useState<number>(0)
     const [isClient, setIsClient] = useState<boolean>(false)
     const [isAnimating, setIsAnimating] = useState<boolean>(false)
-    const {getBalance, fetchProfile, reset: resetClientStore} = useClientStore()
-    const balance = getBalance()
+    const {reset: resetClientStore} = useClientStore()
+    const {data: profile} = useProfile()
+    const balance = profile?.balance ?? null
     const {reset: resetCartStore} = useCartStore()
     const animationRef = useRef<NodeJS.Timeout | null>(null)
     const targetBalanceRef = useRef<number>(0)
 
-    // Ref to track if fetchProfile has been called
-    const fetchProfileCalledRef = useRef(false)
-
     // Fix hydration issues by only rendering on the client-side
     useEffect(() => {
         setIsClient(true)
-
-        // Fetch profile data on component mount, but only once
-        if (!fetchProfileCalledRef.current) {
-            fetchProfileCalledRef.current = true
-            console.log('Nav: Fetching profile data')
-            fetchProfile().then()
-        }
 
         return () => {
             // Clean up animation timeout on unmounting
@@ -224,7 +216,7 @@ export default function Nav() {
                 clearTimeout(animationRef.current)
             }
         }
-    }, [fetchProfile])
+    }, [])
 
     // Handle balance updates and animation
     useEffect(() => {

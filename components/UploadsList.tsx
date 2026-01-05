@@ -11,7 +11,7 @@ import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {FormattedDate} from '@/components/ui/FormattedDate'
 import {cn} from '@/lib/utils'
 import {Input} from '@/components/ui/Input'
-import {useClientStore} from '@/stores/useClientStore'
+import {useUploadFile, useDeleteUpload, useRenameFile} from '@/hooks/queries/use-uploads'
 import {formatFileSize} from '@/utils/formatFileSize'
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from '@/components/ui/Tooltip'
 import LineInput from '@/components/shared/LineInput'
@@ -136,12 +136,14 @@ export default function UploadsList({
     const t = useTranslations('dashboard')
     const [selectedUploads, setSelectedUploads] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
-    const [isUploading, setIsUploading] = useState<boolean>(false)
     const [editingFile, setEditingFile] = useState<string | null>(null)
     const [editingName, setEditingName] = useState<string>('')
-    const [savingFile, setSavingFile] = useState<string | null>(null)
     const [deletingFile, setDeletingFile] = useState<string | null>(null)
-    const {uploadFile, deleteUpload, renameFile} = useClientStore()
+
+    // TanStack Query mutations
+    const uploadFileMutation = useUploadFile()
+    const deleteUploadMutation = useDeleteUpload()
+    const renameFileMutation = useRenameFile()
 
     // Filter uploads based on a search query
     const filteredOptions = options?.filter(option => {
@@ -181,14 +183,8 @@ export default function UploadsList({
     // Handle file upload
     const handleFileUpload = async (files: File[]) => {
         if (files.length > 0) {
-            setIsUploading(true)
-            try {
-                // Upload only the first file as the current implementation only supports single file upload
-                const res = await uploadFile(files[0])
-                if (res) options = res
-            } finally {
-                setIsUploading(false)
-            }
+            // Upload only the first file as the current implementation only supports single file upload
+            uploadFileMutation.mutate({ file: files[0], type: 'document' })
         }
     }
 
@@ -200,14 +196,11 @@ export default function UploadsList({
     }
 
     // Handle delete button click
-    const handleDelete = async (upload: UploadInfo) => {
+    const handleDelete = (upload: UploadInfo) => {
         setDeletingFile(upload.filename)
-        try {
-            const res = await deleteUpload(upload.filename)
-            if (res) options = res
-        } finally {
-            setDeletingFile(null)
-        }
+        deleteUploadMutation.mutate(upload.filename, {
+            onSettled: () => setDeletingFile(null)
+        })
     }
 
     // Handle deletes the selected button click
@@ -215,12 +208,14 @@ export default function UploadsList({
         // Delete all selected uploads one by one
         for (const filename of selectedUploads) {
             setDeletingFile(filename)
-            try {
-                const res = await deleteUpload(filename)
-                if (res) options = res
-            } finally {
-                setDeletingFile(null)
-            }
+            await new Promise<void>((resolve) => {
+                deleteUploadMutation.mutate(filename, {
+                    onSettled: () => {
+                        setDeletingFile(null)
+                        resolve()
+                    }
+                })
+            })
         }
         // Clear selection
         setSelectedUploads([])
@@ -239,16 +234,17 @@ export default function UploadsList({
     }
 
     // Handle edit save
-    const handleEditSave = async (filename: string) => {
+    const handleEditSave = (filename: string) => {
         if (editingName.trim()) {
-            setSavingFile(filename)
-            const res = await renameFile(filename, editingName.trim())
-            setSavingFile(null)
-            if (res) {
-                options = res
-                setEditingFile(null)
-                setEditingName('')
-            }
+            renameFileMutation.mutate(
+                { filename, newName: editingName.trim() },
+                {
+                    onSuccess: () => {
+                        setEditingFile(null)
+                        setEditingName('')
+                    }
+                }
+            )
         }
     }
 
@@ -260,7 +256,7 @@ export default function UploadsList({
     // Handle edit input key press
     const handleEditKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, filename: string) => {
         if (e.key === 'Enter') {
-            handleEditSave(filename).then()
+            handleEditSave(filename)
         } else if (e.key === 'Escape') {
             handleEditCancel()
         }
@@ -284,7 +280,7 @@ export default function UploadsList({
                     <div className="flex items-center gap-2 w-full sm:w-1/2 order-1 sm:order-2">
                         <FileUploader
                             onUploadAction={handleFileUpload}
-                            isUploading={isUploading}
+                            isUploading={uploadFileMutation.isPending}
                         />
                     </div>
                     {/* Search input - second on mobile, first on desktop */}
@@ -402,9 +398,9 @@ export default function UploadsList({
                                                 onClick={() => handleEditStart(upload)}
                                                 className="h-7 w-7 hidden sm:inline-flex"
                                                 title={t('edit')}
-                                                disabled={savingFile === upload.filename}
+                                                disabled={renameFileMutation.isPending && editingFile === upload.filename}
                                             >
-                                                {savingFile === upload.filename ? (
+                                                {renameFileMutation.isPending && editingFile === upload.filename ? (
                                                     <CircleNotchIcon size={16} className="animate-spin"/>
                                                 ) : (
                                                     <PenNibIcon size={16}/>

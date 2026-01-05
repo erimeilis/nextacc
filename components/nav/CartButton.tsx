@@ -1,37 +1,25 @@
 'use client'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Button} from '@/components/ui/Button'
 import {ShoppingBagIcon} from '@phosphor-icons/react'
 import {Drawer} from '@/components/ui/Drawer'
 import MiniCart from '@/components/drawers/MiniCart'
 import {useCartStore} from '@/stores/useCartStore'
-import {CartItem} from '@/types/CartItem'
 import {useRouter, useSearchParams} from 'next/navigation'
+import {useCart} from '@/hooks/queries/use-cart'
+import {getPersistState} from '@/utils/usePersistState'
 
 export default function CartButton() {
-    const [cartState, setCartState] = useState<CartItem[]>([])
-    const [totalItemsState, setTotalItemsState] = useState(0)
-    const [totalPriceState, setTotalPriceState] = useState(0)
-    const {cart, totalItems, totalPrice, selectedItems, fetchData, selectItem} = useCartStore()
+    const persistentId = getPersistState<string>('persistentId', 'no-id')
+    const {data: cartItems = []} = useCart(persistentId)
+    const {selectedItems, selectItem} = useCartStore()
     const router = useRouter()
     const searchParams = useSearchParams()
     const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
 
-    const fetchDataCalledRef = useRef(false)
-
-    useEffect(() => {
-        if (!fetchDataCalledRef.current) {
-            fetchDataCalledRef.current = true
-            console.log('CartButton: Fetching cart data')
-            fetchData().then()
-        }
-    }, [fetchData])
-
-    useEffect(() => {
-        setCartState(cart)
-        setTotalItemsState(totalItems)
-        setTotalPriceState(totalPrice)
-    }, [cart, totalItems, totalPrice])
+    // Calculate totals from cart data
+    const totalItems = cartItems.length
+    const totalPrice = cartItems.reduce((sum, item) => sum + (item.sum || 0), 0)
 
     // Effect to handle a responsive direction
     useEffect(() => {
@@ -103,11 +91,11 @@ export default function CartButton() {
                     handleSidebarChange(!sidebarOpen)
                 }}
             >
-                <span className="text-opacity-80 text-xs mr-1">${totalPriceState}</span>
+                <span className="text-opacity-80 text-xs mr-1">${totalPrice.toFixed(2)}</span>
                 <ShoppingBagIcon size={24}/>
                 <span
                     className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                    {totalItemsState}
+                    {totalItems}
                 </span>
             </Button>
 
@@ -118,7 +106,7 @@ export default function CartButton() {
                 snapPoints={[1]}
             >
                 <MiniCart
-                    cartItems={cartState}
+                    cartItems={cartItems}
                     selectedItems={selectedItems}
                     setSelectedItemsAction={selectItem}
                     setSidebarOpenAction={handleSidebarChange}

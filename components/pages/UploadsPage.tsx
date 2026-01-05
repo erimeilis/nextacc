@@ -1,37 +1,22 @@
 'use client'
+
 import UploadsList from '@/components/UploadsList'
-import {UploadInfo} from '@/types/UploadInfo'
-import {useEffect, useRef, useState} from 'react'
-import {useClientStore} from '@/stores/useClientStore'
+import { useUploads } from '@/hooks/queries/use-uploads'
 
 export default function UploadsPage() {
-    const [localUploads, setLocalUploads] = useState<UploadInfo[] | null>(null)
-    const {getUploads, fetchUploads} = useClientStore()
-    const uploads = getUploads()
-    const backgroundFetchDone = useRef(false)
+    const { data: uploads, isLoading, error } = useUploads()
 
-    // Set data from the store immediately if available
-    useEffect(() => {
-        if (uploads && uploads.length > 0) {
-            setLocalUploads(uploads)
-        }
-
-        // Only fetch once when the component mounts
-        if (!backgroundFetchDone.current) {
-            backgroundFetchDone.current = true
-            console.log('UploadsPage: Fetching uploads in background')
-            fetchUploads()
-                .then((fetchedUploads) => {
-                    if (fetchedUploads) {
-                        setLocalUploads(fetchedUploads)
-                    }
-                })
-        }
-    }, [fetchUploads, uploads])
+    if (error) {
+        return (
+            <div className="text-center py-8 text-destructive">
+                <p>Failed to load uploads: {error.message}</p>
+            </div>
+        )
+    }
 
     return (
         <UploadsList
-            options={localUploads}
+            options={isLoading ? null : (uploads ?? null)}
         />
     )
 }

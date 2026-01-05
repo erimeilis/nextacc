@@ -1,5 +1,5 @@
 'use client'
-import React, {ChangeEvent, SyntheticEvent, useEffect, useMemo, useState} from 'react'
+import React, {ChangeEvent, SyntheticEvent, useMemo, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import DropdownSelect from '@/components/shared/DropdownSelect'
 import {useTranslations} from 'next-intl'
@@ -16,21 +16,17 @@ import {schemaHttps} from '@/schemas/https.schema'
 import {z} from 'zod'
 import {ChatTextIcon, PhoneTransferIcon} from '@phosphor-icons/react'
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/Table'
-import {redAddToCart} from '@/app/api/backend/cart'
-import {redBuy} from '@/app/api/backend/buy'
 import usePersistState, {getPersistState} from '@/utils/usePersistState'
 import {ClientInfo} from '@/types/ClientInfo'
-import {useCartStore} from '@/stores/useCartStore'
-import {useOffersStore} from '@/stores/useOffersStore'
-import {useClientStore} from '@/stores/useClientStore'
-import {useWaitingStore} from '@/stores/useWaitingStore'
 import {useToast} from '@/hooks/use-toast'
 import {useRouter} from 'next/navigation'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
-import {UploadInfo} from '@/types/UploadInfo'
 import {Card} from '@/components/ui/Card'
-import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
+import {useAddToCart, useBuyNumbers} from '@/hooks/queries/use-cart'
+import {useDiscounts} from '@/hooks/queries/use-offers'
+import {useUploads, useUploadFile} from '@/hooks/queries/use-uploads'
+import {useAuthSession} from '@/hooks/use-auth-session'
 
 export default function BuyNumberForm({
                                           numberInfo,
@@ -56,15 +52,19 @@ export default function BuyNumberForm({
         'country': '',
     }, 'persistentClientInfo')
 
-    const {updateData: updateCartData} = useCartStore()
-    const {updateWaitingNumbers} = useWaitingStore()
-    const {updateNumbers} = useClientStore()
+    // TanStack Query hooks
+    const addToCartMutation = useAddToCart()
+    const buyNumbersMutation = useBuyNumbers()
+    const {data: discountsData = []} = useDiscounts()
+    const {data: uploads = []} = useUploads()
+    const uploadFileMutation = useUploadFile()
+    const {status: authStatus} = useAuthSession()
+    const isUserLoggedIn = authStatus === 'authenticated'
 
     const {toast} = useToast()
     const getClientInfo = async () => {
         const res = await fetch('https://ipinfo.io/json?token=39d5c35f2d7eb1')
         const info = await res.json()
-        //await slack(info.ip)
         setPersistentClientInfo(info)
     }
 
@@ -183,199 +183,140 @@ export default function BuyNumberForm({
 
                 // Determine which action to take based on the button clicked
                 if (buttonId === 'buy') {
-                    const response = await redBuy(commonParams)
-
-                    if (response.error) {
-                        // Handle specific error cases
-                        if (response.error.status === 404) {
-                            // Show error toast for a number not available
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('number_not_available')
-                            })
-                        } else if (response.error.status === 402) {
-                            // Show error toast for low balance
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('low_balance')
-                            })
-                        } else if (response.error.status === 409) {
-                            // Show error toast for already exists
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('already_exists')
-                            })
-                        } else if (response.error.status === 500) {
-                            // Show error toast for unknown error
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('unknown_error')
-                            })
-                        } else {
-                            // Show generic error toast
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT(response.error.message)
-                            })
-                        }
-                    } else {
-                        // Update waiting-dids data
-                        if (response.data) {
-                            if (response.type === 'manual') {
-                                await updateWaitingNumbers(response.data as MyWaitingNumberInfo[])
-                            } else {
-                                updateNumbers(response.data as NumberInfo[])
-                            }
-
-                        }
-
-                        // Show success toast with the appropriate message
-                        toast({
-                            variant: 'success',
-                            title: toastT('success_title'),
-                            description: response.type === 'manual'
-                                ? toastT('buy_success_manual')
-                                : toastT('buy_success'),
-                            onDismiss: () => {
-                                setSelectedDocType(null)
-                                // If the type is manual, update waiting DIDs and redirect to number page with waiting tab selected
-                                const url = new URL(window.location.href)
-                                if (response.type === 'manual') {
-                                    // Open minicart when toast is dismissed
-                                    router.push('/waiting-numbers' + url.search)
+                    buyNumbersMutation.mutate(
+                        {
+                            ...commonParams,
+                            numbers: [numberInfo]
+                        },
+                        {
+                            onSuccess: (response) => {
+                                // Show success toast with the appropriate message
+                                const isManual = response && 'status' in response && response.status === 'pending'
+                                toast({
+                                    variant: 'success',
+                                    title: toastT('success_title'),
+                                    description: isManual
+                                        ? toastT('buy_success_manual')
+                                        : toastT('buy_success'),
+                                    onDismiss: () => {
+                                        setSelectedDocType(null)
+                                        // If the type is manual, redirect to waiting-numbers page
+                                        const url = new URL(window.location.href)
+                                        if (isManual) {
+                                            router.push('/waiting-numbers' + url.search)
+                                        } else {
+                                            router.push('/numbers' + url.search)
+                                        }
+                                    }
+                                })
+                            },
+                            onError: (error) => {
+                                // Handle specific error cases
+                                const errorMessage = error.message
+                                if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('number_not_available')
+                                    })
+                                } else if (errorMessage.includes('402') || errorMessage.includes('balance')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('low_balance')
+                                    })
+                                } else if (errorMessage.includes('409') || errorMessage.includes('exists')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('already_exists')
+                                    })
                                 } else {
-                                    router.push('/numbers' + url.search)
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('unknown_error')
+                                    })
                                 }
                             }
-                        })
-                    }
+                        }
+                    )
                 } else {
-                    const response = await redAddToCart(commonParams)
-
-                    if (response.error) {
-                        // Handle specific error cases
-                        if (response.error.status === 404) {
-                            // Show error toast for a number not available
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('number_not_available'),
-                            })
-                        } else if (response.error.status === 402) {
-                            // Show error toast for low balance
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('low_balance'),
-                            })
-                        } else if (response.error.status === 409) {
-                            // Show error toast for already exists
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('already_exists'),
-                            })
-                        } else if (response.error.status === 500) {
-                            // Show error toast for unknown error
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT('unknown_error'),
-                            })
-                        } else {
-                            // Show generic error toast
-                            toast({
-                                variant: 'destructive',
-                                title: toastT('error_title'),
-                                description: toastT(response.error.message),
-                                onDismiss: () => {
-                                    setSelectedDocType(null)
-                                    // Open a mini cart when toast is dismissed
-                                    const url = new URL(window.location.href)
-                                    url.searchParams.set('cart', 'open')
-                                    router.push(url.pathname + url.search)
+                    addToCartMutation.mutate(
+                        commonParams,
+                        {
+                            onSuccess: () => {
+                                // Show success toast
+                                toast({
+                                    variant: 'success',
+                                    title: toastT('success_title'),
+                                    description: toastT('cart_add_success'),
+                                    onDismiss: () => {
+                                        // Open minicart when toast is dismissed
+                                        const url = new URL(window.location.href)
+                                        url.searchParams.set('cart', 'open')
+                                        router.push(url.pathname + url.search)
+                                    }
+                                })
+                            },
+                            onError: (error) => {
+                                // Handle specific error cases
+                                const errorMessage = error.message
+                                if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('number_not_available'),
+                                    })
+                                } else if (errorMessage.includes('402') || errorMessage.includes('balance')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('low_balance'),
+                                    })
+                                } else if (errorMessage.includes('409') || errorMessage.includes('exists')) {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('already_exists'),
+                                    })
+                                } else {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: toastT('error_title'),
+                                        description: toastT('unknown_error'),
+                                    })
                                 }
-                            })
-                        }
-                    } else {
-                        // Update cart data
-                        if (response.data) {
-                            updateCartData(response.data)
-                        }
-
-                        // Show success toast
-                        toast({
-                            variant: 'success',
-                            title: toastT('success_title'),
-                            description: toastT('cart_add_success'),
-                            onDismiss: () => {
-                                // Open minicart when toast is dismissed
-                                const url = new URL(window.location.href)
-                                url.searchParams.set('cart', 'open')
-                                router.push(url.pathname + url.search)
                             }
-                        })
-                    }
+                        }
+                    )
                 }
             }
         } catch (error) {
             console.error('Error processing request:', error)
             // Show error toast
-            if (buttonId === 'buy') {
-                // For the Buy button, don't open the cart
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('cart_add_error')
-                })
-            } else {
-                // For the Add to Cart button, open the cart
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('cart_add_error'),
-                })
-            }
+            toast({
+                variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('cart_add_error')
+            })
         } finally {
             setLoadingButton(null)
         }
     }
 
-    function Discounts(): { id: string, name: string }[] {
-        const {discounts, fetchDiscounts} = useOffersStore()
-
-        // First show cached data from the store
-        // Then update in the background
-        useEffect(() => {
-            fetchDiscounts().then()
-        }, [fetchDiscounts])
-
-        // Add a default "1 month" option if a discount array is empty
-        if (discounts.length === 0) {
-            return [{id: '0', name: '1'}]
-        }
-
-        return discounts
-    }
-
-    const discounts = Discounts()
+    // Use discounts from TanStack Query, with default "1 month" option if empty
+    const discounts = discountsData.length > 0 ? discountsData : [{id: '0', name: '1'}]
 
     function GetDocsPersonal(numberInfo: NumberInfo | null) {
         if (!numberInfo || !numberInfo.docs_personal || !numberInfo.docs_personal.length) return null
         const docsList = numberInfo.docs_personal.map(key => d(key))
-        //console.log(docsList)
         return docsList.length > 0 ? docsList : null
     }
 
     function GetDocsBusiness(numberInfo: NumberInfo | null) {
         if (!numberInfo || !numberInfo.docs_business || !numberInfo.docs_business.length) return null
         const docsList = numberInfo.docs_business.map(key => d(key))
-        //console.log(docsList)
         return docsList.length > 0 ? docsList : null
     }
 
@@ -445,6 +386,8 @@ export default function BuyNumberForm({
     const [selectedDocType, setSelectedDocType] = useState<'personal' | 'business' | null>(null)
     const [personalDocUploads, setPersonalDocUploads] = useState<{ [key: string]: string }>({})
     const [businessDocUploads, setBusinessDocUploads] = useState<{ [key: string]: string }>({})
+    const [uploadingField, setUploadingField] = useState<string | null>(null)
+
     // For backward compatibility with existing code,
     // Wrap in useMemo to prevent recreation on every render
     const docUploads = useMemo(() => {
@@ -471,40 +414,30 @@ export default function BuyNumberForm({
     const handleFileUpload = async (fieldName: string, file: File) => {
         try {
             setUploadingField(fieldName)
-            const res = await uploadFile(file)
-            if (res) {
-                if (res.length > 0) {
-                    const newUpload = res[0]
+            // Extract doc type from field name (remove 'doc_' prefix)
+            const docType = fieldName.startsWith('doc_') ? fieldName.substring(4) : fieldName
 
-                    // Update the document selection with the new file
-                    handleDocUploadSelection(fieldName, newUpload.filename)
-
-                    // Update the local uploads state
-                    setUploads(res)
+            uploadFileMutation.mutate(
+                {file, type: docType},
+                {
+                    onSuccess: (newUpload) => {
+                        if (newUpload) {
+                            // Update the document selection with the new file
+                            handleDocUploadSelection(fieldName, newUpload.filename)
+                        }
+                        setUploadingField(null)
+                    },
+                    onError: (uploadError) => {
+                        console.error('Error uploading file:', uploadError)
+                        setUploadingField(null)
+                    }
                 }
-            }
+            )
         } catch (error) {
             console.error('Error uploading file:', error)
-        } finally {
             setUploadingField(null)
         }
     }
-
-    // Get uploads from the client store
-    const {getUploads, fetchUploads, uploadFile, isUserLoggedIn} = useClientStore()
-    const [uploads, setUploads] = useState<UploadInfo[]>([])
-    const [uploadingField, setUploadingField] = useState<string | null>(null)
-
-    // Fetch uploads when the component mounts
-    useEffect(() => {
-        if (getUploads()) {
-            setUploads(getUploads()!)
-        } else {
-            fetchUploads().then(fetchedUploads => {
-                setUploads(fetchedUploads ?? [])
-            })
-        }
-    }, [fetchUploads, getUploads])
 
     // Create a form validation schema based on the numberInfo properties
     const createFormSchema = (numberInfo: NumberInfo | null) => {
@@ -785,7 +718,7 @@ export default function BuyNumberForm({
                                         }}
                                     >
                                         <div className="font-medium text-sm mb-2">{t('personal_docs')}</div>
-                                        
+
                                         {selectedDocType === 'personal' ? (
                                             <div className="space-y-2">
                                                 {numberInfo?.docs_personal?.map((docKey, index) => {
@@ -952,16 +885,16 @@ export default function BuyNumberForm({
                             type="submit"
                             style="pillow"
                             id="cart"
-                            loading={loadingButton === 'cart'}
+                            loading={loadingButton === 'cart' || addToCartMutation.isPending}
                         >
                             {t('add_to_cart')}
                         </ActionButton>
-                        {isUserLoggedIn() && (
+                        {isUserLoggedIn && (
                             <ActionButton
                                 type="submit"
                                 style="pillow"
                                 id="buy"
-                                loading={loadingButton === 'buy'}
+                                loading={loadingButton === 'buy' || buyNumbersMutation.isPending}
                             >
                                 {t('buy')}
                             </ActionButton>

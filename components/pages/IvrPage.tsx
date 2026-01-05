@@ -1,17 +1,17 @@
 'use client'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {useTranslations} from 'next-intl'
-import {useIvrStore} from '@/stores/useIvrStore'
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useIvrOptions, useOrderIvr } from '@/hooks/queries/use-ivr'
 import DropDownSelectAudio from '@/components/shared/DropDownSelectAudio'
 import LanguageSelector from '@/components/shared/LanguageSelector'
-import {Ivr, IvrEffect, IvrMusic} from '@/types/IvrTypes'
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/Tooltip'
-import {Checkbox} from '@/components/ui/Checkbox'
-import {Button} from '@/components/ui/Button'
-import {useToast} from '@/hooks/use-toast'
-import {redOrderIvr} from '@/app/api/backend/ivr'
+import { Ivr, IvrEffect, IvrMusic } from '@/types/IvrTypes'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { Button } from '@/components/ui/Button'
+import { useToast } from '@/hooks/use-toast'
 import MyIvrList from '@/components/pages/MyIvrList'
-import {calculateSpeechTiming} from '@/utils/calculateSpeechTiming'
+import { calculateSpeechTiming } from '@/utils/calculateSpeechTiming'
 
 // Grammar checker types
 interface GrammarMatch {
@@ -32,9 +32,17 @@ interface GrammarResult {
 
 export default function IvrPage() {
     const t = useTranslations('dashboard')
-    const [localIvr, setLocalIvr] = useState<Ivr[] | null>([])
-    const [localIvrMusic, setLocalIvrMusic] = useState<IvrMusic[] | null>([])
-    const [localIvrEffects, setLocalIvrEffects] = useState<IvrEffect[] | null>([])
+
+    // TanStack Query hooks
+    const { data: ivrOptions } = useIvrOptions()
+    const orderIvrMutation = useOrderIvr()
+
+    // Extract IVR data from options (with fallback)
+    const localIvr = ivrOptions?.ivr ?? null
+    const localIvrMusic = ivrOptions?.ivrmusic ?? null
+    const localIvrEffects = ivrOptions?.ivreffects ?? null
+
+    // Form state
     const [selectedIvr, setSelectedIvr] = useState<string | null>(null)
     const [selectedIvrMusic, setSelectedIvrMusic] = useState<string | null>(null)
     const [selectedIvrEffect, setSelectedIvrEffect] = useState<string | null>(null)
@@ -44,44 +52,13 @@ export default function IvrPage() {
     const [grammarMatches, setGrammarMatches] = useState<GrammarMatch[]>([])
     const [isCheckingGrammar, setIsCheckingGrammar] = useState<boolean>(false)
     const [isGrammarCheckEnabled, setIsGrammarCheckEnabled] = useState<boolean>(false)
-    const [isOrdering, setIsOrdering] = useState<boolean>(false)
-    // IVR orders are now handled by the MyIvrList component
-    const {ivr, ivrMusic, ivrEffects, fetchIvr} = useIvrStore()
-    const ivrBackgroundFetchDone = useRef(false)
-    const {toast} = useToast()
+
+    const { toast } = useToast()
     const toastT = useTranslations('toast')
 
     // Constants for calculations
     const COMMON_LANGUAGE_PREFIXES = useMemo(() => ['en', 'de', 'pl', 'fr', 'cz', 'ru'], [])
     const MAX_DURATION_FOR_AUTO_PRICE = 35
-
-    // IVR orders are now handled by the MyIvrList component
-
-    // Set data from the store immediately if available and fetch in the background if needed
-    useEffect(() => {
-        if (ivr) {
-            setLocalIvr(ivr)
-        }
-        if (ivrMusic) {
-            setLocalIvrMusic(ivrMusic)
-        }
-        if (ivrEffects) {
-            setLocalIvrEffects(ivrEffects)
-        }
-
-        if (!ivr || !ivrMusic || !ivrEffects || !ivrBackgroundFetchDone.current) {
-            ivrBackgroundFetchDone.current = true
-            console.log('Fetching IVR data in background')
-            fetchIvr()
-                .then((result) => {
-                    if (result) {
-                        setLocalIvr(result.ivr)
-                        setLocalIvrMusic(result.ivrMusic)
-                        setLocalIvrEffects(result.ivrEffects)
-                    }
-                })
-        }
-    }, [ivr, ivrMusic, ivrEffects, fetchIvr])
 
     // IVR orders are now handled by the MyIvrList component
 
@@ -539,7 +516,7 @@ export default function IvrPage() {
     }
 
     // Handle order button click
-    const handleOrderClick = async () => {
+    const handleOrderClick = () => {
         // Validate required fields
         if (!selectedIvr) {
             toast({
@@ -559,69 +536,57 @@ export default function IvrPage() {
             return
         }
 
-        setIsOrdering(true)
-
-        try {
-            // For manual calculation cases, we send price as 0
-            const response = await redOrderIvr({
-                ivr: selectedIvr,
-                ivr_music: selectedIvrMusic || undefined,
-                ivr_effect: selectedIvrEffect || undefined,
-                amount: price.toFixed(2), // Already set to "0.00" for manual calculation cases
-                duration: optDurationInSeconds.toString(),
-                text: ivrText,
-                comment: commentText.trim() || undefined
-            })
-
-            if (!response) {
+        // Use TanStack Query mutation
+        orderIvrMutation.mutate({
+            ivr: selectedIvr,
+            ivr_music: selectedIvrMusic || undefined,
+            ivr_effect: selectedIvrEffect || undefined,
+            amount: price.toFixed(2),
+            duration: optDurationInSeconds.toString(),
+            text: ivrText,
+            comment: commentText.trim() || undefined
+        }, {
+            onSuccess: (response) => {
+                // Handle response based on code
+                switch (response.code) {
+                    case 0: // Success
+                        toast({
+                            variant: 'default',
+                            title: toastT('success_title'),
+                            description: toastT('ivr_order_success')
+                        })
+                        break
+                    case 3: // Low balance
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('ivr_order_low_balance')
+                        })
+                        break
+                    case 4: // Manual processing
+                        toast({
+                            variant: 'default',
+                            title: toastT('success_title'),
+                            description: toastT('ivr_order_manual')
+                        })
+                        break
+                    default:
+                        toast({
+                            variant: 'destructive',
+                            title: toastT('error_title'),
+                            description: toastT('ivr_order_error')
+                        })
+                }
+            },
+            onError: (error) => {
+                console.error('Error ordering IVR:', error)
                 toast({
                     variant: 'destructive',
                     title: toastT('error_title'),
                     description: toastT('ivr_order_error')
                 })
-                return
             }
-
-            // Handle response based on code
-            switch (response.code) {
-                case 0: // Success
-                    toast({
-                        variant: 'default',
-                        title: toastT('success_title'),
-                        description: toastT('ivr_order_success')
-                    })
-                    break
-                case 3: // Low balance
-                    toast({
-                        variant: 'destructive',
-                        title: toastT('error_title'),
-                        description: toastT('ivr_order_low_balance')
-                    })
-                    break
-                case 4: // Manual processing
-                    toast({
-                        variant: 'default',
-                        title: toastT('success_title'),
-                        description: toastT('ivr_order_manual')
-                    })
-                    break
-                default:
-                    toast({
-                        variant: 'destructive',
-                        title: toastT('error_title'),
-                        description: toastT('ivr_order_error')
-                    })
-            }
-        } catch (error) {
-            console.error('Error ordering IVR:', error)
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('ivr_order_error')
-            })
-        } finally {
-            setIsOrdering(false)
-        }
+        })
     }
 
     return (
@@ -808,10 +773,10 @@ export default function IvrPage() {
             <div className="mt-2 flex justify-end">
                 <Button
                     onClick={handleOrderClick}
-                    disabled={isOrdering || !selectedIvr || !ivrText.trim()}
+                    disabled={orderIvrMutation.isPending || !selectedIvr || !ivrText.trim()}
                     className="px-6 py-2"
                 >
-                    {isOrdering ? (
+                    {orderIvrMutation.isPending ? (
                         <span className="flex items-center">
                             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

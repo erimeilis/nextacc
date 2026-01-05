@@ -6,12 +6,11 @@ import {Button} from '@/components/ui/Button'
 import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FileIcon as DocIcon, FloppyDiskIcon} from '@phosphor-icons/react'
 import Loader from '@/components/service/Loader'
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
-import {redGetWaitingDidSettings, redUpdateWaitingDidSettings} from '@/app/api/backend/waiting-dids'
 import {useToast} from '@/hooks/use-toast'
 import DropdownSelect from '@/components/shared/DropdownSelect'
-import {useClientStore} from '@/stores/useClientStore'
-import {UploadInfo} from '@/types/UploadInfo'
 import DestinationSettings from '@/components/DestinationSettings'
+import {useWaitingDidSettings, useUpdateWaitingDidSettings} from '@/hooks/queries/use-waiting-dids'
+import {useUploads, useUploadFile} from '@/hooks/queries/use-uploads'
 
 export default function WaitingNumberEditPage() {
     const params = useParams()
@@ -25,70 +24,47 @@ export default function WaitingNumberEditPage() {
     const errorsT = useTranslations('errors')
     const {toast} = useToast()
 
-    const [numberData, setNumberData] = useState<MyWaitingNumberInfo | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
+    // TanStack Query hooks
+    const {data: numberData, isLoading: loading, error} = useWaitingDidSettings(id)
+    const updateWaitingDidMutation = useUpdateWaitingDidSettings()
+    const {data: uploads = []} = useUploads()
+    const uploadFileMutation = useUploadFile()
+
     const [formData, setFormData] = useState<Partial<MyWaitingNumberInfo>>({})
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
     // Document selection state
-    // We only need personal docs for waiting numbers
     const [personalDocUploads, setPersonalDocUploads] = useState<{ [key: string]: string }>({})
-    const [uploads, setUploads] = useState<UploadInfo[]>([])
     const [uploadingField, setUploadingField] = useState<string | null>(null)
 
-    // Get uploads from the client store
-    const {getUploads, fetchUploads, uploadFile} = useClientStore()
-
-    // Fetch uploads when the component mounts
+    // Sync form data when numberData loads
     useEffect(() => {
-        if (getUploads()) {
-            setUploads(getUploads()!)
-        } else {
-            fetchUploads().then(fetchedUploads => {
-                setUploads(fetchedUploads ?? [])
-            })
-        }
-    }, [fetchUploads, getUploads])
+        if (numberData) {
+            setFormData(numberData)
 
-    // Load waiting number details on a component mount
-    useEffect(() => {
-        const loadNumberDetails = async () => {
-            if (!id) return
-
-            setLoading(true)
-            try {
-                // Use redGetWaitingDidSettings to get the waiting number details
-                const data = await redGetWaitingDidSettings(id)
-                if (data) {
-                    setNumberData(data)
-                    setFormData(data)
-
-                    // Initialize document uploads if there are any docs
-                    if (data.docs && data.docs.length > 0) {
-                        // For each doc in the array, create an entry in personalDocUploads
-                        const docUploads: { [key: string]: string } = {}
-                        data.docs.forEach(doc => {
-                            if (typeof doc === 'object' && doc.type && doc.file) {
-                                docUploads[`doc_${doc.type}`] = doc.file
-                            }
-                        })
-                        setPersonalDocUploads(docUploads)
+            // Initialize document uploads if there are any docs
+            if (numberData.docs && numberData.docs.length > 0) {
+                const docUploads: { [key: string]: string } = {}
+                numberData.docs.forEach(doc => {
+                    if (typeof doc === 'object' && doc.type && doc.file) {
+                        docUploads[`doc_${doc.type}`] = doc.file
                     }
-                }
-            } catch (error) {
-                console.error('Failed to load waiting number details:', error)
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('failed_to_load_number'),
                 })
-            } finally {
-                setLoading(false)
+                setPersonalDocUploads(docUploads)
             }
         }
-        loadNumberDetails().then()
-    }, [id, toast, toastT])
+    }, [numberData])
+
+    // Show error toast if loading fails
+    useEffect(() => {
+        if (error) {
+            toast({
+                variant: 'destructive',
+                title: toastT('error_title'),
+                description: toastT('failed_to_load_number'),
+            })
+        }
+    }, [error, toast, toastT])
 
     // Handle document upload selection
     const handleDocUploadSelection = (fieldName: string, value: string) => {
@@ -102,21 +78,26 @@ export default function WaitingNumberEditPage() {
     const handleFileUpload = async (fieldName: string, file: File) => {
         try {
             setUploadingField(fieldName)
-            const res = await uploadFile(file)
-            if (res) {
-                if (res.length > 0) {
-                    const newUpload = res[0]
+            // Extract doc type from field name (remove 'doc_' prefix)
+            const docType = fieldName.startsWith('doc_') ? fieldName.substring(4) : fieldName
 
-                    // Update the document selection with the new file
-                    handleDocUploadSelection(fieldName, newUpload.filename)
-
-                    // Update the local uploads state
-                    setUploads(res)
+            uploadFileMutation.mutate(
+                { file, type: docType },
+                {
+                    onSuccess: (newUpload) => {
+                        if (newUpload) {
+                            handleDocUploadSelection(fieldName, newUpload.filename)
+                        }
+                        setUploadingField(null)
+                    },
+                    onError: (uploadError) => {
+                        console.error(errorsT('error_uploading_file'), uploadError)
+                        setUploadingField(null)
+                    }
                 }
-            }
-        } catch (error) {
-            console.error(errorsT('error_uploading_file'), error)
-        } finally {
+            )
+        } catch (uploadError) {
+            console.error(errorsT('error_uploading_file'), uploadError)
             setUploadingField(null)
         }
     }
@@ -149,7 +130,6 @@ export default function WaitingNumberEditPage() {
 
         // Check if there are any validation errors
         if (hasValidationErrors) {
-            // Show error toast for validation
             toast({
                 variant: 'destructive',
                 title: toastT('error_title'),
@@ -158,54 +138,41 @@ export default function WaitingNumberEditPage() {
             return
         }
 
-        setSaving(true)
-        try {
-            // Add document uploads if any
-            if (Object.keys(personalDocUploads).length > 0) {
-                // Convert the personalDocUploads object to an array of objects with type and file properties
-                // The API expects an array of objects in the 'docs' field
-                const docObjects = Object.entries(personalDocUploads).map(([key, value]) => {
-                    // Extract the document type from the key (remove 'doc_' prefix)
-                    const docType = key.startsWith('doc_') ? key.substring(4) : key
-                    return value ? {type: docType, file: value} : null
-                }).filter(Boolean) as { type: string; file: string }[]
+        // Add document uploads if any
+        if (Object.keys(personalDocUploads).length > 0) {
+            const docObjects = Object.entries(personalDocUploads).map(([key, value]) => {
+                const docType = key.startsWith('doc_') ? key.substring(4) : key
+                return value ? {type: docType, file: value} : null
+            }).filter(Boolean) as { type: string; file: string }[]
 
-                if (docObjects.length > 0) {
-                    dataToSave.docs = docObjects
+            if (docObjects.length > 0) {
+                dataToSave.docs = docObjects
+            }
+        }
+
+        updateWaitingDidMutation.mutate(
+            { id, data: dataToSave },
+            {
+                onSuccess: () => {
+                    toast({
+                        variant: 'success',
+                        title: toastT('success_title'),
+                        description: toastT('changes_saved'),
+                    })
+                },
+                onError: (mutationError) => {
+                    console.error(errorsT('failed_to_save_waiting_number'), mutationError)
+                    toast({
+                        variant: 'destructive',
+                        title: toastT('error_title'),
+                        description: toastT('failed_to_save_changes'),
+                    })
                 }
             }
-            // Call the API to update the waiting number settings
-            const updatedData = await redUpdateWaitingDidSettings(id, dataToSave)
-            if (updatedData) {
-                setNumberData(updatedData)
-                console.log('[DEBUG_LOG] Save successful, showing success toast')
-                // Show success toast
-                toast({
-                    variant: 'success',
-                    title: toastT('success_title'),
-                    description: toastT('changes_saved'),
-                })
-            } else {
-                // Show error toast if the update failed
-                toast({
-                    variant: 'destructive',
-                    title: toastT('error_title'),
-                    description: toastT('failed_to_save_changes'),
-                })
-            }
-        } catch (error) {
-            console.error(errorsT('failed_to_save_waiting_number'), error)
-            // Show error toast
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: toastT('failed_to_save_changes'),
-            })
-        } finally {
-            setSaving(false)
-        }
+        )
     }
 
+    const saving = updateWaitingDidMutation.isPending
 
     if (loading) {
         return (

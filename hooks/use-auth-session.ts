@@ -2,6 +2,7 @@
 
 import { useSession } from '@/lib/auth-client'
 import { useClientStore } from '@/stores/useClientStore'
+import { useProfile } from '@/hooks/queries/use-profile'
 
 /**
  * Custom hook that wraps BetterAuth's useSession hook.
@@ -13,7 +14,7 @@ import { useClientStore } from '@/stores/useClientStore'
 export function useAuthSession() {
     const session = useSession()
     const isDemoSession = useClientStore(state => state.isDemoSession)
-    const profile = useClientStore(state => state.profile)
+    const { data: profile } = useProfile()
 
     // Demo profile ID for comparison (must match DEMO_PROFILE.id in useClientStore)
     const DEMO_PROFILE_ID = 999999

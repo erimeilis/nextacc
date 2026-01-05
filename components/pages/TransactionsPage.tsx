@@ -1,37 +1,24 @@
 'use client'
+
 import MoneyTransactionsList from '@/components/MoneyTransactionsList'
-import {MoneyTransaction} from '@/types/MoneyTransaction'
-import {useEffect, useRef, useState} from 'react'
-import {useClientStore} from '@/stores/useClientStore'
+import { useTransactions } from '@/hooks/queries/use-transactions'
 
 export default function TransactionsPage() {
-    const [localTransactions, setLocalTransactions] = useState<MoneyTransaction[] | null>(null)
-    const {getTransactions, fetchTransactions} = useClientStore()
-    const transactions = getTransactions()
-    const backgroundFetchDone = useRef(false)
+    const { data: transactions, isLoading, error } = useTransactions()
 
-    // Set data from the store immediately if available and fetch in background if needed
-    useEffect(() => {
-        if (transactions) {
-            setLocalTransactions(transactions)
-        }
-
-        // Only fetch once when the component mounts
-        if (!backgroundFetchDone.current) {
-            backgroundFetchDone.current = true
-            console.log('TransactionsPage: Fetching transactions in background')
-            fetchTransactions()
-                .then((fetchedTransactions) => {
-                    if (fetchedTransactions) {
-                        setLocalTransactions(fetchedTransactions)
-                    }
-                })
-        }
-    }, [fetchTransactions, transactions])
+    // MoneyTransactionsList handles null with its own skeleton
+    // Pass null while loading to show skeleton, or error state
+    if (error) {
+        return (
+            <div className="text-center py-8 text-destructive">
+                <p>Failed to load transactions: {error.message}</p>
+            </div>
+        )
+    }
 
     return (
         <MoneyTransactionsList
-            options={localTransactions}
+            options={isLoading ? null : (transactions ?? null)}
         />
     )
 }

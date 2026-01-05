@@ -1,6 +1,7 @@
 //'use server'
 import '@/app/[locale]/globals.css'
 import {AuthProvider} from '@/providers/AuthProvider'
+import {QueryProvider} from '@/providers/QueryProvider'
 import React from 'react'
 import {routing} from '@/i18n/routing'
 import {notFound} from 'next/navigation'
@@ -90,21 +91,23 @@ export default async function RootLayout(
             storageKey="theme"
             defaultTheme="system"
         >
-            <AuthProvider>
-                <NextIntlClientProvider messages={messages}>
-                    <TooltipProvider>
-                        <Nav/>
-                        <div className="h-full overflow-y-auto pt-0 pb-16 sm:pt-16 sm:pb-0">
-                            <main className="flex items-center justify-center px-0 sm:px-2 pb-0">
-                                <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
-                                    {offers}
-                                    {dashboard}
-                                </div>
-                            </main>
-                        </div>
-                    </TooltipProvider>
-                </NextIntlClientProvider>
-            </AuthProvider>
+            <QueryProvider>
+                <AuthProvider>
+                    <NextIntlClientProvider messages={messages}>
+                        <TooltipProvider>
+                            <Nav/>
+                            <div className="h-full overflow-y-auto pt-0 pb-16 sm:pt-16 sm:pb-0">
+                                <main className="flex items-center justify-center px-0 sm:px-2 pb-0">
+                                    <div className="flex flex-col w-full sm:w-full md:w-5/6 lg:w-3/4 max-w-4xl gap-1 sm:gap-4">
+                                        {offers}
+                                        {dashboard}
+                                    </div>
+                                </main>
+                            </div>
+                        </TooltipProvider>
+                    </NextIntlClientProvider>
+                </AuthProvider>
+            </QueryProvider>
             <Toaster/>
         </ThemeProvider>
         </body>

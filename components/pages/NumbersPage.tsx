@@ -1,86 +1,55 @@
 'use client'
+
 import MyNumbersList from '@/components/MyNumbersList'
 import MyWaitingNumbersList from '@/components/MyWaitingNumbersList'
-import {NumberInfo} from '@/types/NumberInfo'
-import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
-import {useEffect, useRef, useState} from 'react'
-import {useClientStore} from '@/stores/useClientStore'
-import {Switch} from '@/components/ui/Switch'
-import {useTranslations} from 'next-intl'
-import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-import {useWaitingStore} from '@/stores/useWaitingStore'
+import { useState } from 'react'
+import { useDids } from '@/hooks/queries/use-dids'
+import { useWaitingDids } from '@/hooks/queries/use-waiting-dids'
+import { Switch } from '@/components/ui/Switch'
+import { useTranslations } from 'next-intl'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 export default function NumbersPage() {
     const t = useTranslations('dashboard')
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const [localNumbers, setLocalNumbers] = useState<NumberInfo[] | null>(null)
-    const [localWaitingNumbers, setLocalWaitingNumbers] = useState<MyWaitingNumberInfo[] | null>(null)
     const [showWaiting, setShowWaiting] = useState<boolean>(pathname?.includes('/waiting-numbers') || false)
-    const {getNumbers, fetchNumbers} = useClientStore()
-    const {waitingNumbers, fetchWaitingNumbers} = useWaitingStore()
-    const numbers = getNumbers()
-    const numbersBackgroundFetchDone = useRef(false)
-    const waitingNumbersBackgroundFetchDone = useRef(false)
 
-
-    // Set data from the store immediately if available and fetch in the background if needed
-    useEffect(() => {
-        if (numbers) {
-            setLocalNumbers(numbers)
-        }
-
-        // Only fetch once when the component mounts
-        if (!numbersBackgroundFetchDone.current) {
-            numbersBackgroundFetchDone.current = true
-            console.log('NumbersPage: Fetching numbers in background')
-            fetchNumbers()
-                .then((fetchedNumbers) => {
-                    if (fetchedNumbers) {
-                        setLocalNumbers(fetchedNumbers)
-                    }
-                })
-        }
-    }, [fetchNumbers, numbers])
-
-    // Set waiting data from the store immediately if available and fetch in the background if needed
-    useEffect(() => {
-        if (waitingNumbers) {
-            setLocalWaitingNumbers(waitingNumbers)
-        }
-
-        // Only fetch once when the component mounts
-        if (!waitingNumbersBackgroundFetchDone.current) {
-            waitingNumbersBackgroundFetchDone.current = true
-            console.log('NumbersPage: Fetching waiting numbers in background')
-            fetchWaitingNumbers()
-                .then(() => {
-                    if (waitingNumbers) {
-                        setLocalWaitingNumbers(waitingNumbers)
-                    }
-                })
-        }
-    }, [fetchWaitingNumbers, waitingNumbers])
+    // Fetch both datasets with TanStack Query
+    const { data: numbers, isLoading: numbersLoading, error: numbersError } = useDids()
+    const { data: waitingNumbers, isLoading: waitingLoading, error: waitingError } = useWaitingDids()
 
     // Handle switch change
     const handleSwitchChange = (checked: boolean) => {
         setShowWaiting(checked)
 
-        // Update URL - navigate between numbers and waiting-numbers paths
-        if (!pathname) {
-            return // Early return if the pathname is null
-        }
+        if (!pathname) return
 
         if (checked) {
-            // Navigate to waiting-numbers
             const newPath = pathname.replace('/numbers', '/waiting-numbers')
             router.push(newPath + (searchParams?.toString() ? '?' + searchParams.toString() : ''))
         } else {
-            // Navigate to numbers
             const newPath = pathname.replace('/waiting-numbers', '/numbers')
             router.push(newPath + (searchParams?.toString() ? '?' + searchParams.toString() : ''))
         }
+    }
+
+    // Error handling
+    if (showWaiting && waitingError) {
+        return (
+            <div className="text-center py-8 text-destructive">
+                <p>Failed to load waiting numbers: {waitingError.message}</p>
+            </div>
+        )
+    }
+
+    if (!showWaiting && numbersError) {
+        return (
+            <div className="text-center py-8 text-destructive">
+                <p>Failed to load numbers: {numbersError.message}</p>
+            </div>
+        )
     }
 
     return (
@@ -97,11 +66,11 @@ export default function NumbersPage() {
             </div>
             {showWaiting ? (
                 <MyWaitingNumbersList
-                    options={localWaitingNumbers}
+                    options={waitingLoading ? null : (waitingNumbers ?? null)}
                 />
             ) : (
                 <MyNumbersList
-                    options={localNumbers}
+                    options={numbersLoading ? null : (numbers ?? null)}
                 />
             )}
         </>

@@ -11,7 +11,7 @@ import {Table, TableBody, TableCell, TableRow} from '@/components/ui/Table'
 import {FormattedDate} from '@/components/ui/FormattedDate'
 import {Input} from '@/components/ui/Input'
 import {useOffersStore} from '@/stores/useOffersStore'
-import {useClientStore} from '@/stores/useClientStore'
+import {useDids, useDeleteDid} from '@/hooks/queries/use-dids'
 
 // Skeleton loader for a numbers list
 function NumbersSkeleton() {
@@ -82,13 +82,13 @@ export default function MyNumbersList({
                                       }: {
     options: NumberInfo[] | null
 }) {
-    // Get numbers directly from the store to ensure we always have the latest data
-    const {getNumbers} = useClientStore()
-    const storeNumbers = getNumbers()
+    // Get numbers from TanStack Query - will use cached data if available
+    const {data: didsData} = useDids()
+    const deleteDidMutation = useDeleteDid()
 
-    // Always use store numbers if they exist, otherwise use options prop
-    // This ensures we always have the latest data from the store
-    const displayOptions = storeNumbers || options
+    // Always use query data if available, otherwise use options prop
+    // This ensures we always have the latest data from the cache
+    const displayOptions = didsData || options
     const t = useTranslations('dashboard')
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -99,7 +99,6 @@ export default function MyNumbersList({
     const [loadingStats, setLoadingStats] = useState<string | null>(null)
     const [loadingDelete, setLoadingDelete] = useState<string | null>(null)
     const {countriesMap} = useOffersStore()
-    const {deleteNumber} = useClientStore()
 
     // Get all countries from all types
     const allCountries = Object.values(countriesMap).flat()
@@ -179,17 +178,16 @@ export default function MyNumbersList({
         // Set the loading state for this number
         setLoadingDelete(number.did)
 
-        try {
-            // Call the API to delete the number
-            // The deleteNumber function already updates the store with the new list
-            const res = await deleteNumber(number.id)
-            if (res) options = res
-        } catch (error) {
-            console.error('Error deleting number:', error)
-        } finally {
-            // Clear loading state
-            setLoadingDelete(null)
-        }
+        // Call the API to delete the number using mutation
+        deleteDidMutation.mutate(number.did, {
+            onSuccess: () => {
+                setLoadingDelete(null)
+            },
+            onError: (error) => {
+                console.error('Error deleting number:', error)
+                setLoadingDelete(null)
+            }
+        })
     }
 
     // Handle deletes the selected button click
@@ -197,15 +195,17 @@ export default function MyNumbersList({
         if (selectedNumbers.length === 0) return
 
         // Delete each selected number one by one
+        // Find the DID for each selected number
         for (const id of selectedNumbers) {
-            setLoadingDelete(id)
-            try {
-                // The deleteNumber function already updates the store with the new list
-                const res = await deleteNumber(id)
-                if (res) options = res
-            } catch (error) {
-                console.error(`Error deleting number ${id}:`, error)
-            }
+            const number = displayOptions?.find(n => n.id === id)
+            if (!number) continue
+
+            setLoadingDelete(number.did)
+            deleteDidMutation.mutate(number.did, {
+                onError: (error) => {
+                    console.error(`Error deleting number ${id}:`, error)
+                }
+            })
         }
 
         // Clear selected numbers and loading state

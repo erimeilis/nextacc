@@ -1,16 +1,15 @@
 'use client'
-import React, {SyntheticEvent, useState} from 'react'
+import React, {SyntheticEvent} from 'react'
 import ActionButton from '@/components/shared/ActionButton'
 import {CartItem} from '@/types/CartItem'
 import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
 import {useTranslations} from 'next-intl'
 import {Checkbox} from '@/components/ui/Checkbox'
 import Show from '@/components/service/Show'
-import {useCartStore} from '@/stores/useCartStore'
-import {useClientStore} from '@/stores/useClientStore'
 import {getPersistState} from '@/utils/usePersistState'
-import {redRemoveFromCart} from '@/app/api/backend/cart'
 import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
+import {useRemoveFromCart} from '@/hooks/queries/use-cart'
+import {useProfile} from '@/hooks/queries/use-profile'
 
 interface MiniCartProps {
     cartItems: CartItem[]
@@ -26,11 +25,12 @@ export default function MiniCart({
                                      setSidebarOpenAction
                                  }: MiniCartProps) {
     const t = useTranslations('cart')
-    const [loadingButton, setLoadingButton] = useState<string | null>(null)
     const persistentId = getPersistState<string>('persistentId', 'no-id')
-    const {updateData} = useCartStore()
-    const {getBalance} = useClientStore()
-    const balance = getBalance()
+
+    // TanStack Query hooks
+    const removeFromCartMutation = useRemoveFromCart()
+    const {data: profile} = useProfile()
+    const balance = profile?.balance ?? null
 
     // Calculate total sum of selected items
     const calculateTotal = () => {
@@ -45,33 +45,19 @@ export default function MiniCart({
 
     const handleRemoveFromCart = async (e?: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
         if (e) e.preventDefault()
-        // Set the button ID for loading state
-        setLoadingButton('remove')
-        try {
-            if (selectedItems && selectedItems.length > 0) {
-                const data = await redRemoveFromCart({
-                    uid: persistentId,
-                    id: selectedItems
-                })
-                if (data) updateData(data)
-            }
-        } catch (error) {
-            console.error('Error removing from cart:', error)
-        } finally {
-            setLoadingButton(null)
+        if (selectedItems && selectedItems.length > 0) {
+            removeFromCartMutation.mutate({
+                uid: persistentId,
+                ids: selectedItems
+            })
         }
     }
 
     const handleRemoveSingleItem = async (itemId: number) => {
-        try {
-            const data = await redRemoveFromCart({
-                uid: persistentId,
-                id: [itemId]
-            })
-            if (data) updateData(data)
-        } catch (error) {
-            console.error('Error removing item from cart:', error)
-        }
+        removeFromCartMutation.mutate({
+            uid: persistentId,
+            ids: [itemId]
+        })
     }
 
     return (
@@ -224,7 +210,7 @@ export default function MiniCart({
                             style="line"
                             className="text-xs transition-all"
                             id="remove"
-                            loading={loadingButton === 'remove'}
+                            loading={removeFromCartMutation.isPending}
                             onClick={(e) => {
                                 e.stopPropagation()
                                 handleRemoveFromCart().then()

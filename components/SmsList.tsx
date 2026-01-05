@@ -1,15 +1,16 @@
 'use client'
-import React, {useEffect, useMemo, useState} from 'react'
-import {useTranslations} from 'next-intl'
+
+import React, { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import DateRangePicker from '@/components/ui/DateRangePicker'
-import {FormattedDate} from '@/components/ui/FormattedDate'
-import {SmsStatistics} from '@/types/Statistics'
-import DataTable, {ColumnDef, FilterDef} from '@/components/ui/DataTable'
+import { FormattedDate } from '@/components/ui/FormattedDate'
+import { SmsStatistics } from '@/types/Statistics'
+import DataTable, { ColumnDef, FilterDef } from '@/components/ui/DataTable'
 import moment from 'moment'
 import ActionButton from '@/components/shared/ActionButton'
 import Loader from '@/components/service/Loader'
-import {redGetSmsStatistics, redSendSmsStatistics} from '@/app/api/backend/statistics'
-import {useToast} from '@/hooks/use-toast'
+import { useSmsStats, useSendSmsStats } from '@/hooks/queries/use-stats'
+import { useToast } from '@/hooks/use-toast'
 
 // Define the filter type for SMS Statistics
 type SmsStatisticsFilter = {
@@ -21,80 +22,56 @@ interface SmsListProps {
     did?: string;
 }
 
-export default function SmsList({did}: SmsListProps) {
+// Date range calculation outside component to avoid impure function in render
+function getInitialDateRange() {
+    return {
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        end: new Date()
+    }
+}
+
+export default function SmsList({ did }: SmsListProps) {
     const t = useTranslations('Statistics')
     const dateRangeT = useTranslations('daterange')
     const toastT = useTranslations('toast')
-    const {toast} = useToast()
+    const { toast } = useToast()
 
-    // State
-    const [localLoading, setLocalLoading] = useState<boolean>(false)
-    const [smsStatistics, setSmsStatistics] = useState<SmsStatistics[] | null>(null)
-    const isLoading = localLoading
+    // Initial date range for filtering (30 days ago to today)
+    const [initialDateRange] = useState(getInitialDateRange)
 
-    // Initial date range for filtering
-    const initialDateRange = {
-        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        end: new Date()
-    }
+    // TanStack Query hooks
+    const { data: smsStatistics, isLoading } = useSmsStats({
+        startDate: initialDateRange.start.toISOString(),
+        endDate: initialDateRange.end.toISOString(),
+        did
+    })
+    const sendEmailMutation = useSendSmsStats()
 
-    // No need for client store anymore as we're fetching directly from API
-
-    // Fetch data on component mount or when did changes
-    useEffect(() => {
-        void fetchData()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [did])
-
-    const fetchData = async () => {
-        setLocalLoading(true)
-        try {
-            const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
-            const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
-            const stats = await redGetSmsStatistics(fromDate, toDate, did)
-            setSmsStatistics(stats)
-        } catch (error: unknown) {
-            console.error(`${t('error_fetching_statistics')}:`, error)
-            setSmsStatistics(null)
-        } finally {
-            setLocalLoading(false)
-        }
-    }
-
-    const handleSendEmail = async () => {
-        setLocalLoading(true)
-        try {
-            // Get the current filter values from the DataTable
-            // For now, we'll use the initialDateRange
-            const fromDate = initialDateRange.start ? initialDateRange.start.toISOString() : undefined
-            const toDate = initialDateRange.end ? initialDateRange.end.toISOString() : undefined
-
-            const success = await redSendSmsStatistics(fromDate, toDate, did)
-
-            if (success) {
+    const handleSendEmail = () => {
+        sendEmailMutation.mutate({
+            startDate: initialDateRange.start.toISOString(),
+            endDate: initialDateRange.end.toISOString(),
+            did
+        }, {
+            onSuccess: () => {
                 toast({
                     variant: 'default',
                     title: toastT('success_title'),
                     description: t('email_sent_success')
                 })
-            } else {
+            },
+            onError: (error) => {
+                console.error(`${t('error_sending_email')}:`, error)
                 toast({
                     variant: 'destructive',
                     title: toastT('error_title'),
                     description: t('email_sent_error')
                 })
             }
-        } catch (error: unknown) {
-            console.error(`${t('error_sending_email')}:`, error)
-            toast({
-                variant: 'destructive',
-                title: toastT('error_title'),
-                description: t('email_sent_error')
-            })
-        } finally {
-            setLocalLoading(false)
-        }
+        })
     }
+
+    const isBusy = isLoading || sendEmailMutation.isPending
 
     // Define columns for the DataTable
     const columns = useMemo(() => {
@@ -201,7 +178,7 @@ export default function SmsList({did}: SmsListProps) {
     return (
         <>
             <DataTable
-                data={smsStatistics}
+                data={smsStatistics ?? null}
                 columns={columns}
                 filters={allFilters}
                 initialFilterValues={initialFilterValues}
@@ -211,11 +188,11 @@ export default function SmsList({did}: SmsListProps) {
                     showItemCounts: true
                 }}
                 emptyMessage={t('no_data')}
-                loadingFallback={isLoading ? <Loader height={32}/> : undefined}
+                loadingFallback={isBusy ? <Loader height={32} /> : undefined}
                 renderExtraFilterButtons={() => (
                     <ActionButton
                         onClick={handleSendEmail}
-                        disabled={isLoading || !smsStatistics || smsStatistics.length === 0}
+                        disabled={isBusy || !smsStatistics || smsStatistics.length === 0}
                         type="button"
                         className="text-xs sm:text-sm ml-2"
                     >
