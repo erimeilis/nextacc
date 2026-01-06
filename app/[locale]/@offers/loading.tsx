@@ -1,4 +1,4 @@
-import Loader from '../../../components/service/Loader'
+import Loader from '@/components/ui/loading/Loader'
 import React from 'react'
 
 export default function Loading() {

@@ -1,6 +1,6 @@
 'use client'
 
-import MoneyTransactionsList from '@/components/MoneyTransactionsList'
+import MoneyTransactionsList from '@/components/transactions/MoneyTransactionsList'
 import { useTransactions } from '@/hooks/queries/use-transactions'
 
 export default function TransactionsPage() {

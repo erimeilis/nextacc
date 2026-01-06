@@ -1,10 +1,11 @@
 'use client'
 import React, {useEffect, useState} from 'react'
+import {useIsClient} from '@/hooks/use-is-client'
 import {useTranslations} from 'next-intl'
 import {useTheme} from 'next-themes'
 import {usePathname, useSearchParams} from 'next/navigation'
 import {routing} from '@/i18n/routing'
-import {Button} from '@/components/ui/Button'
+import {Button} from '@/components/ui/primitives/Button'
 import {MoonIcon, PaletteIcon, SunIcon, TranslateIcon} from '@phosphor-icons/react'
 import usePersistState from '@/utils/usePersistState'
 
@@ -20,21 +21,16 @@ export default function MobileSwitchers({ dropDirection = 'up' }: MobileSwitcher
     const {theme, setTheme} = useTheme()
     const [colorTheme, setColorTheme] = usePersistState('equinox', 'color-theme')
     const [expandedSection, setExpandedSection] = useState<string | null>(null)
-    const [isMounted, setIsMounted] = useState(false)
-
-    // Only run once after component mounts to avoid hydration mismatch
-    useEffect(() => {
-        setIsMounted(true)
-    }, [])
+    const isClient = useIsClient()
 
     // Apply color theme when the component mounts or colorTheme changes
     useEffect(() => {
-        if (!isMounted) return
+        if (!isClient) return
 
         // Apply color theme
         document.documentElement.classList.remove('equinox', 'reef', 'void')
         document.documentElement.classList.add(colorTheme)
-    }, [isMounted, colorTheme])
+    }, [isClient, colorTheme])
 
     // Map of locale codes to flag emojis
     const localeFlags: Record<string, string> = {

@@ -10,7 +10,7 @@
  *   const profile = await dataSource.getProfile()
  */
 
-import { getDataMode, type DataSource, type DataMode } from './types'
+import { getDataMode, type DataSource } from './types'
 import { stubDataSource } from './stub'
 import { liveDataSource } from './live'
 

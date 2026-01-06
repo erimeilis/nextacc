@@ -3,12 +3,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useIvrOptions, useOrderIvr } from '@/hooks/queries/use-ivr'
-import DropDownSelectAudio from '@/components/shared/DropDownSelectAudio'
-import LanguageSelector from '@/components/shared/LanguageSelector'
+import DropdownSelectAudio from '@/components/forms/DropdownSelectAudio'
+import LanguageSelector from '@/components/forms/LanguageSelector'
 import { Ivr, IvrEffect, IvrMusic } from '@/types/IvrTypes'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
-import { Checkbox } from '@/components/ui/Checkbox'
-import { Button } from '@/components/ui/Button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/primitives/Tooltip'
+import { Checkbox } from '@/components/ui/primitives/Checkbox'
+import { Button } from '@/components/ui/primitives/Button'
 import { useToast } from '@/hooks/use-toast'
 import MyIvrList from '@/components/pages/MyIvrList'
 import { calculateSpeechTiming } from '@/utils/calculateSpeechTiming'
@@ -601,7 +601,7 @@ export default function IvrPage() {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="flex flex-col space-y-2">
-                    <DropDownSelectAudio
+                    <DropdownSelectAudio
                         selectId="ivr-voice"
                         selectTitle={t('select_ivr_voice')}
                         data={formatIvrDataWithAudio(filteredIvrData)}
@@ -614,7 +614,7 @@ export default function IvrPage() {
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                    <DropDownSelectAudio
+                    <DropdownSelectAudio
                         selectId="ivr-music"
                         selectTitle={t('select_ivr_music')}
                         data={formatIvrMusicWithAudio(localIvrMusic)}
@@ -625,7 +625,7 @@ export default function IvrPage() {
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                    <DropDownSelectAudio
+                    <DropdownSelectAudio
                         selectId="ivr-effects"
                         selectTitle={t('select_ivr_effect')}
                         data={formatIvrEffectsWithAudio(localIvrEffects)}

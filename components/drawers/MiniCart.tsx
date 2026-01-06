@@ -1,31 +1,29 @@
 'use client'
 import React, {SyntheticEvent} from 'react'
-import ActionButton from '@/components/shared/ActionButton'
-import {CartItem} from '@/types/CartItem'
-import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
+import ActionButton from '@/components/forms/ActionButton'
+import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/primitives/Drawer'
 import {useTranslations} from 'next-intl'
-import {Checkbox} from '@/components/ui/Checkbox'
-import Show from '@/components/service/Show'
+import {Checkbox} from '@/components/ui/primitives/Checkbox'
+import Show from '@/components/ui/display/Show'
 import {getPersistState} from '@/utils/usePersistState'
 import {ChatCircleTextIcon, HeadsetIcon, PhoneIcon, XIcon} from '@phosphor-icons/react'
-import {useRemoveFromCart} from '@/hooks/queries/use-cart'
+import {useCart, useRemoveFromCart} from '@/hooks/queries/use-cart'
 import {useProfile} from '@/hooks/queries/use-profile'
+import {useCartStore} from '@/stores/useCartStore'
 
 interface MiniCartProps {
-    cartItems: CartItem[]
-    selectedItems: number[]
-    setSelectedItemsAction: (id: number, select?: boolean) => void
     setSidebarOpenAction: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export default function MiniCart({
-                                     cartItems,
-                                     selectedItems,
-                                     setSelectedItemsAction,
                                      setSidebarOpenAction
                                  }: MiniCartProps) {
     const t = useTranslations('cart')
     const persistentId = getPersistState<string>('persistentId', 'no-id')
+
+    // Get cart data directly from query - ensures we always have latest data
+    const {data: cartItems = []} = useCart(persistentId)
+    const {selectedItems, selectItem: setSelectedItemsAction} = useCartStore()
 
     // TanStack Query hooks
     const removeFromCartMutation = useRemoveFromCart()
@@ -66,27 +64,13 @@ export default function MiniCart({
             sm:min-w-[40vw] md:min-w-[20vw]
             md:w-fit sm:max-w-[80vw]
             sm:rounded-l-lg sm:border-l sm:border-border/50 sm:fixed sm:right-0 sm:left-auto sm:h-full sm:inset-y-0 sm:bottom-auto sm:mt-0 sm:top-0">
-            {/* Hide the default drawer handle for the right-side drawer on desktop */}
-            <style jsx global>{`
-                .max-w-md > div:first-child {
-                    display: none;
-                }
-            `}</style>
             <div className="flex flex-col h-full w-full pb-9 sm:pb-2">
                 <DrawerHeader className="flex flex-row items-center justify-between">
                     <DrawerTitle className="hidden"></DrawerTitle>
                     <DrawerClose onClick={() => setSidebarOpenAction(false)}/>
                 </DrawerHeader>
 
-                <div
-                    className="flex-1 overflow-y-auto px-4 pt-6"
-                    style={{
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: 'hsl(var(--primary)) hsl(var(--muted))',
-                        maxHeight: 'calc(100vh - 120px)',
-                        overflowY: 'auto'
-                    }}
-                >
+                <div className="flex-1 overflow-y-auto px-4 pt-6 min-h-0">
                     {cartItems.length > 0 ? (
                         <ul className="space-y-1">
                             {cartItems.map((item) => (

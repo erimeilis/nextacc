@@ -1,6 +1,6 @@
 'use client'
 
-import UploadsList from '@/components/UploadsList'
+import UploadsList from '@/components/uploads/UploadsList'
 import { useUploads } from '@/hooks/queries/use-uploads'
 
 export default function UploadsPage() {

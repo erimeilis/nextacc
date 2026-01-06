@@ -1,14 +1,14 @@
 'use client'
-import DropdownSelectGeo from '@/components/shared/DropdownSelectGeo'
-import NumberTypeSelector from '@/components/NumberTypeSelector'
-import {Card} from '@/components/ui/Card'
+import DropdownSelectGeo from '@/components/forms/DropdownSelectGeo'
+import NumberTypeSelector from '@/components/offers/NumberTypeSelector'
+import {Card} from '@/components/ui/layout/Card'
 import {useTranslations} from 'next-intl'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {NumberInfo} from '@/types/NumberInfo'
 import CreateQueryString from '@/utils/CreateQueryString'
 import getSlug from '@/utils/getSlug'
-import Show from '@/components/service/Show'
+import Show from '@/components/ui/display/Show'
 import dynamic from 'next/dynamic'
 import {numberTypes} from '@/constants/numberTypes'
 import {useCart} from '@/hooks/queries/use-cart'
@@ -18,15 +18,15 @@ import {getPersistState} from '@/utils/usePersistState'
 import {useOffersStore} from '@/stores/useOffersStore'
 import {CountryInfo} from '@/types/CountryInfo'
 import {AreaInfo} from '@/types/AreaInfo'
-import Loader from '@/components/service/Loader'
+import Loader from '@/components/ui/loading/Loader'
 
 // Dynamically import components that are only needed conditionally
-const NumberOffersList = dynamic(() => import('@/components/NumberOffersList'), {
+const NumberOffersList = dynamic(() => import('@/components/offers/NumberOffersList'), {
     ssr: true,
     loading: () => <div className="animate-pulse h-40 bg-muted rounded-md"></div>
 })
 
-const BuyNumberForm = dynamic(() => import('@/components/BuyNumberForm'), {
+const BuyNumberForm = dynamic(() => import('@/components/offers/BuyNumberForm'), {
     ssr: true,
     loading: () => <div className="animate-pulse h-60 bg-muted rounded-md"></div>
 })
@@ -41,11 +41,77 @@ export default function OffersPage() {
     const [localAreasMap, setLocalAreasMap] = useState<AreaInfo[] | null>([])
     const [localNumbersMap, setLocalNumbersMap] = useState<NumberInfo[] | null>([])
     const {countriesMap, areasMap, numbersMap, fetchCountries, fetchAreas, fetchNumbers} = useOffersStore()
+
+    // Get URL params
+    const type = searchParams ? searchParams.get('type') : null
+    const countryParam = searchParams?.get('country') ?? null
+    const areaParam = searchParams?.get('area') ?? null
+
+    // Compute derived values
+    const countryFromUrl = countryParam && type && localCountriesMap
+        ? localCountriesMap.find(c => getSlug(c.countryname) === countryParam || c.id.toString() === countryParam)?.id
+        : null
+    const areaFromUrl = areaParam && localAreasMap
+        ? localAreasMap.find(a => getSlug(a.areaname) === areaParam || a.areaprefix.toString() === areaParam)?.areaprefix
+        : null
+
+    // Cache keys
+    const cachedCountries = type ? countriesMap[type] : null
+    const areasKey = type && countryFromUrl ? `${type}_${countryFromUrl}` : null
+    const cachedAreas = areasKey ? areasMap[areasKey] : null
+    const numbersKey = type && countryFromUrl && areaFromUrl ? `${type}_${countryFromUrl}_${areaFromUrl}` : null
+    const cachedNumbers = numbersKey ? numbersMap[numbersKey] : null
+
+    // Sync from store cache to local state (useEffect is required here due to SSR/hydration)
+    // Intentionally excluding local*Map from deps - we only want to sync when cache changes, not when local changes
+    useEffect(() => {
+        if (cachedCountries && localCountriesMap !== cachedCountries) {
+            setLocalCountriesMap(cachedCountries)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cachedCountries])
+
+    useEffect(() => {
+        if (cachedAreas && localAreasMap !== cachedAreas) {
+            setLocalAreasMap(cachedAreas)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cachedAreas])
+
+    useEffect(() => {
+        if (cachedNumbers && localNumbersMap !== cachedNumbers) {
+            setLocalNumbersMap(cachedNumbers)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cachedNumbers])
+
+    // Clear dependent state when URL params change
+    useEffect(() => {
+        if (!type) {
+            setLocalCountriesMap(null)
+            setLocalAreasMap(null)
+            setLocalNumbersMap(null)
+        }
+    }, [type])
+
+    useEffect(() => {
+        if (!countryParam) {
+            setLocalAreasMap(null)
+            setLocalNumbersMap(null)
+        }
+    }, [countryParam])
+
+    useEffect(() => {
+        if (!areaParam) {
+            setLocalNumbersMap(null)
+        }
+    }, [areaParam])
+
     const persistentId = getPersistState<string>('persistentId', 'no-id')
     const {data: cart = []} = useCart(persistentId)
     const {data: waitingNumbers = []} = useWaitingDids()
     const {status: authStatus} = useAuthSession()
-    const isUserLoggedIn = () => authStatus === 'authenticated'
+    const isUserLoggedIn = useCallback(() => authStatus === 'authenticated', [authStatus])
     const buyForm = useRef<HTMLDivElement>(null)
     const latestTypeRequestRef = useRef<string | null>(null)
     const latestCountryRequestRef = useRef<number | null>(null)
@@ -55,9 +121,7 @@ export default function OffersPage() {
             // If no type is in the URL and this is an initial render, set voice as default
             router.push(pathName + '?' + CreateQueryString('type', 'voice', searchParams, ['country', 'area', 'number']))
         }
-        if (searchParams && !searchParams.has('area')) {
-            setLocalNumbersMap(null)
-        }
+        // Note: localNumbersMap clearing is now handled by render-time sync above
         if (searchParams &&
             searchParams.has('number') &&
             localNumbersMap &&
@@ -83,7 +147,7 @@ export default function OffersPage() {
         }
     }, [searchParams, pathName, router, localNumbersMap, cart, waitingNumbers, isUserLoggedIn])
 
-    const type = searchParams ? searchParams.get('type') : null
+    // Note: type is defined earlier for render-time sync
     const countryBySlug = (searchParams && searchParams.has('country')) ?
         (localCountriesMap?.find(e =>
             getSlug(e.countryname) == searchParams.get('country'))) :
@@ -143,11 +207,9 @@ export default function OffersPage() {
 
     useEffect(() => {
         if (type) {
-            // Initial load of countries - set from store if available
-            if (countriesMap[type!]) {
-                setLocalCountriesMap(countriesMap[type!])
-            } else {
-                // Only fetch if not available
+            // Note: cache sync from countriesMap is handled by render-time sync above
+            // Only fetch if not in cache
+            if (!countriesMap[type!]) {
                 fetchCountries(type!)
                     .then((fetchedCountries) => {
                         setLocalCountriesMap(fetchedCountries)
@@ -162,9 +224,8 @@ export default function OffersPage() {
                 }
 
                 const cKey: string = `${type}_${country}`
-                // Initial load of areas - set from store if available
+                // Note: cache sync from areasMap is handled by render-time sync above
                 if (areasMap[cKey]) {
-                    setLocalAreasMap(areasMap[cKey])
                     // Handle auto-selection of area when there's only one option
                     if (areasMap[cKey]?.length === 1 &&
                         !searchParams?.has('area') &&
@@ -173,7 +234,7 @@ export default function OffersPage() {
                         handleArea(areasMap[cKey].at(0)!.areaprefix)
                     }
                 } else {
-                    // Only fetch if not available
+                    // Only fetch if not available in cache
                     fetchAreas(type!, country)
                         .then((fetchedAreas) => {
                             setLocalAreasMap(fetchedAreas)
@@ -189,9 +250,8 @@ export default function OffersPage() {
 
                 if (area) {
                     const aKey: string = `${type}_${country}_${area}`
-                    // Initial load of numbers - set from store if available
+                    // Note: cache sync from numbersMap is handled by render-time sync above
                     if (numbersMap[aKey]) {
-                        setLocalNumbersMap(numbersMap[aKey])
                         // Auto-select the only number if there's just one
                         if (numbersMap[aKey].length === 1 &&
                             !searchParams?.has('number') &&
@@ -199,7 +259,7 @@ export default function OffersPage() {
                             handleNumber(numbersMap[aKey].at(0)!)
                         }
                     } else {
-                        // Only fetch if not available
+                        // Only fetch if not available in cache
                         fetchNumbers(type!, country, area)
                             .then((fetchedNumbers) => {
                                 setLocalNumbersMap(fetchedNumbers)
@@ -211,20 +271,9 @@ export default function OffersPage() {
                                 }
                             })
                     }
-                } else {
-                    // Clear the number list when an area is not selected
-                    setLocalNumbersMap(null)
                 }
-            } else {
-                // Clear both area and number lists when a country is not selected
-                setLocalAreasMap(null)
-                setLocalNumbersMap(null)
+                // Note: Clearing is handled by render-time sync when params become null
             }
-        } else {
-            // Clear all lists when a type is not selected
-            setLocalCountriesMap(null)
-            setLocalAreasMap(null)
-            setLocalNumbersMap(null)
         }
     }, [area, areasMap, countriesMap, country, handleArea, handleNumber, numbersMap, pathName, router, searchParams, type, fetchAreas, fetchCountries, fetchNumbers])
 

@@ -5,8 +5,8 @@ import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
-import {Button} from '@/components/ui/Button'
-import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/Drawer'
+import {Button} from '@/components/ui/primitives/Button'
+import {DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle} from '@/components/ui/primitives/Drawer'
 import MobileSwitchers from '@/components/nav/MobileSwitchers'
 
 interface ProfileDrawerContentProps {

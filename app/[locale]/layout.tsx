@@ -10,9 +10,9 @@ import {NextIntlClientProvider} from 'next-intl'
 import {ThemeProvider} from 'next-themes'
 import dynamic from 'next/dynamic'
 import {Metadata} from 'next'
-import {Toaster} from '@/components/ui/Toaster'
+import {Toaster} from '@/components/ui/primitives/Toaster'
 import {ubuntu} from '@/app/fonts' // Import from the font file
-import {TooltipProvider} from '@/components/ui/Tooltip'
+import {TooltipProvider} from '@/components/ui/primitives/Tooltip'
 
 // Dynamically import a Nav component to reduce the initial bundle size
 const Nav = dynamic(() => import('@/components/nav/Nav'), {

@@ -27,6 +27,10 @@ export function useCart(uid: string) {
             return result.data
         },
         enabled: !!uid,
+        // Keep data fresh for 30 seconds - prevents unnecessary refetches
+        staleTime: 30 * 1000,
+        // Don't refetch on window focus - cart is updated via mutations
+        refetchOnWindowFocus: false,
     })
 }
 
@@ -54,8 +58,10 @@ export function useAddToCart() {
             }
             return result.data
         },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.detail(variables.uid) })
+        onSuccess: (data, variables) => {
+            // Immediately update the cache with the returned cart data
+            // This ensures the drawer shows items right away without waiting for refetch
+            queryClient.setQueryData(cartKeys.detail(variables.uid), data)
         },
     })
 }
@@ -74,8 +80,9 @@ export function useRemoveFromCart() {
             }
             return result.data
         },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.detail(variables.uid) })
+        onSuccess: (data, variables) => {
+            // Immediately update the cache with the returned cart data
+            queryClient.setQueryData(cartKeys.detail(variables.uid), data)
         },
     })
 }

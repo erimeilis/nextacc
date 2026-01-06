@@ -5,8 +5,8 @@ import {MoonIcon, PaletteIcon, SunIcon} from '@phosphor-icons/react'
 import {useTheme} from 'next-themes'
 import usePersistState from '@/utils/usePersistState'
 
-import {Button} from '@/components/ui/Button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/DropdownMenu'
+import {Button} from '@/components/ui/primitives/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/primitives/DropdownMenu'
 
 const colorThemes = ['equinox', 'reef', 'void']
 

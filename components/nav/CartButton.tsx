@@ -1,10 +1,9 @@
 'use client'
 import React, {useEffect, useState} from 'react'
-import {Button} from '@/components/ui/Button'
+import {Button} from '@/components/ui/primitives/Button'
 import {ShoppingBagIcon} from '@phosphor-icons/react'
-import {Drawer} from '@/components/ui/Drawer'
+import {Drawer} from '@/components/ui/primitives/Drawer'
 import MiniCart from '@/components/drawers/MiniCart'
-import {useCartStore} from '@/stores/useCartStore'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {useCart} from '@/hooks/queries/use-cart'
 import {getPersistState} from '@/utils/usePersistState'
@@ -12,7 +11,6 @@ import {getPersistState} from '@/utils/usePersistState'
 export default function CartButton() {
     const persistentId = getPersistState<string>('persistentId', 'no-id')
     const {data: cartItems = []} = useCart(persistentId)
-    const {selectedItems, selectItem} = useCartStore()
     const router = useRouter()
     const searchParams = useSearchParams()
     const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
@@ -37,20 +35,8 @@ export default function CartButton() {
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
-    // State for controlling the sidebar
-    const [sidebarOpen, setSidebarOpen] = useState(false)
-
-    // Check for cart parameter in URL and open/close the sidebar accordingly
-    useEffect(() => {
-        if (searchParams) {
-            const cartParam = searchParams.get('cart')
-            if (cartParam === 'open') {
-                setSidebarOpen(true)
-            } else {
-                setSidebarOpen(false)
-            }
-        }
-    }, [searchParams])
+    // Derive sidebar open state directly from URL (React 19 pattern - no useEffect sync)
+    const sidebarOpen = searchParams?.get('cart') === 'open'
 
     // Custom function to handle sidebar open/close and update URL
     const handleSidebarChange = (openState: boolean | ((prevState: boolean) => boolean)) => {
@@ -59,20 +45,14 @@ export default function CartButton() {
             ? (openState as ((prevState: boolean) => boolean))(sidebarOpen)
             : openState
 
-        setSidebarOpen(open)
-
-        // Update URL based on sidebar state
+        // Update URL based on sidebar state (state is derived from URL, no setState needed)
+        const url = new URL(window.location.href)
         if (open) {
-            // Add cart=open parameter to URL
-            const url = new URL(window.location.href)
             url.searchParams.set('cart', 'open')
-            router.push(url.pathname + url.search)
         } else {
-            // Remove cart parameter from URL
-            const url = new URL(window.location.href)
             url.searchParams.delete('cart')
-            router.push(url.pathname + url.search)
         }
+        router.push(url.pathname + url.search)
     }
 
     if (totalItems === 0) {
@@ -103,12 +83,8 @@ export default function CartButton() {
                 open={sidebarOpen}
                 onOpenChange={handleSidebarChange}
                 direction={drawerDirection}
-                snapPoints={[1]}
             >
                 <MiniCart
-                    cartItems={cartItems}
-                    selectedItems={selectedItems}
-                    setSelectedItemsAction={selectItem}
                     setSidebarOpenAction={handleSidebarChange}
                 />
             </Drawer>

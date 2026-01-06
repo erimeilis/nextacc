@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 import {useAuthSession} from '@/hooks/use-auth-session'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/Avatar'
-import {Button} from '@/components/ui/Button'
-import {Drawer} from '@/components/ui/Drawer'
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/display/Avatar'
+import {Button} from '@/components/ui/primitives/Button'
+import {Drawer} from '@/components/ui/primitives/Drawer'
 import {createHash} from 'crypto'
 import Client from '@/components/drawers/Client'
 

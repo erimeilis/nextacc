@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/primitives/Button'
 import { Ivr, IvrEffect, IvrMusic } from '@/types/IvrTypes'
 import { useIvrOrders } from '@/hooks/queries/use-ivr'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/Table'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/layout/Table'
 import { InfoIcon } from '@phosphor-icons/react'
-import { Boolean } from '@/components/ui/Boolean'
-import { FormattedDate } from '@/components/ui/FormattedDate'
+import { Boolean } from '@/components/ui/display/Boolean'
+import { FormattedDate } from '@/components/ui/display/FormattedDate'
 
 interface MyIvrListProps {
     localIvr: Ivr[] | null

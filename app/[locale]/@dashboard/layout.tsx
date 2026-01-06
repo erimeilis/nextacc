@@ -1,14 +1,14 @@
 'use client'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useAuthSession} from '@/hooks/use-auth-session'
-import Show from '@/components/service/Show'
-import Login from '@/components/Login'
-import Loader from '@/components/service/Loader'
-import SkeletonLoader from '@/components/service/SkeletonLoader'
+import Show from '@/components/ui/display/Show'
+import Login from '@/components/auth/Login'
+import Loader from '@/components/ui/loading/Loader'
+import SkeletonLoader from '@/components/ui/loading/SkeletonLoader'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {profileTabs} from '@/constants/profileTabs'
 import {useTranslations} from 'next-intl'
-import Tab from '@/components/shared/Tab'
+import Tab from '@/components/forms/Tab'
 
 export default function Layout({children}: { children: React.ReactNode }) {
     const session = useAuthSession()
@@ -55,8 +55,13 @@ export default function Layout({children}: { children: React.ReactNode }) {
         }
     }, [])
 
-    // Track previous session status to detect when user logs in
+    // Track previous session status to detect when user logs in (React 19 render-time sync)
     const [prevSessionStatus, setPrevSessionStatus] = useState(session.status)
+
+    // Sync prevSessionStatus during render (React 19 approved pattern - no useEffect)
+    if (session.status !== prevSessionStatus) {
+        setPrevSessionStatus(session.status)
+    }
 
     // Check scrollability when user logs in
     useEffect(() => {
@@ -71,13 +76,10 @@ export default function Layout({children}: { children: React.ReactNode }) {
                 clearTimeout(timeoutId)
             }
         }
-
-        // Update previous session status
-        setPrevSessionStatus(session.status)
     }, [session.status, prevSessionStatus, checkScrollability])
 
-    // Get the current active tab from the URL
-    const getCurrentTab = useCallback(() => {
+    // Derive active tab from URL (React 19 pattern - no useState + useEffect sync)
+    const activeTab = (() => {
         if (!pathName) {
             return 'profile'
         } else {
@@ -88,19 +90,27 @@ export default function Layout({children}: { children: React.ReactNode }) {
             }
             return segments[2] ? segments[2] : 'profile'
         }
-    }, [pathName])
+    })()
 
-    // State to track the active tab
-    const [activeTab, setActiveTab] = useState(getCurrentTab())
+    // Track previous activeTab for loading state management (React 19 render-time sync)
+    const [prevActiveTab, setPrevActiveTab] = useState(activeTab)
+    // State for optimistic UI update when switching tabs
+    const [pendingTab, setPendingTab] = useState<string | null>(null)
     // State to track loading state when switching tabs
     const [isLoading, setIsLoading] = useState(false)
 
-    // Update activeTab when the URL changes
-    useEffect(() => {
-        setActiveTab(getCurrentTab())
-        // When URL changes, content has loaded
+    // Sync loading state during render (React 19 approved pattern - no useEffect)
+    if (activeTab !== prevActiveTab) {
+        setPrevActiveTab(activeTab)
+        setPendingTab(null)
         setIsLoading(false)
+    }
 
+    // Use pendingTab for optimistic UI, fall back to activeTab
+    const displayedActiveTab = pendingTab ?? activeTab
+
+    // Check scrollability after tab change
+    useEffect(() => {
         // Check scrollability after tab change and a short delay to ensure DOM updates
         const timeoutId = setTimeout(() => {
             checkScrollability()
@@ -109,7 +119,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
         return () => {
             clearTimeout(timeoutId)
         }
-    }, [getCurrentTab, checkScrollability])
+    }, [activeTab, checkScrollability])
 
     // Set up scroll event listener and initial check
     useEffect(() => {
@@ -291,7 +301,7 @@ export default function Layout({children}: { children: React.ReactNode }) {
                             data-tab-slug={tab.slug}
                             onClick={() => {
                                 // Don't allow clicking on the already active tab
-                                if (activeTab === tab.slug) {
+                                if (displayedActiveTab === tab.slug) {
                                     return
                                 }
 
@@ -337,15 +347,15 @@ export default function Layout({children}: { children: React.ReactNode }) {
                                     }
                                 }
 
-                                // Update the active tab state immediately
-                                setActiveTab(tab.slug)
+                                // Update pending tab for optimistic UI
+                                setPendingTab(tab.slug)
                                 // Set the loading state to true
                                 setIsLoading(true)
                                 // Then initiate route change
                                 router.push('/' + tab.slug + search)
                             }}
-                            active={activeTab === tab.slug}
-                            isLoading={isLoading && activeTab === tab.slug}
+                            active={displayedActiveTab === tab.slug}
+                            isLoading={isLoading && displayedActiveTab === tab.slug}
                             icon={tab.icon}
                             iconSize="h-4 w-4"
                         >

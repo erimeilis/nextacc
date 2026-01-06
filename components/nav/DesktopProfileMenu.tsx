@@ -5,9 +5,9 @@ import {useAuthSession} from '@/hooks/use-auth-session'
 import {useRouter} from 'next/navigation'
 import {resetPersistentId} from '@/utils/resetPersistentId'
 import {profileTabs} from '@/constants/profileTabs'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/Avatar'
-import {Button} from '@/components/ui/Button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/display/Avatar'
+import {Button} from '@/components/ui/primitives/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from '@/components/ui/primitives/DropdownMenu'
 import {createHash} from 'crypto'
 
 interface DesktopProfileMenuProps {

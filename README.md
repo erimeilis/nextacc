@@ -1,6 +1,14 @@
+<p align="center">
+  <img src="public/icon.png" alt="NextAcc Logo" width="120" height="120">
+</p>
+
 # NextAcc
 
 Telecom account management dashboard built with Next.js 16 and React 19.
+
+## Documentation
+
+- [API Specification](docs/API_SPECIFICATION.md) - Backend API requirements
 
 ## Tech Stack
 
@@ -199,12 +207,16 @@ nextacc/
 │       ├── backend/           # Backend API proxy
 │       └── other/
 ├── components/
-│   ├── ui/                    # UI primitives
+│   ├── ui/                    # UI components
+│   │   ├── primitives/        # Radix wrappers (Button, Input, Dialog...)
+│   │   ├── display/           # Visual formatting (Avatar, Boolean, FormattedDate)
+│   │   ├── data/              # Data components (DataTable, DatePicker)
+│   │   ├── layout/            # Layout components (Card, ListGroup, Table)
+│   │   └── loading/           # Loading states (Loader, SkeletonLoader)
+│   ├── forms/                 # Form components (CommonInput, Toggle, DropdownSelect)
 │   ├── nav/                   # Navigation
 │   ├── pages/                 # Page components
-│   ├── drawers/               # Drawer components
-│   ├── shared/                # Shared components
-│   └── service/               # Service components
+│   └── drawers/               # Drawer components
 ├── lib/
 │   ├── data-source/           # Data abstraction
 │   │   ├── index.ts           # Mode switching

@@ -1,8 +1,8 @@
 'use client'
 import React, {useEffect, useState} from 'react'
-import {Button} from '@/components/ui/Button'
+import {Button} from '@/components/ui/primitives/Button'
 import {PlusCircleIcon} from '@phosphor-icons/react'
-import {Drawer} from '@/components/ui/Drawer'
+import {Drawer} from '@/components/ui/primitives/Drawer'
 import Payment from '@/components/drawers/Payment'
 import {useRouter, useSearchParams} from 'next/navigation'
 
@@ -27,20 +27,8 @@ export default function PaymentButton() {
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
-    // State for controlling the sidebar
-    const [sidebarOpen, setSidebarOpen] = useState(false)
-
-    // Check for payment parameter in the URL and open/close the sidebar accordingly
-    useEffect(() => {
-        if (searchParams) {
-            const paymentParam = searchParams.get('payment')
-            if (paymentParam === 'open') {
-                setSidebarOpen(true)
-            } else {
-                setSidebarOpen(false)
-            }
-        }
-    }, [searchParams])
+    // Derive sidebar open state directly from URL (React 19 pattern - no useEffect sync)
+    const sidebarOpen = searchParams?.get('payment') === 'open'
 
     // Custom function to handle sidebar open/close and update URL
     const handleSidebarChange = (openState: boolean | ((prevState: boolean) => boolean)) => {
@@ -49,20 +37,14 @@ export default function PaymentButton() {
             ? (openState as ((prevState: boolean) => boolean))(sidebarOpen)
             : openState
 
-        setSidebarOpen(open)
-
-        // Update URL based on sidebar state
+        // Update URL based on sidebar state (state is derived from URL, no setState needed)
+        const url = new URL(window.location.href)
         if (open) {
-            // Add payment=open parameter to URL
-            const url = new URL(window.location.href)
             url.searchParams.set('payment', 'open')
-            router.push(url.pathname + url.search)
         } else {
-            // Remove payment parameter from URL
-            const url = new URL(window.location.href)
             url.searchParams.delete('payment')
-            router.push(url.pathname + url.search)
         }
+        router.push(url.pathname + url.search)
     }
 
     return (

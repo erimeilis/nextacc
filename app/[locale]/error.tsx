@@ -1,7 +1,7 @@
 'use client'
-import ActionButton from '@/components/shared/ActionButton'
+import ActionButton from '@/components/forms/ActionButton'
 import {useTranslations} from 'next-intl'
-import Loader from '@/components/service/Loader'
+import Loader from '@/components/ui/loading/Loader'
 import React from 'react'
 
 export default function Error({

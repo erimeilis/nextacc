@@ -2,14 +2,14 @@
 import React, {useEffect, useState} from 'react'
 import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {useTranslations} from 'next-intl'
-import {Button} from '@/components/ui/Button'
-import {Input} from '@/components/ui/Input'
-import {Checkbox} from '@/components/ui/Checkbox'
+import {Button} from '@/components/ui/primitives/Button'
+import {Input} from '@/components/ui/primitives/Input'
+import {Checkbox} from '@/components/ui/primitives/Checkbox'
 import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FloppyDiskIcon, FadersHorizontalIcon} from '@phosphor-icons/react'
-import Loader from '@/components/service/Loader'
+import Loader from '@/components/ui/loading/Loader'
 import {MyNumberInfo} from '@/types/MyNumberInfo'
-import ExtManSettings from '../ExtManSettings'
-import SmsSettings from '../SmsSettings'
+import ExtManSettings from '@/components/settings/ExtManSettings'
+import SmsSettings from '@/components/settings/SmsSettings'
 import {useToast} from '@/hooks/use-toast'
 import {schemaNumberEdit} from '@/schemas/numberEdit.schema'
 import {validateFormData, validateInputData} from '@/utils/validation'
@@ -19,6 +19,7 @@ import {schemaHttps} from '@/schemas/https.schema'
 import {schemaTelegram} from '@/schemas/telegram.schema'
 import {schemaSip} from '@/schemas/sip.schema'
 import {useDidSettings, useUpdateDidSettings} from '@/hooks/queries/use-dids'
+import {mapLegacyTypeValue} from '@/utils/legacyTypeMapping'
 
 export default function NumberEditPage() {
     const params = useParams()
@@ -36,12 +37,16 @@ export default function NumberEditPage() {
     const [formData, setFormData] = useState<Partial<MyNumberInfo>>({})
     const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-    // Sync form data when numberData loads
-    useEffect(() => {
+    // Track previous numberData for render-time sync (React 19 pattern)
+    const [prevNumberData, setPrevNumberData] = useState(numberData)
+
+    // Sync form data when numberData loads (React 19 approved pattern - no useEffect)
+    if (numberData !== prevNumberData) {
+        setPrevNumberData(numberData)
         if (numberData) {
             setFormData(numberData)
         }
-    }, [numberData])
+    }
 
     // Show error toast if loading fails
     useEffect(() => {
@@ -88,20 +93,6 @@ export default function NumberEditPage() {
                         const typeField = field === 'f_num1' ? 'type_num1' : 'type_num2'
                         // Check both formData and numberData for the type to ensure validation works from start
                         const currentType = formData[typeField] || numberData?.[typeField] || ''
-
-                        // Map legacy type values to current values
-                        const mapLegacyTypeValue = (typeValue: string): string => {
-                            switch (typeValue) {
-                                case 'skype':
-                                    return 'voiceTelegram'
-                                case 'phone':
-                                    return 'voicePhone'
-                                case 'sip':
-                                    return 'voiceSip'
-                                default:
-                                    return typeValue
-                            }
-                        }
 
                         const mappedType = mapLegacyTypeValue(currentType)
                         // Validate based on type

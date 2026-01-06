@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useSession } from '@/lib/auth-client'
 import usePersistState from '@/utils/usePersistState'
 import { v4 as uuidv4 } from 'uuid'
@@ -13,10 +13,9 @@ const SessionHandler = ({ children }: React.PropsWithChildren<object>) => {
     const reset = useClientStore(state => state.reset)
     const isDemoSession = useClientStore(state => state.isDemoSession)
     const queryClient = useQueryClient()
-    const [wasAuthenticated, setWasAuthenticated] = useState(false)
 
-    // Demo profile ID for comparison (must match DEMO_PROFILE.id in useClientStore)
-    const DEMO_PROFILE_ID = 999999
+    // Use ref to track previous auth state (avoids setState in effect)
+    const wasAuthenticatedRef = useRef(false)
 
     // Determine authentication status - either BetterAuth session OR demo session
     const hasBetterAuthSession = !isPending && !!session?.user
@@ -24,7 +23,7 @@ const SessionHandler = ({ children }: React.PropsWithChildren<object>) => {
 
     // Reset store and query cache when session becomes unauthenticated
     useEffect(() => {
-        if (wasAuthenticated && !isAuthenticated && !isPending) {
+        if (wasAuthenticatedRef.current && !isAuthenticated && !isPending) {
             console.log('Session no longer authenticated, resetting stores')
             reset()
             // Clear all TanStack Query caches
@@ -32,9 +31,9 @@ const SessionHandler = ({ children }: React.PropsWithChildren<object>) => {
         }
 
         if (!isPending) {
-            setWasAuthenticated(isAuthenticated)
+            wasAuthenticatedRef.current = isAuthenticated
         }
-    }, [isAuthenticated, isPending, reset, wasAuthenticated, queryClient])
+    }, [isAuthenticated, isPending, reset, queryClient])
 
     // Log any auth errors
     useEffect(() => {

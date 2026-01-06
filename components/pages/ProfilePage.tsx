@@ -1,8 +1,8 @@
 'use client'
 
-import Profile from '@/components/Profile'
+import Profile from '@/components/profile/Profile'
 import { useProfile } from '@/hooks/queries/use-profile'
-import { ProfileSkeleton } from '@/components/service/SkeletonLoader'
+import { ProfileSkeleton } from '@/components/ui/loading/SkeletonLoader'
 
 export default function ProfilePage() {
     const { data: profile, isLoading, error } = useProfile()

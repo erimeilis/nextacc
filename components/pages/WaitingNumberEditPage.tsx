@@ -2,13 +2,13 @@
 import React, {useEffect, useState} from 'react'
 import {useParams, useRouter, useSearchParams} from 'next/navigation'
 import {useTranslations} from 'next-intl'
-import {Button} from '@/components/ui/Button'
+import {Button} from '@/components/ui/primitives/Button'
 import {ArrowArcLeftIcon, ArrowLeftIcon, CircleNotchIcon, FileIcon as DocIcon, FloppyDiskIcon} from '@phosphor-icons/react'
-import Loader from '@/components/service/Loader'
+import Loader from '@/components/ui/loading/Loader'
 import {MyWaitingNumberInfo} from '@/types/MyWaitingNumberInfo'
 import {useToast} from '@/hooks/use-toast'
-import DropdownSelect from '@/components/shared/DropdownSelect'
-import DestinationSettings from '@/components/DestinationSettings'
+import DropdownSelect from '@/components/forms/DropdownSelect'
+import DestinationSettings from '@/components/settings/DestinationSettings'
 import {useWaitingDidSettings, useUpdateWaitingDidSettings} from '@/hooks/queries/use-waiting-dids'
 import {useUploads, useUploadFile} from '@/hooks/queries/use-uploads'
 
@@ -37,8 +37,12 @@ export default function WaitingNumberEditPage() {
     const [personalDocUploads, setPersonalDocUploads] = useState<{ [key: string]: string }>({})
     const [uploadingField, setUploadingField] = useState<string | null>(null)
 
-    // Sync form data when numberData loads
-    useEffect(() => {
+    // Track previous numberData for render-time sync (React 19 pattern)
+    const [prevNumberData, setPrevNumberData] = useState(numberData)
+
+    // Sync form data when numberData loads (React 19 approved pattern - no useEffect)
+    if (numberData !== prevNumberData) {
+        setPrevNumberData(numberData)
         if (numberData) {
             setFormData(numberData)
 
@@ -53,7 +57,7 @@ export default function WaitingNumberEditPage() {
                 setPersonalDocUploads(docUploads)
             }
         }
-    }, [numberData])
+    }
 
     // Show error toast if loading fails
     useEffect(() => {

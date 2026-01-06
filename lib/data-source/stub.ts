@@ -13,9 +13,7 @@ import type { NumberInfo } from '@/types/NumberInfo'
 import type { MyNumberInfo } from '@/types/MyNumberInfo'
 import type { MyWaitingNumberInfo } from '@/types/MyWaitingNumberInfo'
 import type { CartItem } from '@/types/CartItem'
-import type { NumberDestination } from '@/types/NumberDestination'
-import type { ClientInfo } from '@/types/ClientInfo'
-import type { PaymentRegion, PaymentMethod } from '@/types/PaymentTypes'
+import type { PaymentRegion } from '@/types/PaymentTypes'
 import type { CallStatistics, SmsStatistics } from '@/types/Statistics'
 import type { UploadInfo } from '@/types/UploadInfo'
 import type { Ivr, IvrMusic, IvrEffect, IvrOrder, OrderIvrParams, OrderIvrResponse } from '@/types/IvrTypes'
@@ -31,12 +29,12 @@ let stubCart: CartItem[] = []
 let stubTransactions: MoneyTransaction[] | null = null
 let stubUploads: UploadInfo[] | null = null
 
-// Seed faker for consistent data within session
-function seedFaker(userId?: string) {
-    if (userId) {
-        faker.seed(userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0))
-    }
-}
+// Seed faker for consistent data within session (currently unused, kept for future use)
+// function seedFaker(userId?: string) {
+//     if (userId) {
+//         faker.seed(userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0))
+//     }
+// }
 
 // Generate a phone number for a country
 function generatePhoneNumber(countryCode: string): string {
@@ -671,9 +669,10 @@ export const stubDataSource: DataSource = {
     },
 
     // Cart
-    async getCart(uid: string): Promise<CartItem[] | null> {
+    async getCart(_uid: string): Promise<CartItem[] | null> {
+        void _uid // In demo mode, return all cart items regardless of uid
         await simulateLatency()
-        return stubCart.filter(item => item.id.toString().includes(uid.slice(0, 4)))
+        return stubCart
     },
 
     async addToCart(params): Promise<ApiResult<CartItem[]>> {
@@ -791,6 +790,7 @@ export const stubDataSource: DataSource = {
     },
 
     async uploadFile(file: File, type: string): Promise<ApiResult<UploadInfo>> {
+        void type // Parameter required by interface but not used in stub
         await simulateLatency()
         const upload: UploadInfo = {
             filename: `${faker.string.alphanumeric(16)}.${file.name.split('.').pop()}`,
@@ -835,6 +835,7 @@ export const stubDataSource: DataSource = {
     },
 
     async orderIvr(params: OrderIvrParams): Promise<OrderIvrResponse | null> {
+        void params // Parameter required by interface but not used in stub
         await simulateLatency()
         return {
             code: 200,

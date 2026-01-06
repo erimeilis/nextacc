@@ -6,6 +6,7 @@ import {useAuthSession} from '@/hooks/use-auth-session'
 import {useTranslations} from 'next-intl'
 import Image from 'next/image'
 import React, {useEffect, useRef, useState} from 'react'
+import {useIsClient} from '@/hooks/use-is-client'
 import Link from 'next/link'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {ThemeToggle} from '@/components/nav/ThemeToggle'
@@ -44,7 +45,6 @@ const ClientOnlyNav = ({
     searchParams: ReturnType<typeof useSearchParams>;
 }) => {
     const [showMobileSwitchers, setShowMobileSwitchers] = useState(false)
-    const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
     const [drawerDirection, setDrawerDirection] = useState<'bottom' | 'right'>('right')
 
     // Effect to handle a responsive direction for the drawer
@@ -63,17 +63,8 @@ const ClientOnlyNav = ({
         return () => window.removeEventListener('resize', handleResize)
     }, [])
 
-    // Check for profile parameter in URL and open/close the drawer accordingly
-    useEffect(() => {
-        if (searchParams) {
-            const profileParam = searchParams.get('profile')
-            if (profileParam === 'open') {
-                setProfileDrawerOpen(true)
-            } else {
-                setProfileDrawerOpen(false)
-            }
-        }
-    }, [searchParams])
+    // Derive drawer open state directly from URL (React 19 pattern - no useEffect sync)
+    const profileDrawerOpen = searchParams?.get('profile') === 'open'
 
     // Custom function to handle drawer open/close and update URL
     const handleProfileDrawerChangeAction = (openState: boolean | ((prevState: boolean) => boolean)) => {
@@ -82,20 +73,14 @@ const ClientOnlyNav = ({
             ? (openState as ((prevState: boolean) => boolean))(profileDrawerOpen)
             : openState
 
-        setProfileDrawerOpen(open)
-
-        // Update URL based on drawer state
+        // Update URL based on drawer state (state is derived from URL, no setState needed)
+        const url = new URL(window.location.href)
         if (open) {
-            // Add profile=open parameter to URL
-            const url = new URL(window.location.href)
             url.searchParams.set('profile', 'open')
-            router.push(url.pathname + url.search)
         } else {
-            // Remove profile parameter from URL
-            const url = new URL(window.location.href)
             url.searchParams.delete('profile')
-            router.push(url.pathname + url.search)
         }
+        router.push(url.pathname + url.search)
     }
 
     useEffect(() => {
@@ -197,8 +182,8 @@ export default function Nav() {
     const search = searchParams && searchParams.size > 0 ? `?${searchParams.toString()}` : ''
 
     const [displayBalance, setDisplayBalance] = useState<number>(0)
-    const [isClient, setIsClient] = useState<boolean>(false)
-    const [isAnimating, setIsAnimating] = useState<boolean>(false)
+    const isClient = useIsClient()
+    const isAnimatingRef = useRef<boolean>(false)
     const {reset: resetClientStore} = useClientStore()
     const {data: profile} = useProfile()
     const balance = profile?.balance ?? null
@@ -206,12 +191,9 @@ export default function Nav() {
     const animationRef = useRef<NodeJS.Timeout | null>(null)
     const targetBalanceRef = useRef<number>(0)
 
-    // Fix hydration issues by only rendering on the client-side
+    // Clean up animation timeout on unmounting
     useEffect(() => {
-        setIsClient(true)
-
         return () => {
-            // Clean up animation timeout on unmounting
             if (animationRef.current) {
                 clearTimeout(animationRef.current)
             }
@@ -230,9 +212,9 @@ export default function Nav() {
             return
         }
 
-        // Start animation
-        if (!isAnimating && displayBalance !== actualBalance) {
-            setIsAnimating(true)
+        // Start animation using ref to track animation state (avoids setState in useEffect)
+        if (!isAnimatingRef.current && displayBalance !== actualBalance) {
+            isAnimatingRef.current = true
 
             const animateBalance = () => {
                 setDisplayBalance(prev => {
@@ -241,7 +223,7 @@ export default function Nav() {
 
                     // If the difference is small enough, just set to target
                     if (Math.abs(diff) < 0.1) {
-                        setIsAnimating(false)
+                        isAnimatingRef.current = false
                         return target
                     }
 
@@ -257,7 +239,7 @@ export default function Nav() {
 
             animateBalance()
         }
-    }, [balance, displayBalance, isAnimating, isClient])
+    }, [balance, displayBalance, isClient])
 
     // Function to close drawers by removing cart, payment, and profile parameters from URL
     const closeDrawers = (e: React.MouseEvent) => {

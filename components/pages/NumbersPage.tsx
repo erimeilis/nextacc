@@ -1,11 +1,11 @@
 'use client'
 
-import MyNumbersList from '@/components/MyNumbersList'
-import MyWaitingNumbersList from '@/components/MyWaitingNumbersList'
+import MyNumbersList from '@/components/numbers/MyNumbersList'
+import MyWaitingNumbersList from '@/components/numbers/MyWaitingNumbersList'
 import { useState } from 'react'
 import { useDids } from '@/hooks/queries/use-dids'
 import { useWaitingDids } from '@/hooks/queries/use-waiting-dids'
-import { Switch } from '@/components/ui/Switch'
+import { Switch } from '@/components/ui/primitives/Switch'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 

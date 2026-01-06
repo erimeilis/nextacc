@@ -3,8 +3,8 @@ import {routing, usePathname, useRouter} from '@/i18n/routing'
 import {useTranslations} from 'next-intl'
 import {useSearchParams} from 'next/navigation'
 import {useTransition} from 'react'
-import {Button} from '@/components/ui/Button'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/DropdownMenu'
+import {Button} from '@/components/ui/primitives/Button'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '@/components/ui/primitives/DropdownMenu'
 
 // Map of locale codes to flag emojis
 const localeFlags: Record<string, string> = {

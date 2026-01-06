@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { ChatTextIcon, PhoneIcon } from '@phosphor-icons/react'
-import { Switch } from '@/components/ui/Switch'
-import DropdownSelect from '@/components/shared/DropdownSelect'
-import CallsList from '@/components/CallsList'
-import SmsList from '@/components/SmsList'
+import { Switch } from '@/components/ui/primitives/Switch'
+import DropdownSelect from '@/components/forms/DropdownSelect'
+import StatisticsList from '@/components/statistics/StatisticsList'
 import { useDids } from '@/hooks/queries/use-dids'
 
 export default function StatisticsPage() {
@@ -26,14 +25,12 @@ export default function StatisticsPage() {
     const selectedNumberDid = params?.number as string
     const selectedNumber = selectedNumberDid ? numbers?.find(number => number.did === selectedNumberDid) : null
 
-    // Determine switch state based on selected number features
-    const isSwitchDisabled = selectedNumber ? (
-        (selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms || // Voice/toll_free without SMS
-        (!selectedNumber.voice && !selectedNumber.toll_free && selectedNumber.sms)   // SMS only
-    ) : false
+    // Track previous selectedNumber for render-time sync (React 19 pattern)
+    const [prevSelectedNumber, setPrevSelectedNumber] = useState(selectedNumber)
 
-    // Set default statistics type based on selected number features
-    useEffect(() => {
+    // Set default statistics type based on selected number features (React 19 approved pattern - no useEffect)
+    if (selectedNumber !== prevSelectedNumber) {
+        setPrevSelectedNumber(selectedNumber)
         if (selectedNumber) {
             if ((selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms) {
                 // If the number has voice/toll_free but no SMS, set to calls
@@ -43,7 +40,13 @@ export default function StatisticsPage() {
                 setStatisticsType('sms')
             }
         }
-    }, [selectedNumber])
+    }
+
+    // Determine switch state based on selected number features
+    const isSwitchDisabled = selectedNumber ? (
+        (selectedNumber.voice || selectedNumber.toll_free) && !selectedNumber.sms || // Voice/toll_free without SMS
+        (!selectedNumber.voice && !selectedNumber.toll_free && selectedNumber.sms)   // SMS only
+    ) : false
 
     // Handle number selection
     const handleNumberSelect = (value: string) => {
@@ -93,11 +96,7 @@ export default function StatisticsPage() {
                     />
                 </div>
             </div>
-            {statisticsType === 'calls' ? (
-                <CallsList/>
-            ) : (
-                <SmsList/>
-            )}
+            <StatisticsList type={statisticsType} did={selectedNumberDid} />
         </>
     )
 }
