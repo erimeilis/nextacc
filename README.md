@@ -5,6 +5,13 @@
 </p>
 
 <p align="center">
+  <a href="https://nextacc.redshoes.pro/"><img src="https://img.shields.io/badge/Deployed%20at-nextacc.redshoes.pro-blue?style=flat-square" alt="Deployed at"></a>
+  <img src="https://img.shields.io/badge/Next.js-16.1-black?style=flat-square&logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react" alt="React">
+  <img src="https://img.shields.io/badge/License-Polyform%20NC-green?style=flat-square" alt="License">
+</p>
+
+<p align="center">
   Telecom account management dashboard built with Next.js 16 and React 19.
 </p>
 
